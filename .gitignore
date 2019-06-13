@@ -77,3 +77,5 @@ WUAT\.csproj
 WUAT\.sln\.DotSettings\.user
 
 Properties/
+
+client_software/\.idea/\.idea\.WUAT/\.idea/
