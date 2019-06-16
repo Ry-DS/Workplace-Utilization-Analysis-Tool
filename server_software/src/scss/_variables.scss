@@ -4,6 +4,13 @@ $body-color: #23282c; //kinda sketchy
 
 //top bar
 $navbar-bg: #fff;
+$navbar-border: (
+  bottom: (
+    size: 5px,
+    style: solid,
+    color: $border-color
+  )
+);
 //main sidebar
 $sidebar-color: #fff;
 $sidebar-bg: #0b406c;
