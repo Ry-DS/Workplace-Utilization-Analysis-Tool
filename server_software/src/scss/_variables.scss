@@ -1,5 +1,5 @@
 //global border color
-$border-color: #0b406c;
+$border-color: #1b99ff;
 $body-color: #23282c; //kinda sketchy
 
 //top bar
@@ -16,20 +16,20 @@ $sidebar-nav-color: #fff;
 //THEME, COMPONENETS, EXTRAS
 $sidebar-nav-title-color: #fff;
 //sidebar items
-$sidebar-nav-link-color: #fff;
+$sidebar-nav-link-color: #b7b7b7;
 $sidebar-nav-link-bg: transparent;
-$sidebar-nav-link-icon-color: #fff; //gray
-//side bar items on hover
-$sidebar-nav-link-hover-color: #fff;
-$sidebar-nav-link-hover-bg: #5da3e6; //cyan
-$sidebar-nav-link-hover-icon-color: #fff;
+$sidebar-nav-link-icon-color: #b7b7b7; //gray
 //side bar items on select
 $sidebar-nav-link-active-color: #fff;
-$sidebar-nav-link-active-bg: lighten($sidebar-bg, 5%);
-$sidebar-nav-link-active-icon-color: #5da3e6; //cyan
-//sidebar disabled
-$sidebar-nav-link-disabled-color: darken(#fff, 30%);
-$sidebar-nav-link-disabled-bg: $sidebar-bg;
+$sidebar-nav-link-active-bg: #5b8ab6;
+$sidebar-nav-link-active-icon-color: #fff; //cyan
+//side bar items on hover
+$sidebar-nav-link-hover-color: #fff;
+$sidebar-nav-link-hover-bg: darken($sidebar-nav-link-active-bg, 5%); //cyan
+$sidebar-nav-link-hover-icon-color: #fff;
+//sidebar disabled UP to
+$sidebar-nav-link-disabled-color: darken($sidebar-nav-link-color, 30%);
+$sidebar-nav-link-disabled-bg: #fff;
 $sidebar-nav-link-disabled-icon-color: $sidebar-nav-link-icon-color;
 //sidebar sub items
 $sidebar-nav-dropdown-color: #fff;
