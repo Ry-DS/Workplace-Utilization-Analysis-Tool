@@ -1,7 +1,7 @@
-import React, { Component } from 'react';
+import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import { mapToCssModules } from 'reactstrap/lib/utils';
+import {mapToCssModules} from 'reactstrap/lib/utils';
 
 const propTypes = {
   children: PropTypes.node,
@@ -14,7 +14,7 @@ const defaultProps = {
   dataBox: () => ({ variant: 'facebook', friends: '-', feeds: '-' }),
 };
 
-class Widget03 extends Component {
+class Widget03 extends Component {//facebook and stuff widget
   render() {
 
     // eslint-disable-next-line
