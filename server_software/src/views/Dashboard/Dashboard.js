@@ -1,6 +1,5 @@
-import React, {Component, lazy, Suspense} from 'react';
+import React, {Component, lazy} from 'react';
 import {Bar, Line} from 'react-chartjs-2';
-import loading from '../../load_animation';
 import {
   Badge,
   Button,
@@ -500,8 +499,8 @@ class Dashboard extends Component {
                     </DropdownMenu>
                   </ButtonDropdown>
                 </ButtonGroup>
-                <div className="text-value">9.823</div>
-                <div>Members online</div>
+                <div className="text-value">1000</div>
+                <div>Total Hours on Laptop</div>
               </CardBody>
               <div className="chart-wrapper mx-3" style={{ height: '70px' }}>
                 <Line data={cardChartData2} options={cardChartOpts2} height={70} />
@@ -525,7 +524,7 @@ class Dashboard extends Component {
                   </Dropdown>
                 </ButtonGroup>
                 <div className="text-value">9.823</div>
-                <div>Members online</div>
+                <div>Total Hours on Desk Monitor</div>
               </CardBody>
               <div className="chart-wrapper mx-3" style={{ height: '70px' }}>
                 <Line data={cardChartData1} options={cardChartOpts1} height={70} />
@@ -549,7 +548,7 @@ class Dashboard extends Component {
                   </Dropdown>
                 </ButtonGroup>
                 <div className="text-value">9.823</div>
-                <div>Members online</div>
+                <div>Total Hours on Projector</div>
               </CardBody>
               <div className="chart-wrapper" style={{ height: '70px' }}>
                 <Line data={cardChartData3} options={cardChartOpts3} height={70} />
@@ -573,7 +572,7 @@ class Dashboard extends Component {
                   </ButtonDropdown>
                 </ButtonGroup>
                 <div className="text-value">9.823</div>
-                <div>Members online</div>
+                <div>Employees online</div>
               </CardBody>
               <div className="chart-wrapper mx-3" style={{ height: '70px' }}>
                 <Bar data={cardChartData4} options={cardChartOpts4} height={70} />
@@ -587,8 +586,8 @@ class Dashboard extends Component {
               <CardBody>
                 <Row>
                   <Col sm="5">
-                    <CardTitle className="mb-0">Traffic</CardTitle>
-                    <div className="small text-muted">November 2015</div>
+                    <CardTitle className="mb-0">Monitor Utilization over Time</CardTitle>
+                    <div className="small text-muted">July 2019</div>
                   </Col>
                   <Col sm="7" className="d-none d-sm-inline-block">
                     <Button color="primary" className="float-right"><i className="icon-cloud-download"></i></Button>
@@ -638,48 +637,7 @@ class Dashboard extends Component {
           </Col>
         </Row>
 
-        <Row>
-          <Col xs="6" sm="6" lg="3">
-            <Suspense fallback={loading()}>
-              <Widget03 dataBox={() => ({ variant: 'facebook', friends: '89k', feeds: '459' })} >
-                <div className="chart-wrapper">
-                  <Line data={makeSocialBoxData(0)} options={socialChartOpts} height={90} />
-                </div>
-              </Widget03>
-            </Suspense>
-          </Col>
-
-          <Col xs="6" sm="6" lg="3">
-            <Suspense fallback={loading()}>
-              <Widget03 dataBox={() => ({ variant: 'twitter', followers: '973k', tweets: '1.792' })} >
-                <div className="chart-wrapper">
-                  <Line data={makeSocialBoxData(1)} options={socialChartOpts} height={90} />
-                </div>
-              </Widget03>
-            </Suspense>
-          </Col>
-
-          <Col xs="6" sm="6" lg="3">
-            <Suspense fallback={loading()}>
-              <Widget03 dataBox={() => ({ variant: 'linkedin', contacts: '500+', feeds: '292' })} >
-                <div className="chart-wrapper">
-                  <Line data={makeSocialBoxData(2)} options={socialChartOpts} height={90} />
-                </div>
-              </Widget03>
-            </Suspense>
-          </Col>
-
-          <Col xs="6" sm="6" lg="3">
-            <Suspense fallback={loading()}>
-              <Widget03 dataBox={() => ({ variant: 'google-plus', followers: '894', circles: '92' })} >
-                <div className="chart-wrapper">
-                  <Line data={makeSocialBoxData(3)} options={socialChartOpts} height={90} />
-                </div>
-              </Widget03>
-            </Suspense>
-          </Col>
-        </Row>
-
+        
         <Row>
           <Col>
             <Card>
