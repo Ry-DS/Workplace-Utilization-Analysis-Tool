@@ -2,7 +2,7 @@ import React, {Component, Suspense} from 'react';
 import * as router from 'react-router-dom';
 import {Redirect, Route, Switch} from 'react-router-dom';
 import {Container} from 'reactstrap';
-
+import loading from '../../load_animation';
 import {
   AppAside,
   AppBreadcrumb2 as AppBreadcrumb,
@@ -22,14 +22,6 @@ import routes from '../../routes';
 //Logo for WUAT
 import wuatLogo from '../../assets/img/brand/wuat/WUAT Logo.svg';
 
-const logoStyle = {
-  width: '50px',
-  display: 'block',
-  marginLeft: 'auto',
-  marginRight: 'auto',
-  paddingTop: '10px',
-  paddingBottom: '10px'
-};
 
 const DefaultAside = React.lazy(() => import('./DefaultAside'));
 const DefaultFooter = React.lazy(() => import('./DefaultFooter'));
@@ -37,9 +29,7 @@ const DefaultHeader = React.lazy(() => import('./DefaultHeader'));
 
 
 class DefaultLayout extends Component {
-  //WUAT LOGO STYLE
 
-  loading = () => <div className="animated fadeIn pt-1 text-center">Loading...</div>;
 
   signOut(e) {
     e.preventDefault();
@@ -50,7 +40,7 @@ class DefaultLayout extends Component {
     return (
       <div className="app">
         <AppHeader fixed>
-          <Suspense  fallback={this.loading()}>
+          <Suspense fallback={loading()}>
             <DefaultHeader onLogout={e=>this.signOut(e)}/>
           </Suspense>
         </AppHeader>
@@ -59,17 +49,19 @@ class DefaultLayout extends Component {
             <AppSidebarHeader />
             <AppSidebarForm />
             <Suspense>
-              {/*Sidebar*/}
-              <img src={wuatLogo} alt={wuatLogo} style={logoStyle}/>
+              {/*WUAT Logo here*/}
+              <img src={wuatLogo} alt="WUAT Logo" className="center"/>
+              {/*The sidebar object*/}
             <AppSidebarNav navConfig={navigation} {...this.props} router={router}/>
             </Suspense>
             <AppSidebarFooter />
             <AppSidebarMinimizer />
           </AppSidebar>
           <main className="main">
+
             <AppBreadcrumb appRoutes={routes} router={router}/>
             <Container fluid>
-              <Suspense fallback={this.loading()}>
+              <Suspense fallback={loading()}>
                 <Switch>
                   {routes.map((route, idx) => {
                     return route.component ? (
@@ -89,13 +81,13 @@ class DefaultLayout extends Component {
             </Container>
           </main>
           <AppAside fixed>
-            <Suspense fallback={this.loading()}>
+            <Suspense fallback={loading()}>
               <DefaultAside />
             </Suspense>
           </AppAside>
         </div>
         <AppFooter>
-          <Suspense fallback={this.loading()}>
+          <Suspense fallback={loading()}>
             <DefaultFooter />
           </Suspense>
         </AppFooter>
