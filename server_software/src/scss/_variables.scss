@@ -1,5 +1,5 @@
 //global border color
-$border-color: #0d1284;
+$border-color: #0b406c;
 $body-color: #23282c; //kinda sketchy
 
 //top bar
@@ -39,7 +39,7 @@ $sidebar-nav-link-disabled-color: darken($sidebar-nav-link-color, 30%);
 $sidebar-nav-link-disabled-bg: #fff;
 $sidebar-nav-link-disabled-icon-color: $sidebar-nav-link-icon-color;
 //sidebar sub items
-$sidebar-nav-dropdown-color: #fff;
+$sidebar-nav-dropdown-color: $sidebar-nav-link-color;
 $sidebar-nav-dropdown-bg: rgba(0, 0, 0, .2);
 $sidebar-nav-dropdown-borders: 0;
 $sidebar-nav-dropdown-indicator-color: #fff; //gray

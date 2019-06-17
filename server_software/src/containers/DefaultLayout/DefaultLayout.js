@@ -21,12 +21,12 @@ import navigation from '../../_nav';
 import routes from '../../routes';
 //Logo for WUAT
 import wuatLogo from '../../assets/img/brand/wuat/WUAT Logo.svg';
+import logoCover from '../../assets/img/brand/logo_small.png';
 
 
 const DefaultAside = React.lazy(() => import('./DefaultAside'));
 const DefaultFooter = React.lazy(() => import('./DefaultFooter'));
 const DefaultHeader = React.lazy(() => import('./DefaultHeader'));
-
 
 class DefaultLayout extends Component {
 
@@ -58,6 +58,7 @@ class DefaultLayout extends Component {
             <AppSidebarMinimizer />
           </AppSidebar>
           <main className="main">
+            <img src={logoCover} className="cover-bg" alt="BGIS Background Cover"/>
 
             <AppBreadcrumb appRoutes={routes} router={router}/>
             <Container fluid>

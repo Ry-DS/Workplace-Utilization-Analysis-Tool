@@ -3,6 +3,16 @@
   font-weight: bold;
 }
 
+//large logo cover in homescreen
+.cover-bg {
+  position: fixed;
+  height: 100%;
+  opacity: 0.27;
+  right: 0;
+}
+
+
+//centers things across the project, like the WUAT logo and loading anims
 .center {
   width: 50px;
   display: block;
