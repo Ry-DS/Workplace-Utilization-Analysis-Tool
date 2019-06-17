@@ -580,7 +580,7 @@ class Dashboard extends Component {
           </Col>
         </Row>
 
-        f
+        
         <Row>
           <Col>
             <Card>
