@@ -24,11 +24,10 @@ import {CustomTooltips} from '@coreui/coreui-plugin-chartjs-custom-tooltips';
 import {getStyle, hexToRgba} from '@coreui/coreui/dist/js/coreui-utilities'
 
 
-const brandPrimary = getStyle('--primary');
-const brandSuccess = getStyle('--success');
-const brandInfo = getStyle('--info');
-const brandWarning = getStyle('--warning');
-const brandDanger = getStyle('--danger');
+const brandDark = getStyle('--theme-dark');
+const brankLight = getStyle('--theme-light');
+const brandNorm = getStyle('--theme-norm');
+const brandBland = getStyle('--theme-bland');
 
 // Card Chart 1
 const cardChartData1 = {
@@ -36,7 +35,7 @@ const cardChartData1 = {
   datasets: [
     {
       label: 'My First dataset',
-      backgroundColor: brandPrimary,
+      backgroundColor: brandDark,
       borderColor: 'rgba(255,255,255,.55)',
       data: [65, 59, 84, 84, 51, 55, 40],
     },
@@ -94,7 +93,7 @@ const cardChartData2 = {
   datasets: [
     {
       label: 'My First dataset',
-      backgroundColor: brandInfo,
+      backgroundColor: brankLight,
       borderColor: 'rgba(255,255,255,.55)',
       data: [1, 18, 9, 17, 34, 22, 11],
     },
@@ -325,8 +324,8 @@ const mainChart = {
   datasets: [
     {
       label: 'My First dataset',
-      backgroundColor: hexToRgba(brandInfo, 10),
-      borderColor: brandInfo,
+      backgroundColor: hexToRgba(brandNorm, 10),
+      borderColor: brandNorm,
       pointHoverBackgroundColor: '#fff',
       borderWidth: 2,
       data: data1,
@@ -334,7 +333,7 @@ const mainChart = {
     {
       label: 'My Second dataset',
       backgroundColor: 'transparent',
-      borderColor: brandSuccess,
+      borderColor: brankLight,
       pointHoverBackgroundColor: '#fff',
       borderWidth: 2,
       data: data2,
@@ -342,7 +341,7 @@ const mainChart = {
     {
       label: 'My Third dataset',
       backgroundColor: 'transparent',
-      borderColor: brandDanger,
+      borderColor: brandNorm,
       pointHoverBackgroundColor: '#fff',
       borderWidth: 1,
       borderDash: [8, 5],
@@ -399,6 +398,8 @@ class Dashboard extends Component {
   constructor(props) {
     super(props);
 
+    console.log(getStyle('card-1-bg'));
+    console.log(getStyle('--info'));
     this.toggle = this.toggle.bind(this);
     this.onRadioBtnClick = this.onRadioBtnClick.bind(this);
 
@@ -427,7 +428,7 @@ class Dashboard extends Component {
       <div className="animated fadeIn">
         <Row>
           <Col xs="12" sm="6" lg="3">
-            <Card className="text-white bg-info">
+            <Card className="text-white card-1-bg">
               <CardBody className="pb-0">
                 <ButtonGroup className="float-right">
                   <ButtonDropdown id='card1' isOpen={this.state.card1} toggle={() => { this.setState({ card1: !this.state.card1 }); }}>
@@ -446,13 +447,13 @@ class Dashboard extends Component {
                 <div>Total Hours on Laptop</div>
               </CardBody>
               <div className="chart-wrapper mx-3" style={{ height: '70px' }}>
-                <Line data={cardChartData2} options={cardChartOpts2} height={70} />
+                <Line data={cardChartData1} options={cardChartOpts1} height={70}/>
               </div>
             </Card>
           </Col>
 
           <Col xs="12" sm="6" lg="3">
-            <Card className="text-white bg-primary">
+            <Card className="text-white card-2-bg">
               <CardBody className="pb-0">
                 <ButtonGroup className="float-right">
                   <Dropdown id='card2' isOpen={this.state.card2} toggle={() => { this.setState({ card2: !this.state.card2 }); }}>
@@ -470,13 +471,13 @@ class Dashboard extends Component {
                 <div>Total Hours on Desk Monitor</div>
               </CardBody>
               <div className="chart-wrapper mx-3" style={{ height: '70px' }}>
-                <Line data={cardChartData1} options={cardChartOpts1} height={70} />
+                <Line data={cardChartData2} options={cardChartOpts2} height={70}/>
               </div>
             </Card>
           </Col>
 
           <Col xs="12" sm="6" lg="3">
-            <Card className="text-white bg-warning">
+            <Card className="text-white card-3-bg">
               <CardBody className="pb-0">
                 <ButtonGroup className="float-right">
                   <Dropdown id='card3' isOpen={this.state.card3} toggle={() => { this.setState({ card3: !this.state.card3 }); }}>
@@ -500,7 +501,7 @@ class Dashboard extends Component {
           </Col>
 
           <Col xs="12" sm="6" lg="3">
-            <Card className="text-white bg-danger">
+            <Card className="text-white card-4-bg">
               <CardBody className="pb-0">
                 <ButtonGroup className="float-right">
                   <ButtonDropdown id='card4' isOpen={this.state.card4} toggle={() => { this.setState({ card4: !this.state.card4 }); }}>
@@ -597,7 +598,8 @@ class Dashboard extends Component {
                           <br />
                           <strong className="h4">9,123</strong>
                           <div className="chart-wrapper">
-                            <Line data={makeSparkLineData(0, brandPrimary)} options={sparklineChartOpts} width={100} height={30} />
+                            <Line data={makeSparkLineData(0, brandDark)} options={sparklineChartOpts} width={100}
+                                  height={30}/>
                           </div>
                         </div>
                       </Col>
@@ -607,7 +609,8 @@ class Dashboard extends Component {
                           <br />
                           <strong className="h4">22,643</strong>
                           <div className="chart-wrapper">
-                            <Line data={makeSparkLineData(1, brandDanger)} options={sparklineChartOpts} width={100} height={30} />
+                            <Line data={makeSparkLineData(1, brandNorm)} options={sparklineChartOpts} width={100}
+                                  height={30}/>
                           </div>
                         </div>
                       </Col>
@@ -708,7 +711,8 @@ class Dashboard extends Component {
                           <br />
                           <strong className="h4">78,623</strong>
                           <div className="chart-wrapper">
-                            <Line data={makeSparkLineData(2, brandWarning)} options={sparklineChartOpts} width={100} height={30} />
+                            <Line data={makeSparkLineData(2, brandBland)} options={sparklineChartOpts} width={100}
+                                  height={30}/>
                           </div>
                         </div>
                       </Col>
@@ -718,7 +722,8 @@ class Dashboard extends Component {
                           <br />
                           <strong className="h4">49,123</strong>
                           <div className="chart-wrapper">
-                            <Line data={makeSparkLineData(3, brandSuccess)} options={sparklineChartOpts} width={100} height={30} />
+                            <Line data={makeSparkLineData(3, brankLight)} options={sparklineChartOpts} width={100}
+                                  height={30}/>
                           </div>
                         </div>
                       </Col>

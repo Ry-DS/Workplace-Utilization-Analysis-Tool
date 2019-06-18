@@ -11,6 +11,29 @@
   right: 0;
 }
 
+//colors for cars in dashboard
+:root {
+  --theme-dark: #244058;
+  --theme-light: #0a68b6;
+  --theme-norm: #0b406c;
+  --theme-bland: #4f5f7e;
+}
+
+.card-1-bg {
+  background-color: var(--theme-dark);
+}
+
+.card-2-bg {
+  background-color: var(--theme-light);
+}
+
+.card-3-bg {
+  background-color: var(--theme-norm);
+}
+
+.card-4-bg {
+  background-color: var(--theme-bland);
+}
 //Fix dropdown elements not looking good sometimes
 .sidebar {
 
