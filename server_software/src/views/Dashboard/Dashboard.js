@@ -25,7 +25,7 @@ import {getStyle, hexToRgba} from '@coreui/coreui/dist/js/coreui-utilities'
 
 
 const brandDark = getStyle('--theme-dark');
-const brankLight = getStyle('--theme-light');
+const brandLight = getStyle('--theme-light');
 const brandNorm = getStyle('--theme-norm');
 const brandBland = getStyle('--theme-bland');
 
@@ -93,7 +93,7 @@ const cardChartData2 = {
   datasets: [
     {
       label: 'My First dataset',
-      backgroundColor: brankLight,
+      backgroundColor: brandLight,
       borderColor: 'rgba(255,255,255,.55)',
       data: [1, 18, 9, 17, 34, 22, 11],
     },
@@ -333,7 +333,7 @@ const mainChart = {
     {
       label: 'My Second dataset',
       backgroundColor: 'transparent',
-      borderColor: brankLight,
+      borderColor: brandLight,
       pointHoverBackgroundColor: '#fff',
       borderWidth: 2,
       data: data2,
@@ -722,7 +722,7 @@ class Dashboard extends Component {
                           <br />
                           <strong className="h4">49,123</strong>
                           <div className="chart-wrapper">
-                            <Line data={makeSparkLineData(3, brankLight)} options={sparklineChartOpts} width={100}
+                            <Line data={makeSparkLineData(3, brandLight)} options={sparklineChartOpts} width={100}
                                   height={30}/>
                           </div>
                         </div>
