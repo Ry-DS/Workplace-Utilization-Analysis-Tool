@@ -398,8 +398,6 @@ class Dashboard extends Component {
   constructor(props) {
     super(props);
 
-    console.log(getStyle('card-1-bg'));
-    console.log(getStyle('--info'));
     this.toggle = this.toggle.bind(this);
     this.onRadioBtnClick = this.onRadioBtnClick.bind(this);
 

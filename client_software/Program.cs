@@ -3,7 +3,6 @@ using System.Linq;
 using System.Windows.Forms;
 using WindowsDisplayAPI;
 using WindowsDisplayAPI.DisplayConfig;
-using InTheHand.Graphics.Display;
 
 namespace WUAT {
     internal class Program
@@ -23,7 +22,8 @@ namespace WUAT {
 
 
             Console.WriteLine("Display Amount: "+ PathDisplayTarget.GetDisplayTargets().Count());
-            Console.ReadLine();
+            new ServerConnection();
+            Console.ReadKey();
 
 
         }
