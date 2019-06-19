@@ -19,7 +19,7 @@ import {CustomTooltips} from '@coreui/coreui-plugin-chartjs-custom-tooltips';
 import {getStyle, hexToRgba} from '@coreui/coreui/dist/js/coreui-utilities'
 import DashboardCard from "./DashboardCard";
 
-
+//fetch color themes from css
 const brandDark = getStyle('--theme-dark');
 const brandLight = getStyle('--theme-light');
 const brandNorm = getStyle('--theme-norm');
@@ -399,8 +399,7 @@ class Dashboard extends Component {
 
     this.state = {
       dropdownOpen: false,
-      radioSelected: 2,
-      employeesOnline: 0
+      radioSelected: 2
     };
   }
 
