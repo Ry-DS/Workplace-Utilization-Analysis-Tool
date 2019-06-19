@@ -46,7 +46,7 @@
 
 
 //centers things across the project, like the WUAT logo and loading anims
-.center {
+.center-art {
   width: 50px;
   display: block;
   margin-left: auto;
@@ -56,26 +56,39 @@
 }
 
 //Loading animation https://loading.io/css/
-.lds-dual-ring {
+@mixin duel-ring($size) {
   display: inline-block;
-  width: 64px;
-  height: 64px;
+  width: $size;
+  height: $size;
   margin-left: auto;
   margin-right: auto;
 }
-
-.lds-dual-ring:after {
-  content: " ";
-  display: block;
-  width: 46px;
-  height: 46px;
-  margin: 1px;
-  border-radius: 50%;
-  border: 5px solid #0b406c;
-  border-color: #0b406c transparent #0b406c transparent;
-  animation: lds-dual-ring 1.2s linear infinite;
+.lds-dual-ring {
+  @include duel-ring(64px);
 }
 
+.lds-tiny-dual-ring {
+  @include duel-ring(1em)
+}
+
+@mixin duel-ring-after($size,$border-size,$color) {
+  content: " ";
+  display: block;
+  width: $size;
+  height: $size;
+  margin: 1px;
+  border-radius: 50%;
+  border: $border-size solid $color;
+  border-color: $color transparent $color transparent;
+  animation: lds-dual-ring 1.2s linear infinite;
+}
+.lds-dual-ring:after {
+  @include duel-ring-after(46px, 5px, #0b406c);
+}
+
+.lds-tiny-dual-ring:after {
+  @include duel-ring-after(1em, 0.1em, #fff);
+}
 @keyframes lds-dual-ring {
   0% {
     transform: rotate(0deg);

@@ -19,6 +19,7 @@ namespace WUAT
             //on init, we make the client and try connecting to the server
             client = new TcpClient();
             OpenConnection(client);
+            SendData("Hello Server!");
             
         }
 
