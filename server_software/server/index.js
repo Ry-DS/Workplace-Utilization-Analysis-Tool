@@ -4,31 +4,65 @@
 const express = require('express');//express server backend
 const bodyParser = require('body-parser');//for parsing requests and data given from users
 const pino = require('express-pino-logger')();//better looking server logs
-const EmployeeServer = require('./employee-server');
-
-const app = express();
 
 
-app.use(bodyParser.urlencoded({extended: false}));
-app.use(pino);
+const EmployeeServer = require('./employee-server');//employee server for employees to connect and give data
 
-let employeeServer = new EmployeeServer();//start employee server
+const mongoose = require('mongoose');
+const mongoURI = require('./keys').mongoURI;//mongo auth key
 
-app.get('/api/greeting', (req, res) => {
-  const name = req.query.name || 'World';
-  res.setHeader('Content-Type', 'application/json');
-  res.send(JSON.stringify({greeting: `Hello ${name}!`}));
-});
-app.get('/api/employees/online', (req, res) => {//fetch the current amount of employees online
+const app = express();//express server init
 
-  res.setHeader('Content-Type', 'text/plain');
-  res.send(employeeServer.connectionCount.toString());
-
-});
+startupMongoConnection();//stored in mongoose dependancy
+const expressServer = startupExpressServer();
+const employeeServer = startupEmployeeServer();
 
 
+function startupEmployeeServer() {
+  return new EmployeeServer();//start employee server
+}
 
-app.listen(3001, () =>
-  console.log('Express server is running on localhost:3001')
-);
+function startupExpressServer() {
+  //setup express addins
+  //this one allows us to parse/send uris
+  app.use(bodyParser.urlencoded({extended: false}));
+  app.use(pino);//this one gives better looking logs to console
+  app.use(bodyParser.json());//this one allows us to parse json instantly in the response
+
+
+  app.get('/api/greeting', (req, res) => {
+    const name = req.query.name || 'World';
+    res.setHeader('Content-Type', 'application/json');
+    res.send(JSON.stringify({greeting: `Hello ${name}!`}));
+  });
+  app.get('/api/employees/online', (req, res) => {//fetch the current amount of employees online
+
+    res.setHeader('Content-Type', 'text/plain');
+    res.send(employeeServer.connectionCount.toString());
+
+  });
+
+
+  app.listen(3001, () =>
+    console.log('Express server is running on localhost:3001')
+  );
+  return app;
+}
+
+function startupMongoConnection() {
+  mongoose.connect(
+    mongoURI,
+    {useNewUrlParser: true}
+  )
+    .then(() => console.log("MongoDB successfully connected"))
+    .catch(err => console.log(err));
+}
+
+
+
+
+
+
+
+
 

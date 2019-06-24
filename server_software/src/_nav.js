@@ -1,8 +1,8 @@
 export default {//defines everything in the sidebar
   items: [
     {
-      title: true,
-      name: 'View',
+      title: true,//says this item is a title to a subset
+      name: 'View',//name to show
       wrapper: {            // optional wrapper object
         element: '',        // required valid HTML5 element tag
         attributes: {}        // optional valid JS object with JS API naming ex: { className: "my-class", style: { fontFamily: "Verdana" }, id: "my-id"}
@@ -10,10 +10,10 @@ export default {//defines everything in the sidebar
       class: ''             // optional class names space delimited list for title item ex: "text-center"
     },
     {
-      name: 'Dashboard',
-      url: '/dashboard',
-      icon: 'icon-speedometer',
-      badge: {
+      name: 'Dashboard',//for an actual item, more data is needed
+      url: '/dashboard',//link to go to
+      icon: 'icon-speedometer',//icon to show
+      badge: {//badge if required
         variant: 'info',
         text: 'NEW',
       },

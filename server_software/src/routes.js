@@ -1,5 +1,6 @@
 import React from 'react';
-
+//this file defines the routes. A route a subset of the domain to link to. A section of the program.
+//For example, localhost/dashboard is a route to the dashboard part of the app
 const Breadcrumbs = React.lazy(() => import('./views/Base/Breadcrumbs'));
 const Cards = React.lazy(() => import('./views/Base/Cards'));
 const Carousels = React.lazy(() => import('./views/Base/Carousels'));
