@@ -1,0 +1,25 @@
+const Validator = require('validator');
+const isEmpty = require('is-empty');
+const emptyOr = require('./emptyOr');
+//we process login validation data here
+module.exports = function validateLoginInput(data) {
+  let errors = {};
+  //if the data given is missing some fields, fill it with empty strings
+  data.email = emptyOr(data);
+  data.password = emptyOr(data);
+  //password check
+  if (Validator.isEmpty(data.password)) {
+    errors.password = "Password field is required";
+  }
+  //email check
+  if (Validator.isEmpty(data.email)) {
+    errors.email = "Email field is required";
+  } else if (!Validator.isEmail(data.email)) {
+    errors.email = "Email is invalid";
+  }
+  //return the errors, if none we return the data is valid
+  return {
+    errors, isValid: isEmpty(errors)
+  }
+
+};
