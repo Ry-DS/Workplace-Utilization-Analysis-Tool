@@ -5,8 +5,8 @@ const emptyOr = require('./emptyOr');
 module.exports = function validateLoginInput(data) {
   let errors = {};
   //if the data given is missing some fields, fill it with empty strings
-  data.email = emptyOr(data);
-  data.password = emptyOr(data);
+  data.email = emptyOr(data.email);
+  data.password = emptyOr(data.password);
   //password check
   if (Validator.isEmpty(data.password)) {
     errors.password = "Password field is required";

@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 // Create Schema
-const AccountSchema = new Schema({
+const UserSchema = new Schema({
   name: {
     type: String,
     required: true
@@ -21,7 +21,7 @@ const AccountSchema = new Schema({
   },
   lastLogin: {
     type: Date,
-    default: Date.now
+    default: ''
   }
 });
-module.exports = Account = mongoose.model("accounts", AccountSchema);
+module.exports = Account = mongoose.model("users", UserSchema);

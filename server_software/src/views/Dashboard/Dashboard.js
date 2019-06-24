@@ -449,7 +449,7 @@ class Dashboard extends Component {
           </Col>
 
           <Col xs="12" sm="6" lg="3">
-            <DashboardCard className="text-white card-4-bg" title="Employees Online" request="employees/online">
+            <DashboardCard className="text-white card-4-bg" title="Average Employees" request="employees/online">
               <div className="chart-wrapper mx-3" style={{ height: '70px' }}>
                 <Bar data={cardChartData4} options={cardChartOpts4} height={70} />
               </div>

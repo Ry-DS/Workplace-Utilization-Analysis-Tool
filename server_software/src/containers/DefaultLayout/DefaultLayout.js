@@ -50,6 +50,7 @@ class DefaultLayout extends Component {
             <AppSidebarForm />
             <Suspense>
               {/*WUAT Logo here*/}
+
               <img src={wuatLogo} alt="WUAT Logo" className="center-art"/>
               {/*The sidebar object*/}
             <AppSidebarNav navConfig={navigation} {...this.props} router={router}/>

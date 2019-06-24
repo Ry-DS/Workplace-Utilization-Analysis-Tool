@@ -6,10 +6,10 @@ const passwordRestrictions = {min: 6, max: 30};
 module.exports = function validateRegistrationInput(data) {
   let errors = {};
   //if the data given is missing some fields, fill it with empty strings
-  data.name = emptyOr(data);
-  data.email = emptyOr(data);
-  data.password = emptyOr(data);
-  data.passwordRetype = emptyOr(data);
+  data.name = emptyOr(data.name);
+  data.email = emptyOr(data.email);
+  data.password = emptyOr(data.password);
+  data.passwordRetype = emptyOr(data.passwordRetype);
   //name checks
 
   if (Validator.isEmpty(data.name)) {
@@ -20,6 +20,10 @@ module.exports = function validateRegistrationInput(data) {
   if (Validator.isEmpty(data.password)) {
     errors.password = "Password field is required";
   }
+  if (!Validator.equals(data.passwordRetype, data.password)) {
+    errors.passwordRetype = "Passwords must match";
+
+  }
   if (Validator.isEmpty(data.passwordRetype)) {
     errors.passwordRetype = "Confirm Password field is required";
   }
@@ -28,10 +32,7 @@ module.exports = function validateRegistrationInput(data) {
     errors.password = `Password must be between ${passwordRestrictions.min} and ${passwordRestrictions.max} characters long`;
 
   }
-  if (!Validator.equals(data.passwordRetype, data.password)) {
-    errors.passwordRetype = "Passwords must match";
 
-  }
   //email check
   if (Validator.isEmpty(data.email)) {
     errors.email = "Email field is required";

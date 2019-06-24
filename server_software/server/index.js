@@ -5,13 +5,15 @@ const express = require('express');//express server backend
 const bodyParser = require('body-parser');//for parsing requests and data given from users
 const pino = require('express-pino-logger')();//better looking server logs
 
+//database and auth stuff
+const passport=require('passport');
+const users=require('./routes/users');
 
 const EmployeeServer = require('./employee-server');//employee server for employees to connect and give data
 
 const mongoose = require('mongoose');
 const mongoURI = require('./keys').mongoURI;//mongo auth key
 
-const app = express();//express server init
 
 startupMongoConnection();//stored in mongoose dependancy
 const expressServer = startupExpressServer();
@@ -23,13 +25,14 @@ function startupEmployeeServer() {
 }
 
 function startupExpressServer() {
+  const app=express();
   //setup express addins
   //this one allows us to parse/send uris
   app.use(bodyParser.urlencoded({extended: false}));
   app.use(pino);//this one gives better looking logs to console
   app.use(bodyParser.json());//this one allows us to parse json instantly in the response
 
-
+  //setup default request stuff
   app.get('/api/greeting', (req, res) => {
     const name = req.query.name || 'World';
     res.setHeader('Content-Type', 'application/json');
@@ -41,6 +44,13 @@ function startupExpressServer() {
     res.send(employeeServer.connectionCount.toString());
 
   });
+  //setup login stuff
+  // Passport middleware
+  app.use(passport.initialize());
+  // Passport config
+  require("./passport")(passport);
+  // Routes
+  app.use("/api/users", users);
 
 
   app.listen(3001, () =>

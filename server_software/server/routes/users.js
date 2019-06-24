@@ -6,27 +6,29 @@ const keys = require("../keys");
 // Load input validation
 const validateRegistrationInput = require("../validation/register");
 const validateLoginInput = require("../validation/login");
-// Load Account model
-const Account = require("../models/Account");
+// Load User model
+const User = require("../models/User");
 
 // @route POST api/users/register
 // @desc Register user
 // @access Public
 router.post("/register", (req, res) => {
   // Form validation
-  const {errors, isValid} = validateRegistrationInput(req.body);
+  const query=req.query;
+  const {errors, isValid} = validateRegistrationInput(query);
+
 // Check validation
   if (!isValid) {
     return res.status(400).json(errors);
   }
-  Account.findOne({email: req.body.email}).then(user => {
+  User.findOne({email: query.email}).then(user => {
     if (user) {
       return res.status(400).json({email: "Email already exists"});
     } else {
-      const newUser = new Account({
-        name: req.body.name,
-        email: req.body.email,
-        password: req.body.password
+      const newUser = new User({
+        name: query.name,
+        email: query.email,
+        password: query.password
       });
 // Hash password before saving in database
       bcrypt.genSalt(10, (err, salt) => {
@@ -35,7 +37,7 @@ router.post("/register", (req, res) => {
           newUser.password = hash;
           newUser
             .save()
-            .then(user => res.json(user))
+            .then(user => res.json({name: user.name,email: user.email}))
             .catch(err => console.log(err));
         });
       });
@@ -48,15 +50,16 @@ router.post("/register", (req, res) => {
 // @access Public
 router.post("/login", (req, res) => {
   // Form validation
-  const {errors, isValid} = validateLoginInput(req.body);
+  const query=req.query;
+  const {errors, isValid} = validateLoginInput(query);
 // Check validation
   if (!isValid) {
     return res.status(400).json(errors);
   }
-  const email = req.body.email;
-  const password = req.body.password;
+  const email = query.email;
+  const password = query.password;
 // Find user by email
-  Account.findOne({email}).then(user => {
+  User.findOne({email}).then(user => {
     // Check if user exists
     if (!user) {
       return res.status(404).json({emailnotfound: "Email not found"});
@@ -75,7 +78,7 @@ router.post("/login", (req, res) => {
           payload,
           keys.secretOrKey,
           {
-            expiresIn: 31556926 // 1 year in seconds
+            expiresIn: 24*60*60// 24 hours
           },
           (err, token) => {
             res.json({
