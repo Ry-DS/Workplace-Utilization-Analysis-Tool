@@ -33,9 +33,9 @@ class DashboardCard extends Component {
   }
 
   render() {
-    return <Card className={this.props.className}><!--Card design, pass css styles from parent for background colors-->
+    return <Card className={this.props.className}>{/*Card design, pass css styles from parent for background colors*/}
       <CardBody className="pb-0">
-        <ButtonGroup className="float-right"><!--Buttons to change what the card displays-->
+        <ButtonGroup className="float-right">{/*Buttons to change what the card displays*/}
           <ButtonDropdown isOpen={this.state.isOpen} toggle={() => {
             this.setState({isOpen: !this.state.isOpen});
           }}>
@@ -51,10 +51,10 @@ class DashboardCard extends Component {
           </ButtonDropdown>
         </ButtonGroup>
         <div className="text-value fadeIn">{this.state.value}</div>
-        <!--We set the value and title based on what is given from the constructor and server-->
+        {/*We set the value and title based on what is given from the constructor and server*/}
         <div>{this.props.title}</div>
       </CardBody>
-      {this.props.children}<!--Paste children given from dash, normally a graph or something, displayed below content in card with no paddings-->
+      {this.props.children}{/*Paste children given from dash, normally a graph or something, displayed below content in card with no paddings*/}
     </Card>;
 
   }
