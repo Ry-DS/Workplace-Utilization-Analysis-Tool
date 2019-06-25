@@ -1,4 +1,4 @@
-import {ButtonDropdown, ButtonGroup, Card, CardBody, DropdownItem, DropdownMenu, DropdownToggle} from 'reactstrap';
+import {Card, CardBody} from 'reactstrap';
 import React, {Component} from 'react';
 import axios from 'axios';
 
@@ -36,21 +36,6 @@ class DashboardCard extends Component {
   render() {
     return <Card className={this.props.className}>{/*Card design, pass css styles from parent for background colors*/}
       <CardBody className="pb-0">
-        <ButtonGroup className="float-right">{/*Buttons to change what the card displays*/}
-          <ButtonDropdown isOpen={this.state.isOpen} toggle={() => {
-            this.setState({isOpen: !this.state.isOpen});
-          }}>
-            <DropdownToggle caret className="p-0" color="transparent">
-              <i className="icon-settings"></i>
-            </DropdownToggle>
-            <DropdownMenu right>
-              <DropdownItem>Action</DropdownItem>
-              <DropdownItem>Another action</DropdownItem>
-              <DropdownItem disabled>Disabled action</DropdownItem>
-              <DropdownItem>Something else here</DropdownItem>
-            </DropdownMenu>
-          </ButtonDropdown>
-        </ButtonGroup>
         <div className="text-value fadeIn">{this.state.value}</div>
         {/*We set the value and title based on what is given from the constructor and server*/}
         <div>{this.props.title}</div>

@@ -36,6 +36,7 @@ function startupExpressServer() {
   //setup login stuff
   // Passport middleware
   app.use(passport.initialize());
+
   // Passport config
   require("./passport-config")(passport);
   // Routes

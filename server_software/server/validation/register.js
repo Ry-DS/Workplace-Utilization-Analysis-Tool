@@ -2,7 +2,7 @@
 const Validator = require('validator');
 const isEmpty = require('is-empty');
 const emptyOr = require('./emptyOr');
-const passwordRestrictions = {min: 6, max: 30};
+const passwordRestrictions = {min: 5, max: 30};
 module.exports = function validateRegistrationInput(data) {
   let errors = {};
   //if the data given is missing some fields, fill it with empty strings
