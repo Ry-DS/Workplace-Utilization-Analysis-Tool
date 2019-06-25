@@ -14,7 +14,7 @@ const User = require("../models/User");
 // @access Public
 router.post("/register", (req, res) => {
   // Form validation
-  const query=req.query;
+  const query = req.body;
   const {errors, isValid} = validateRegistrationInput(query);
 
 // Check validation
@@ -50,7 +50,7 @@ router.post("/register", (req, res) => {
 // @access Public
 router.post("/login", (req, res) => {
   // Form validation
-  const query=req.query;
+  const query = req.body;
   const {errors, isValid} = validateLoginInput(query);
 // Check validation
   if (!isValid) {

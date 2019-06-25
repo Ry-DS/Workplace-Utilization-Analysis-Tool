@@ -25,29 +25,40 @@ import {getStyle} from '@coreui/coreui/dist/js/coreui-utilities'
 class Login extends Component {
   constructor(props){
     super(props);
+
     this.state={
       popoverOpen: false,
-      errors: {email: 'No'},
+      loading: false,
+      errors: {},
       email: '',
       password: ''
     };
+
   }
 
+  componentDidMount() {
+    // If logged in and user navigates here, take them to the dashboard
+    if (this.props.auth.isAuthenticated) {
+      this.props.history.push("/dashboard");
+    }
+  }
   componentWillReceiveProps(nextProps) {
+
     if (nextProps.auth.isAuthenticated) {
       this.props.history.push("/dashboard"); // push user to dashboard when they login
     }
     if (nextProps.errors) {
       this.setState({
-        errors: nextProps.errors
+        errors: nextProps.errors, loading: false
       });
-    }
+    } else this.setState({loading: false});
   }
   onChange=e=>{
     this.setState({[e.target.id]: e.target.value});
   };
   onSubmit=e=>{
     e.preventDefault();
+    this.setState({loading: true});
     const userData = {
       email: this.state.email,
       password: this.state.password
@@ -56,6 +67,7 @@ class Login extends Component {
   };
 
   toggle=()=>{
+    console.log('d');
     this.setState({popoverOpen: !this.state.popoverOpen});
   };
 
@@ -75,7 +87,7 @@ class Login extends Component {
             <Col md="8">
                 <Card>
                   <CardBody>
-                    <Form noValidate onSubmit={this.onSubmit}>
+                    <Form noValidate>
                       <img src={wuatLogo} alt="Logo" className="center-art" style={logoStyle}/>
                       <div className="p-4">
                       <h1>Login</h1>
@@ -102,14 +114,17 @@ class Login extends Component {
                       </InputGroup>
                       <Row>
                         <Col xs="6">
-                          <Button className="px-4" style={buttonStyle}>Login</Button>
+                          <Button className="px-4" style={buttonStyle} onClick={this.onSubmit}>{this.state.loading ?
+                            <span className="lds-tiny-dual-ring"/> : "Login"}</Button>
                         </Col>
                         <Col xs="6" className="text-right">
-                          <Button color="link" className="px-0" id="forgotPassword">Forgot password?</Button>
-                          <Popover placement="right" isOpen={this.state.popoverOpen} target="forgotPassword" toggle={this.toggle}>
+                          <Button color="link" className="px-0" id="forgotPassword" onClick={this.toggle}>Forgot
+                            password?</Button>
+                          <div className="fadeIn">
+                            <Popover placement="right" isOpen={this.state.popoverOpen} target="forgotPassword">
                             <PopoverHeader>Forgot your Password?</PopoverHeader>
                             <PopoverBody>Make sure to contact an admin in order to reset your password</PopoverBody>
-                          </Popover>
+                            </Popover></div>
                         </Col>
                       </Row>
                         </div>

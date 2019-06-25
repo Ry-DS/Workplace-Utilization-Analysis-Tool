@@ -16,8 +16,9 @@ export const registerUser = (userData, history) => dispatch => {
 };
 // Login - get user token
 export const loginUser = userData => dispatch => {
+
   axios
-    .post("/api/users/login", null, userData)
+    .post("/api/users/login", userData)
     .then(res => {
       // Save to localStorage
 // Set token to localStorage
@@ -30,11 +31,14 @@ export const loginUser = userData => dispatch => {
       // Set current user
       dispatch(setCurrentUser(decoded));
     })
-    .catch(err =>
+    .catch(err => {
+        console.log(err.response.data);
       dispatch({
         type: GET_ERRORS,
         payload: err.response.data
-      })
+      });
+
+      }
     );
 };
 // Set logged in user
