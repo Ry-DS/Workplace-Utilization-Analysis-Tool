@@ -1,4 +1,8 @@
-import React, { Component } from 'react';
+//https://blog.bitsrc.io/build-a-login-auth-app-with-the-mern-stack-part-3-react-components-88190f8db718
+import React, {Component} from 'react';
+import PropTypes from "prop-types";
+import {connect} from "react-redux";
+import {loginUser} from "../../../redux/actions/authActions";
 import wuatLogo from '../../../assets/img/brand/wuat/WUAT Logo.svg';
 import {
   Button,
@@ -10,11 +14,14 @@ import {
   Input,
   InputGroup,
   InputGroupAddon,
-  InputGroupText, Popover, PopoverBody,
+  InputGroupText,
+  Popover,
+  PopoverBody,
   PopoverHeader,
   Row
 } from 'reactstrap';
 import {getStyle} from '@coreui/coreui/dist/js/coreui-utilities'
+
 class Login extends Component {
   constructor(props){
     super(props);
@@ -25,6 +32,17 @@ class Login extends Component {
       password: ''
     };
   }
+
+  componentWillReceiveProps(nextProps) {
+    if (nextProps.auth.isAuthenticated) {
+      this.props.history.push("/dashboard"); // push user to dashboard when they login
+    }
+    if (nextProps.errors) {
+      this.setState({
+        errors: nextProps.errors
+      });
+    }
+  }
   onChange=e=>{
     this.setState({[e.target.id]: e.target.value});
   };
@@ -34,13 +52,14 @@ class Login extends Component {
       email: this.state.email,
       password: this.state.password
     };
-    console.log(userData);
+    this.props.loginUser(userData);
   };
 
   toggle=()=>{
     this.setState({popoverOpen: !this.state.popoverOpen});
   };
-  render() {
+
+  render() {//TODO error styles
     const logoStyle={
       width: '8em'
     };
@@ -105,4 +124,16 @@ class Login extends Component {
   }
 }
 
-export default Login;
+Login.propTypes = {//setup props that are needed and what they should be.
+  loginUser: PropTypes.func.isRequired,//saying a function is needed for loginUser
+  auth: PropTypes.object.isRequired,//saying an object is needed
+  errors: PropTypes.object.isRequired//saying an object is needed
+};
+const mapStateToProps = state => ({
+  auth: state.auth,
+  errors: state.errors
+});
+export default connect(
+  mapStateToProps,
+  {loginUser}
+)(Login);//don't need to wrap with withRouter() since we direct to dashboard ourselves instead of doing it in the action.

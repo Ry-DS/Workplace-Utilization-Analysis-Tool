@@ -25,6 +25,7 @@ const brandLight = getStyle('--theme-light');
 const brandNorm = getStyle('--theme-norm');
 const brandBland = getStyle('--theme-bland');
 
+
 // Card Chart 1
 const cardChartData1 = {
   labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],

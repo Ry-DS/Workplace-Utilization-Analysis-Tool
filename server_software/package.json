@@ -26,6 +26,7 @@
     "enzyme-adapter-react-16": "^1.13.0",
     "flag-icon-css": "^3.3.0",
     "font-awesome": "^4.7.0",
+    "jwt-decode": "^2.2.0",
     "node-sass": "^4.12.0",
     "prop-types": "^15.7.2",
     "react": "^16.8.6",
@@ -38,6 +39,7 @@
     "react-test-renderer": "^16.8.6",
     "reactstrap": "^7.1.0",
     "redux": "^4.0.1",
+    "redux-devtools-extension": "^2.13.8",
     "redux-thunk": "^2.3.0",
     "simple-line-icons": "^2.4.1"
   },

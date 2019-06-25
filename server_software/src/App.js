@@ -3,7 +3,10 @@ import {HashRouter, Route, Switch} from 'react-router-dom';
 // import { renderRoutes } from 'react-router-config';
 import './App.scss';
 
-import loading from './load_animation';
+import loading from './utils/load_animation';
+//redux
+import {Provider} from "react-redux";
+import store from "./redux/store";
 
 // Containers
 const DefaultLayout = React.lazy(() => import('./containers/DefaultLayout'));
@@ -14,11 +17,13 @@ const Register = React.lazy(() => import('./views/Pages/Register'));
 const Page404 = React.lazy(() => import('./views/Pages/Page404'));
 const Page500 = React.lazy(() => import('./views/Pages/Page500'));
 
+
 class App extends Component {
 
   render() {
     return (
-      <HashRouter>
+      <Provider store={store}>
+        <HashRouter>
           <React.Suspense fallback={loading()}>
             <Switch>
               <Route exact path="/login" name="Login Page" render={props => <Login {...props}/>} />
@@ -28,7 +33,8 @@ class App extends Component {
               <Route path="/" name="Home" render={props => <DefaultLayout {...props}/>} />
             </Switch>
           </React.Suspense>
-      </HashRouter>
+        </HashRouter>
+      </Provider>
     );
   }
 }

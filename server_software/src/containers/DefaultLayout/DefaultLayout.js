@@ -2,7 +2,7 @@ import React, {Component, Suspense} from 'react';
 import * as router from 'react-router-dom';
 import {Redirect, Route, Switch} from 'react-router-dom';
 import {Container} from 'reactstrap';
-import loading from '../../load_animation';
+import loading from '../../utils/load_animation';
 import {
   AppAside,
   AppBreadcrumb2 as AppBreadcrumb,
@@ -15,6 +15,10 @@ import {
   AppSidebarMinimizer,
   AppSidebarNav2 as AppSidebarNav,
 } from '@coreui/react';
+//redux
+import PropTypes from "prop-types";
+import {connect} from "react-redux";
+import {logoutUser} from "../../redux/actions/authActions";
 // sidebar nav config
 import navigation from '../../_nav';
 // routes config
@@ -33,10 +37,12 @@ class DefaultLayout extends Component {
 
   signOut(e) {
     e.preventDefault();
-    this.props.history.push('/login')
+    this.props.logoutUser();
+    //this.props.history.push('/login')
   }
 
   render() {
+    const {user} = this.props.auth;
     return (
       <div className="app">
         <AppHeader fixed>
@@ -98,4 +104,14 @@ class DefaultLayout extends Component {
   }
 }
 
-export default DefaultLayout;
+DefaultLayout.propTypes = {
+  logoutUser: PropTypes.func.isRequired,
+  auth: PropTypes.object.isRequired
+};
+const mapStateToProps = state => ({
+  auth: state.auth
+});
+export default connect(
+  mapStateToProps,
+  {logoutUser}
+)(DefaultLayout);
