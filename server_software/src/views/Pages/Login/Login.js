@@ -18,7 +18,8 @@ import {
   Popover,
   PopoverBody,
   PopoverHeader,
-  Row
+  Row,
+  Tooltip
 } from 'reactstrap';
 import {getStyle} from '@coreui/coreui/dist/js/coreui-utilities'
 
@@ -30,6 +31,7 @@ class Login extends Component {
       popoverOpen: false,
       loading: false,
       errors: {},
+      tooltipOpen: [false, false],
       email: '',
       password: ''
     };
@@ -49,29 +51,34 @@ class Login extends Component {
     }
     if (nextProps.errors) {
       this.setState({
-        errors: nextProps.errors, loading: false
+        errors: nextProps.errors, loading: false//when we receive an error, stop the loading animation
       });
     } else this.setState({loading: false});
   }
   onChange=e=>{
-    this.setState({[e.target.id]: e.target.value});
+    this.setState({[e.target.id]: e.target.value});//edit email and password fields while also storing it in state
+
   };
-  onSubmit=e=>{
+  onSubmit = e => {//when login button pressed
     e.preventDefault();
-    this.setState({loading: true});
+    this.setState({loading: true});//we start the loading animation
     const userData = {
       email: this.state.email,
       password: this.state.password
     };
-    this.props.loginUser(userData);
+    this.props.loginUser(userData);//we try login
   };
 
-  toggle=()=>{
-    console.log('d');
+  toggle = () => {//show popup for password forget
     this.setState({popoverOpen: !this.state.popoverOpen});
   };
+  tooltipToggle = (index) => {
+    let tooltipOpen = this.state.tooltipOpen.slice(0);
+    tooltipOpen[index] = !tooltipOpen[index];
+    this.setState({tooltipOpen})
+  };
 
-  render() {//TODO error styles
+  render() {
     const logoStyle={
       width: '8em'
     };
@@ -100,7 +107,17 @@ class Login extends Component {
                         </InputGroupAddon>
                         <Input onChange={this.onChange}
                                value={this.state.email}
-                               error={this.state.errors.email} id="email" type="text" placeholder="Email" autoComplete="email" />
+                               id="email" type="text" className={this.state.errors.email ? 'is-invalid' : ''}
+                               placeholder="Email" autoComplete="email"/>
+                        {/*We are able to add an error tooltip if an error is given from the backend*/}
+                        {this.state.errors.email ?
+                          <Tooltip placement="right" isOpen={this.state.tooltipOpen[0]} target="email" toggle={() => {
+                            this.tooltipToggle(0)
+                          }}>
+
+                            {this.state.errors.email}
+                          </Tooltip> : null}
+
                       </InputGroup>
                       <InputGroup className="mb-4">
                         <InputGroupAddon addonType="prepend">
@@ -110,7 +127,16 @@ class Login extends Component {
                         </InputGroupAddon>
                         <Input onChange={this.onChange}
                                value={this.state.password}
-                               error={this.state.errors.password} id="password" type="password" placeholder="Password" autoComplete="current-password" />
+                               id="password" type="password" className={this.state.errors.password ? 'is-invalid' : ''}
+                               placeholder="Password" autoComplete="current-password"/>
+                        {this.state.errors.password ?
+                          <Tooltip placement="right" isOpen={this.state.tooltipOpen[1]} target="password"
+                                   toggle={() => {
+                                     this.tooltipToggle(1)
+                                   }}>
+
+                            {this.state.errors.password}
+                          </Tooltip> : null}
                       </InputGroup>
                       <Row>
                         <Col xs="6">
