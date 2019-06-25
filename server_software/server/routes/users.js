@@ -87,6 +87,14 @@ router.post("/login", (req, res) => {
             });
           }
         );
+        user.lastLogin = Date.now();
+
+        user.save(err => {//better way instead of making two requests? Like returning within this current method?
+          if (err) {
+            console.log(`Failed to update user ${user.email} last login: `);
+            console.log(err);
+          }
+        });
       } else {
         return res
           .status(400)

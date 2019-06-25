@@ -32,26 +32,25 @@ function startupExpressServer() {
   app.use(pino);//this one gives better looking logs to console
   app.use(bodyParser.json());//this one allows us to parse json instantly in the response
 
-  //setup default request stuff
+
+  //setup login stuff
+  // Passport middleware
+  app.use(passport.initialize());
+  // Passport config
+  require("./passport-config")(passport);
+  // Routes
+  app.use("/api/users", users);
+//setup default request stuff
   app.get('/api/greeting', (req, res) => {
     const name = req.query.name || 'World';
     res.setHeader('Content-Type', 'application/json');
     res.send(JSON.stringify({greeting: `Hello ${name}!`}));
   });
-  app.get('/api/employees/online', (req, res) => {//fetch the current amount of employees online
-
+  app.get('/api/employees/online', passport.authenticate('jwt', {session: false}), (req, res) => {//fetch the current amount of employees online
     res.setHeader('Content-Type', 'text/plain');
     res.send(employeeServer.connectionCount.toString());
 
   });
-  //setup login stuff
-  // Passport middleware
-  app.use(passport.initialize());
-  // Passport config
-  require("./passport")(passport);
-  // Routes
-  app.use("/api/users", users);
-
 
   app.listen(3001, () =>
     console.log('Express server is running on localhost:3001')

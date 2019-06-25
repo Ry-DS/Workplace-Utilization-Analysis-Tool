@@ -1,5 +1,6 @@
 import {ButtonDropdown, ButtonGroup, Card, CardBody, DropdownItem, DropdownMenu, DropdownToggle} from 'reactstrap';
 import React, {Component} from 'react';
+import axios from 'axios';
 
 //This special card automatically updates from the database server
 class DashboardCard extends Component {
@@ -15,12 +16,12 @@ class DashboardCard extends Component {
   componentDidMount() {//run on component init
     if (this.props.request != null) {//if the card actually has a request to check from
       let doFetch = () =>
-        fetch(`/api/${this.props.request}`).then(req => req.text()).then(dat => {
+        axios(`/api/${this.props.request}`).then(dat => {
           if (!this.active) {//we check if we are still on the dashboard, therefore still updating
             return;
           }
-          this.setState({value: dat});//set the state to the new value
-          setTimeout(doFetch, 2000);//do it again in 2 seconds, provides live updating
+          this.setState({value: dat.data});//set the state to the new value
+          setTimeout(doFetch, 3000);//do it again in 2 seconds, provides live updating
 
         });
       doFetch();//initial call to start the loop
