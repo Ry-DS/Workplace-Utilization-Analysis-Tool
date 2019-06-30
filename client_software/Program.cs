@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Linq;
+using System.Net.Sockets;
+using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Windows.Forms;
 using WindowsDisplayAPI;
@@ -17,25 +20,50 @@ namespace WUAT {
             Console.WriteLine("Attempting to connect to server...");
             connection=new ServerConnection();
             connection.OpenConnection();
-            while (true)
+            while (true)//main app loop
             {
-
+                //make sure connection remains active
                 if (!connection.IsConnected())
                 {
                     Console.WriteLine("Lost connection to server! Reconnecting...");
                     connection.OpenConnection();//blocks everything else, program useless without server connection
                     
                 }
+                //parse any response from the server
+                var ns = connection.GetClient().GetStream();
+                var bufferSize = connection.GetClient().ReceiveBufferSize;
+                if(bufferSize> 0&&ns.DataAvailable){
+                    var bytes = new byte[bufferSize];
+                    ns.Read(bytes, 0, bufferSize);             
+                    var msg = Encoding.ASCII.GetString(bytes).Replace("\0",""); //the message incoming, also remove null char from empty buffer
+                    
+                    MessageBox.Show(msg);//TODO testing remove
+                    ExecuteServerInstruction(msg);
+                    
+                }
+
                 
                 
-                Thread.Sleep(1000);//every second we tick the program to check for monitor updates and server disconnects
+                
+                Thread.Sleep(100);//every second we tick the program to check for monitor updates and server disconnects
                 
             }
 
 
         }
 
-        private void PrintDisplayInfo()
+            private void ExecuteServerInstruction(string msg)
+            {
+                switch (msg.Contains(":")?msg.Split(':')[0]:msg)
+                {
+                    case "INIT"://called when the server can't recognise the computer and is requesting for it to send over a team name to register with
+                        Application.Run(new TeamChooser());
+                        break;
+
+                }
+            }
+
+            private void PrintDisplayInfo()
         {
             foreach (var target in PathDisplayTarget.GetDisplayTargets())
             {
@@ -55,8 +83,8 @@ namespace WUAT {
         public static void Main()
         {
             Application.EnableVisualStyles();
-            Application.Run(new TeamChooser());
-            
+            new Program();
+
         }
         
     }

@@ -140,7 +140,8 @@ class Login extends Component {
                       </InputGroup>
                       <Row>
                         <Col xs="6">
-                          <Button className="px-4" style={buttonStyle} onClick={this.onSubmit}>{this.state.loading ?
+                          <Button className="px-4" style={buttonStyle} onClick={this.onSubmit}
+                                  disabled={this.state.loading}>{this.state.loading ?
                             <span className="lds-tiny-dual-ring"/> : "Login"}</Button>
                         </Col>
                         <Col xs="6" className="text-right">

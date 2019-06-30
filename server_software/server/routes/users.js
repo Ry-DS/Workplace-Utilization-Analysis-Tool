@@ -21,13 +21,13 @@ router.post("/register", (req, res) => {
   if (!isValid) {
     return res.status(400).json(errors);
   }
-  User.findOne({email: query.email}).then(user => {
+  User.findOne({email: query.email.toLowerCase()}).then(user => {
     if (user) {
       return res.status(400).json({email: "Email already exists"});
     } else {
       const newUser = new User({
         name: query.name,
-        email: query.email,
+        email: query.email.toLowerCase(),
         password: query.password
       });
 // Hash password before saving in database
@@ -37,7 +37,7 @@ router.post("/register", (req, res) => {
           newUser.password = hash;
           newUser
             .save()
-            .then(user => res.json({name: user.name,email: user.email}))
+            .then(user => res.json({name: user.name, email: user.email.toLowerCase()}))
             .catch(err => console.log(err));
         });
       });
@@ -56,7 +56,7 @@ router.post("/login", (req, res) => {
   if (!isValid) {
     return res.status(400).json(errors);
   }
-  const email = query.email;
+  const email = query.email.toLowerCase();
   const password = query.password;
 // Find user by email
   User.findOne({email}).then(user => {

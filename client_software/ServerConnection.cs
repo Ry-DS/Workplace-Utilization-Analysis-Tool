@@ -1,12 +1,13 @@
 using System;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 
 namespace WUAT
 {
-    public class ServerConnection//we manage the connection to the WUAT server here
+    public class ServerConnection//we manage the connection to the WUAT server here. Only the connection however. 
     {
         
         
@@ -45,7 +46,8 @@ namespace WUAT
             {//try connecting, if we fail, print error and try connecting again 
                 client.Connect(HOST, PORT);
                 Console.WriteLine("Connected");
-                SendData("Hello Server!");
+                SendData("ID:"+NetworkInterface.GetAllNetworkInterfaces()[0].GetPhysicalAddress());//send computer's unique ID
+
                 
 
             }
@@ -54,7 +56,7 @@ namespace WUAT
                 Console.WriteLine(e.StackTrace);
                 Console.WriteLine("Failed to Connect");
                 Console.WriteLine("Retrying in 10 min");
-                if(connectionUpdater.WaitOne(10 * 60 * 1000))//wait for 10 min or when the network state changes
+                if(connectionUpdater.WaitOne(/*10 * 60 * 1000*/1000))//wait for 10 min or when the network state changes
                     Console.WriteLine("Network change detected! Retrying...");
                 
                 OpenConnection();
@@ -67,7 +69,7 @@ namespace WUAT
             //TODO prob wanna quit here
         }
 
-        private void SendData(string data)
+        internal void SendData(string data)
         {
             if (client == null || !client.Connected)
             {
@@ -93,6 +95,11 @@ namespace WUAT
         public bool IsConnected()
         {
             return client.Connected;
+        }
+
+        internal TcpClient GetClient()
+        {
+            return client;
         }
     }
    
