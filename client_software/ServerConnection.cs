@@ -1,4 +1,5 @@
 using System;
+using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
@@ -7,47 +8,60 @@ namespace WUAT
 {
     public class ServerConnection//we manage the connection to the WUAT server here
     {
+        
+        
         //Location of server on the network
         private const string HOST = "localhost";
         private const int PORT = 7250;
+        
+        
+        
         //client instance
         private TcpClient client;
-
+            
+        //used to tell the server to try connecting to the server when the computer connects to a new network
+        private AutoResetEvent connectionUpdater =new AutoResetEvent(false);
+        
+        
 
         public ServerConnection()
         {
+            //setup network listener so we can see when the employee connects to a new network
+            NetworkChange.NetworkAddressChanged += new 
+                NetworkAddressChangedEventHandler((sender, args) => { connectionUpdater.Set(); });//notify the client thread to try connecting again since we're on a new network
+            
+            
+            
             //on init, we make the client and try connecting to the server
             client = new TcpClient();
-            OpenConnection(client);
-            SendData("Hello Server!");
+            
             
         }
 
-        private void OpenConnection(TcpClient client)
+        //Blocking method that tries to connect to the server. Will not return unless it does. 
+        internal void OpenConnection()
         {
-            if (client == null)
-            {
-                throw new NullReferenceException("Need to give initialized client");
-                
-            }
-
             try
-            {//try connecting, if we fail, print error and try connecting after a second. 
+            {//try connecting, if we fail, print error and try connecting again 
                 client.Connect(HOST, PORT);
+                Console.WriteLine("Connected");
+                SendData("Hello Server!");
+                
+
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.StackTrace);
                 Console.WriteLine("Failed to Connect");
-                Console.WriteLine("Retrying...");
-                Thread.Sleep(1000);
-                OpenConnection(client);
+                Console.WriteLine("Retrying in 10 min");
+                if(connectionUpdater.WaitOne(10 * 60 * 1000))//wait for 10 min or when the network state changes
+                    Console.WriteLine("Network change detected! Retrying...");
                 
+                OpenConnection();
                 
             }
-            Console.WriteLine("Connected");
         }
-        private void CloseConnection(TcpClient client){
+        private void CloseConnection(){
             client.Close();
             Console.WriteLine("Connection Closed");
             //TODO prob wanna quit here
@@ -74,6 +88,11 @@ namespace WUAT
                 Console.WriteLine(e.StackTrace);
             }
 
+        }
+
+        public bool IsConnected()
+        {
+            return client.Connected;
         }
     }
    

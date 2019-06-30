@@ -1,6 +1,8 @@
 //this server accepts connections from the employees in order to store usage data and allow the other server to access.
 const Net = require('net');
 //server test
+const employeesConnected=[];
+
 
 const port = 7250;
 module.exports = class EmployeeServer {

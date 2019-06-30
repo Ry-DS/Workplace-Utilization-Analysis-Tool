@@ -22,6 +22,10 @@ const UserSchema = new Schema({
   lastLogin: {
     type: Date,
     default: ''
+  },
+  permissions:{
+    type: Array
+    //TODO
   }
 });
 module.exports = Account = mongoose.model("users", UserSchema);
