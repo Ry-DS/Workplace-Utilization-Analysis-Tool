@@ -9,6 +9,7 @@ const pino = require('express-pino-logger')();//better looking server logs
 const passport=require('passport');
 const users=require('./routes/users');
 
+
 const EmployeeServer = require('./employee-server');//employee server for employees to connect and give data
 
 const mongoose = require('mongoose');
@@ -38,7 +39,7 @@ function startupExpressServer() {
   app.use(passport.initialize());
 
   // Passport config
-  require("./passport-config")(passport);
+  require("./passport-config").passportConfig(passport);
   // Routes
   app.use("/api/users", users);
 //setup default request stuff

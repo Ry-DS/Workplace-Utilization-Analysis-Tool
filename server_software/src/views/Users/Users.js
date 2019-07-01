@@ -1,6 +1,6 @@
-import React, { Component } from 'react';
-import { Card, CardBody, CardHeader, Col, Row, Table, Button} from 'reactstrap';
-
+import React, {Component} from 'react';
+import {Button, Card, CardBody, CardHeader, Col, Row, Table} from 'reactstrap';
+import axios from 'axios';
 
 function UserRow(props) {
   const user = props.user;
@@ -25,7 +25,9 @@ class Users extends Component {
 
   }
   componentDidMount() {//on component mount, we try fetch data from db
-
+    axios('/api/users/list').then(data => {
+      console.log(data.data);
+    });
   }
 
   render() {

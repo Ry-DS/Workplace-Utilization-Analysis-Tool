@@ -11,6 +11,7 @@ class DashboardCard extends Component {
       isOpen: false,
     };
     this.active = true;
+
   }
 
   componentDidMount() {//run on component init
@@ -21,7 +22,7 @@ class DashboardCard extends Component {
             return;
           }
           this.setState({value: dat.data});//set the state to the new value
-          setTimeout(doFetch, 3000);//do it again in 2 seconds, provides live updating
+          this.task = setTimeout(doFetch, 3000);//do it again in 2 seconds, provides live updating
 
         });
       doFetch();//initial call to start the loop
@@ -30,7 +31,8 @@ class DashboardCard extends Component {
 
   componentWillUnmount() {//called when we leave the dash page
     this.active = false;//stop loop above so we aren't causing any leaks or errors
-
+    if (this.task)
+      clearTimeout(this.task);
   }
 
   render() {

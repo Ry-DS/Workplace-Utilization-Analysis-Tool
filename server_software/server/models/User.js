@@ -25,8 +25,7 @@ const UserSchema = new Schema({
   },
   permissions:{
     type: Array,
-    default: [],
-    required: true
+    default: ['EDIT_USERS'],
     //TODO
   }
 });

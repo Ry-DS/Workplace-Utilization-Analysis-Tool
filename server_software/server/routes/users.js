@@ -1,13 +1,18 @@
+const passport = require('passport');
+
 const express = require("express");
 const router = express.Router();
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const keys = require("../keys");
+
 // Load input validation
 const validateRegistrationInput = require("../validation/register");
 const validateLoginInput = require("../validation/login");
 // Load User model
 const User = require("../models/User");
+
+const {routeBuffer} = require('../passport-config');//authenticate specific routes
 
 // @route POST api/users/register
 // @desc Register user
@@ -72,7 +77,6 @@ router.post("/login", (req, res) => {
         const payload = {
           id: user.id,
           name: user.name,
-          permissions: user.permissions
         };
 // Sign token
         jwt.sign(
@@ -104,7 +108,15 @@ router.post("/login", (req, res) => {
     });
   });
 });
-router.post("/list",(req,res)=>{
+
+router.use('/list', (req, res, next) => {
+  routeBuffer.push("EDIT_USERS");
+  next();
+});
+router.get("/list", passport.authenticate('jwt', {session: false}), (req, res) => {
+  User.find({}, (err, users) => {
+    res.send(users);
+  });
 
 });
 module.exports = router;
