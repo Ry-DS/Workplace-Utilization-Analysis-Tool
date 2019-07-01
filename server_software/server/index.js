@@ -47,6 +47,7 @@ function startupExpressServer() {
     res.setHeader('Content-Type', 'application/json');
     res.send(JSON.stringify({greeting: `Hello ${name}!`}));
   });
+
   app.get('/api/employees/online', passport.authenticate('jwt', {session: false}), (req, res) => {//fetch the current amount of employees online
     res.setHeader('Content-Type', 'text/plain');
     res.send(employeeServer.connectionCount.toString());

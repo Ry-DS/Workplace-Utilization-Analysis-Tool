@@ -1,37 +1,35 @@
 import React, { Component } from 'react';
-import { Link } from 'react-router-dom';
-import { Badge, Card, CardBody, CardHeader, Col, Row, Table } from 'reactstrap';
+import { Card, CardBody, CardHeader, Col, Row, Table, Button} from 'reactstrap';
 
-import usersData from './UsersData'
 
 function UserRow(props) {
-  const user = props.user
-  const userLink = `/users/${user.id}`
-
-  const getBadge = (status) => {
-    return status === 'Active' ? 'success' :
-      status === 'Inactive' ? 'secondary' :
-        status === 'Pending' ? 'warning' :
-          status === 'Banned' ? 'danger' :
-            'primary'
-  }
+  const user = props.user;
 
   return (
-    <tr key={user.id.toString()}>
-      <th scope="row"><Link to={userLink}>{user.id}</Link></th>
-      <td><Link to={userLink}>{user.name}</Link></td>
+    <tr key={props.id}>
+      <th scope="row">{user.name}</th>
+      <td>{user.email}</td>
       <td>{user.registered}</td>
-      <td>{user.role}</td>
-      <td><Link to={userLink}><Badge color={getBadge(user.status)}>{user.status}</Badge></Link></td>
+      <td>{user.lastLogin}</td>
+      <td><Button onClick={console.log("TODO pop modal")}>Change Password</Button></td>
     </tr>
   )
 }
 
 class Users extends Component {
+  constructor(props){
+    super(props);
+    this.state={
+      loading: true
+    }
+
+  }
+  componentDidMount() {//on component mount, we try fetch data from db
+
+  }
 
   render() {
 
-    const userList = usersData.filter((user) => user.id < 10)
 
     return (
       <div className="animated fadeIn">
@@ -53,9 +51,7 @@ class Users extends Component {
                     </tr>
                   </thead>
                   <tbody>
-                    {userList.map((user, index) =>
-                      <UserRow key={index} user={user}/>
-                    )}
+
                   </tbody>
                 </Table>
               </CardBody>

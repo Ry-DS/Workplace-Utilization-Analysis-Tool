@@ -2,7 +2,7 @@ import React, {Component, Suspense} from 'react';
 import * as router from 'react-router-dom';
 import {Redirect, Route, Switch} from 'react-router-dom';
 import {Container} from 'reactstrap';
-import loading from '../../utils/load_animation';
+import loading from '../../utils/LoadingAnimation';
 import {
   AppAside,
   AppBreadcrumb2 as AppBreadcrumb,

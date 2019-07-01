@@ -3,7 +3,7 @@ import {HashRouter, Route, Switch} from 'react-router-dom';
 // import { renderRoutes } from 'react-router-config';
 import './App.scss';
 
-import loading from './utils/load_animation';
+import loading from './utils/LoadingAnimation';
 //redux
 import {Provider} from "react-redux";
 import store from "./redux/store";
@@ -11,7 +11,7 @@ import store from "./redux/store";
 import jwt_decode from "jwt-decode";
 import setAuthToken from "./utils/authToken";
 import {logoutUser, setCurrentUser} from "./redux/actions/authActions";
-import PrivateRoute from "./utils/private-route";
+import PrivateRoute from "./utils/PrivateRoute";
 
 // Containers
 const DefaultLayout = React.lazy(() => import('./containers/DefaultLayout'));
