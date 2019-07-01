@@ -8,7 +8,7 @@ const Team = require('./models/Team');
 
 const port = 7250;
 module.exports = class EmployeeServer {
-  constructor(mongoose) {
+  constructor() {
     this.server = Net.createServer();
     this.connectionCount = 0;
     this.server.listen(port, () => {

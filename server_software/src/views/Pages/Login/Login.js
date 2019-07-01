@@ -18,10 +18,10 @@ import {
   Popover,
   PopoverBody,
   PopoverHeader,
-  Row,
-  Tooltip
+  Row
 } from 'reactstrap';
 import {getStyle} from '@coreui/coreui/dist/js/coreui-utilities'
+import FormFeedback from "reactstrap/es/FormFeedback";
 
 class Login extends Component {
   constructor(props){
@@ -31,7 +31,6 @@ class Login extends Component {
       popoverOpen: false,
       loading: false,
       errors: {},
-      tooltipOpen: [false, false],
       email: '',
       password: ''
     };
@@ -61,7 +60,7 @@ class Login extends Component {
   };
   onSubmit = e => {//when login button pressed
     e.preventDefault();
-    this.setState({loading: true});//we start the loading animation
+    this.setState({loading: true, errors: []});//we start the loading animation
     const userData = {
       email: this.state.email,
       password: this.state.password
@@ -71,11 +70,6 @@ class Login extends Component {
 
   toggle = () => {//show popup for password forget
     this.setState({popoverOpen: !this.state.popoverOpen});
-  };
-  tooltipToggle = (index) => {
-    let tooltipOpen = this.state.tooltipOpen.slice(0);
-    tooltipOpen[index] = !tooltipOpen[index];
-    this.setState({tooltipOpen})
   };
 
   render() {
@@ -95,7 +89,7 @@ class Login extends Component {
                 <Card>
                   <CardBody>
                     <Form noValidate>
-                      <img src={wuatLogo} alt="Logo" className="center-art" style={logoStyle}/>
+                      <img src={wuatLogo} alt="Logo" className="center-art animated fadeIn" style={logoStyle}/>
                       <div className="p-4">
                       <h1>Login</h1>
                       <p className="text-muted">Sign In to your account</p>
@@ -109,14 +103,7 @@ class Login extends Component {
                                value={this.state.email}
                                id="email" type="text" className={this.state.errors.email ? 'is-invalid' : ''}
                                placeholder="Email" autoComplete="email"/>
-                        {/*We are able to add an error tooltip if an error is given from the backend*/}
-                        {this.state.errors.email ?
-                          <Tooltip placement="right" isOpen={this.state.tooltipOpen[0]} target="email" toggle={() => {
-                            this.tooltipToggle(0)
-                          }}>
-
-                            {this.state.errors.email}
-                          </Tooltip> : null}
+                        <FormFeedback>{this.state.errors.email}</FormFeedback>
 
                       </InputGroup>
                       <InputGroup className="mb-4">
@@ -129,14 +116,7 @@ class Login extends Component {
                                value={this.state.password}
                                id="password" type="password" className={this.state.errors.password ? 'is-invalid' : ''}
                                placeholder="Password" autoComplete="current-password"/>
-                        {this.state.errors.password ?
-                          <Tooltip placement="right" isOpen={this.state.tooltipOpen[1]} target="password"
-                                   toggle={() => {
-                                     this.tooltipToggle(1)
-                                   }}>
-
-                            {this.state.errors.password}
-                          </Tooltip> : null}
+                        <FormFeedback>{this.state.errors.password}</FormFeedback>
                       </InputGroup>
                       <Row>
                         <Col xs="6">

@@ -21,7 +21,7 @@ const employeeServer = startupEmployeeServer();
 
 
 function startupEmployeeServer() {
-  return new EmployeeServer(mongoose);//start employee server
+  return new EmployeeServer();//start employee server
 }
 
 function startupExpressServer() {
