@@ -34,5 +34,5 @@ module.exports = {
       else done(null, false);
     })
   );
-  }, routeBuffer
+  }, routeBuffer, userCache
 };

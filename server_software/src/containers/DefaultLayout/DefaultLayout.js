@@ -42,7 +42,6 @@ class DefaultLayout extends Component {
   }
 
   render() {
-    const {user} = this.props.auth;
     return (
       <div className="app">
         <AppHeader fixed>

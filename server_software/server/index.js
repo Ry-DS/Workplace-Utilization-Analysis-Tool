@@ -16,7 +16,7 @@ const mongoose = require('mongoose');
 const mongoURI = require('./keys').mongoURI;//mongo auth key
 
 
-startupMongoConnection();//stored in mongoose dependancy
+startupMongoConnection();//stored in mongoose dependency
 const expressServer = startupExpressServer();
 const employeeServer = startupEmployeeServer();
 
@@ -27,6 +27,8 @@ function startupEmployeeServer() {
 
 function startupExpressServer() {
   const app=express();
+
+  //app.use('/',express.static('build'));
   //setup express addins
   //this one allows us to parse/send uris
   app.use(bodyParser.urlencoded({extended: false}));

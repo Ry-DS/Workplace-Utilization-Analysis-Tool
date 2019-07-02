@@ -12,7 +12,7 @@ const validateLoginInput = require("../validation/login");
 // Load User model
 const User = require("../models/User");
 
-const {routeBuffer} = require('../passport-config');//authenticate specific routes
+const {routeBuffer, userCache} = require('../passport-config');//authenticate specific routes
 
 // @route POST api/users/register
 // @desc Register user
@@ -100,6 +100,7 @@ router.post("/login", (req, res) => {
             console.log(err);
           }
         });
+        userCache.remove(user.id);//make sure the user is refreshed from security once logged in
       } else {
         return res
           .status(400)
@@ -109,12 +110,17 @@ router.post("/login", (req, res) => {
   });
 });
 
-router.use('/list', (req, res, next) => {
+router.use('/edit', (req, res, next) => {
   routeBuffer.push("EDIT_USERS");
   next();
 });
-router.get("/list", passport.authenticate('jwt', {session: false}), (req, res) => {
+router.use('/edit', passport.authenticate('jwt', {session: false}));
+router.get("/edit/list", (req, res) => {
   User.find({}, (err, users) => {
+    users.map(user => {
+      user.password = undefined;//the client doesnt need this
+      return user;
+    });
     res.send(users);
   });
 
