@@ -45,7 +45,7 @@ export default {//defines everything in the sidebar
     {
       name: 'Monitor Groups',
       url: '/groups',
-      icon: 'fa fa-desktop',
+      icon: 'cui-laptop',
     },
     {
       title: true,

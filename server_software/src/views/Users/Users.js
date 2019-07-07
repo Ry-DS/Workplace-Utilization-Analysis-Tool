@@ -1,5 +1,19 @@
 import React, {Component} from 'react';
-import {Card, CardBody, CardHeader, Col, Row} from 'reactstrap';
+import {
+  Button,
+  Card,
+  CardBody,
+  CardHeader,
+  Col,
+  Form,
+  FormFeedback,
+  FormGroup,
+  Input,
+  InputGroup,
+  InputGroupAddon,
+  InputGroupText,
+  Row
+} from 'reactstrap';
 import axios from 'axios';
 import 'react-tabulator/css/tabulator_simple.min.css'
 import {ReactTabulator} from 'react-tabulator';
@@ -24,11 +38,18 @@ class Users extends Component {
     super(props);
     this.state={
       loading: true,
-      data: []
+      data: [],
+      errors: {},
+      name: '',
+      email: '',
+      password: '',
+      passwordRetype: '',
+      formLoading: false
     }
 
   }
   componentDidMount() {//on component mount, we try fetch data from db
+    this.setState({loading: true});
     axios('/api/users/edit/list').then(dat => {
       let data = [];
       dat.data.forEach(user => {
@@ -40,6 +61,8 @@ class Users extends Component {
         user.editUsers = user.permissions.editUsers;
         user.editSettings = user.permissions.editSettings;
         user.editMonitors = user.permissions.editMonitors;
+        if (user.lastLogin.includes('1970'))//invalid date, means they never logged in
+          user.lastLogin = 'Never';
         data.push(user)
 
       });
@@ -52,19 +75,41 @@ class Users extends Component {
     let type = cell.column.field;
     let id = cell.row.data._id;
     let value = cell.value;
-    console.log("s");
     axios.post('/api/users/edit/permission', {id, type, value}).catch(err => {
       console.log(err);
       this.componentDidMount();
     });
   }
+
+  register = (e) => {
+    e.preventDefault();
+    this.setState({formLoading: true, errors: {}});
+    axios.post('/api/users/register', {
+      name: this.state.name,
+      email: this.state.email,
+      password: this.state.password,
+      passwordRetype: this.state.passwordRetype
+    }).then(res => {
+      console.log(res);
+      this.setState({formLoading: false});
+      this.componentDidMount();
+    }).catch(err => {
+      this.setState({errors: err.response.data, formLoading: false});
+    });
+
+
+  };
+  onChange = e => {
+    this.setState({[e.target.id]: e.target.value});//edit email and password fields while also storing it in state
+
+  };
   render() {
 
 
     return (
       <div className="animated fadeIn">
         <Row>
-          <Col>
+          <Col xs="12" sm="12">
             <Card>
               <CardHeader>
                 <i className="fa fa-user"/> Users
@@ -72,7 +117,7 @@ class Users extends Component {
               <CardBody>
                 {this.state.loading ? <LoadingAnimation/> :
                   this.state.data.length === 0 ?
-                    <div className="text-center text-muted">Add a user below to get started</div> :
+                    <div className="text-center text-muted">Add a user to get started</div> :
                     <ReactTabulator
                       data={this.state.data}
                       columns={columns}
@@ -84,8 +129,72 @@ class Users extends Component {
 
               </CardBody>
             </Card>
+
+
+          </Col>
+          <Col xs="12" sm="4">
+            <Card>
+              <CardHeader>
+                <i className="fa fa-plus"/> Add a User
+              </CardHeader>
+              <CardBody>
+                <Form noValidate>
+                  <FormGroup>
+                    <InputGroup>
+                      <InputGroupAddon addonType="prepend">
+                        <InputGroupText><i className="icon-user"/></InputGroupText>
+                      </InputGroupAddon>
+                      <Input value={this.state.name} onChange={this.onChange}
+                             className={this.state.errors.name ? 'is-invalid' : ''} type="text" id="name" name="name"
+                             placeholder="Name"/>
+                      <FormFeedback>{this.state.errors.name}</FormFeedback>
+                    </InputGroup>
+                  </FormGroup>
+                  <FormGroup>
+                    <InputGroup>
+                      <InputGroupAddon addonType="prepend">
+                        <InputGroupText><i className="icon-envelope"/></InputGroupText>
+                      </InputGroupAddon>
+                      <Input value={this.state.email} onChange={this.onChange}
+                             className={this.state.errors.email ? 'is-invalid' : ''} type="email" id="email"
+                             name="email" placeholder="Email"/>
+                      <FormFeedback>{this.state.errors.email}</FormFeedback>
+                    </InputGroup>
+
+                  </FormGroup>
+                  <FormGroup>
+                    <InputGroup>
+                      <InputGroupAddon addonType="prepend">
+                        <InputGroupText><i className="icon-lock"/></InputGroupText>
+                      </InputGroupAddon>
+                      <Input value={this.state.password} onChange={this.onChange}
+                             className={this.state.errors.password ? 'is-invalid' : ''} type="password" id="password"
+                             name="password" placeholder="Password"/>
+                      <FormFeedback>{this.state.errors.password}</FormFeedback>
+                    </InputGroup>
+                  </FormGroup>
+                  <FormGroup>
+                    <InputGroup>
+                      <InputGroupAddon addonType="prepend">
+                        <InputGroupText><i className="icon-lock"/></InputGroupText>
+                      </InputGroupAddon>
+                      <Input value={this.state.passwordRetype} onChange={this.onChange}
+                             className={this.state.errors.passwordRetype ? 'is-invalid' : ''} type="password"
+                             id="passwordRetype" name="passwordRetype" placeholder="Confirm"/>
+                      <FormFeedback>{this.state.errors.passwordRetype}</FormFeedback>
+                    </InputGroup>
+                  </FormGroup>
+                  <FormGroup>
+                    <Button type="submit" color="success" onClick={this.register} disabled={this.state.formLoading}>
+                      {this.state.formLoading ? <span className="lds-tiny-dual-ring"/> : 'Submit'}
+                    </Button>
+                  </FormGroup>
+                </Form>
+              </CardBody>
+            </Card>
           </Col>
         </Row>
+
       </div>
     )
   }

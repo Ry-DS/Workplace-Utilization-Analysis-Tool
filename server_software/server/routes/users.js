@@ -135,9 +135,11 @@ router.post("/login", (req, res) => {
   });
 });
 
-//next two statements make everything under /edit a protected route. Only users with EDIT_USERS permission can use these actions
-router.use('/edit', (req, res, next) => {
+//next two statements make everything under /edit a protected route. Only users with editUsers can perform operations here
+router.use('/edit', (req, res, next) => {//
   routeBuffer.push("editUsers");
+  for (let usr in userCache)//we want to clear the cache since users have been edited and permissions may be different
+    delete userCache[usr];
   next();
 });
 router.use('/edit', passport.authenticate('jwt', {session: false}));

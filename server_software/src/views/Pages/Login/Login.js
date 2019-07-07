@@ -11,6 +11,7 @@ import {
   Col,
   Container,
   Form,
+  FormFeedback,
   Input,
   InputGroup,
   InputGroupAddon,
@@ -21,7 +22,6 @@ import {
   Row
 } from 'reactstrap';
 import {getStyle} from '@coreui/coreui/dist/js/coreui-utilities'
-import FormFeedback from "reactstrap/es/FormFeedback";
 
 class Login extends Component {
   constructor(props){
