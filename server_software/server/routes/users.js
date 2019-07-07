@@ -17,6 +17,17 @@ const {routeBuffer, userCache} = require('../passport-config');//authenticate sp
 // @route POST api/users/register
 // @desc Register user
 // @access Public
+router.use('/register', (req, res, next) => {
+  User.count({}, (err, count) => {
+    if (count === 0) {
+      req.body.firstUser = true;
+      next();
+    } else {
+      routeBuffer.push('editUsers');
+      passport.authenticate('jwt', {session: false})(req, res, next);
+    }
+  })
+});
 router.post("/register", (req, res) => {
   // Form validation
   const query = req.body;
@@ -50,10 +61,7 @@ router.post("/register", (req, res) => {
       });
     });
   };
-  User.count({}, (err, count) => {
-    if (err)
-      throw err;
-    if (count === 0)
+  if (req.body.firstUser)
       addUser(true, query);
     else
       User.findOne({email: query.email.toLowerCase()}).then(user => {
@@ -65,7 +73,6 @@ router.post("/register", (req, res) => {
         }
       });
 
-  });
 });
 
 // @route POST api/users/login
