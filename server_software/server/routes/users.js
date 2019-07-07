@@ -26,27 +26,45 @@ router.post("/register", (req, res) => {
   if (!isValid) {
     return res.status(400).json(errors);
   }
-  User.findOne({email: query.email.toLowerCase()}).then(user => {
-    if (user) {
-      return res.status(400).json({email: "Email already exists"});
-    } else {
-      const newUser = new User({
-        name: query.name,
-        email: query.email.toLowerCase(),
-        password: query.password
-      });
+  const addUser = (firstUser, query) => {
+    const permissions = {
+      editMonitors: firstUser,
+      editSettings: firstUser,
+      editUsers: firstUser
+    };
+    const newUser = new User({
+      name: query.name,
+      email: query.email.toLowerCase(),
+      password: query.password,
+      permissions
+    });
 // Hash password before saving in database
-      bcrypt.genSalt(10, (err, salt) => {
-        bcrypt.hash(newUser.password, salt, (err, hash) => {
-          if (err) throw err;
-          newUser.password = hash;
-          newUser
-            .save()
-            .then(user => res.json({name: user.name, email: user.email.toLowerCase()}))
-            .catch(err => console.log(err));
-        });
+    bcrypt.genSalt(10, (err, salt) => {
+      bcrypt.hash(newUser.password, salt, (err, hash) => {
+        if (err) throw err;
+        newUser.password = hash;
+        newUser
+          .save()
+          .then(user => res.json({name: user.name, email: user.email.toLowerCase()}))
+          .catch(err => console.log(err));
       });
-    }
+    });
+  };
+  User.count({}, (err, count) => {
+    if (err)
+      throw err;
+    if (count === 0)
+      addUser(true, query);
+    else
+      User.findOne({email: query.email.toLowerCase()}).then(user => {
+        if (user) {
+          return res.status(400).json({email: "Email already exists"});
+        } else {
+          addUser(false, query);
+
+        }
+      });
+
   });
 });
 
@@ -112,7 +130,7 @@ router.post("/login", (req, res) => {
 
 //next two statements make everything under /edit a protected route. Only users with EDIT_USERS permission can use these actions
 router.use('/edit', (req, res, next) => {
-  routeBuffer.push("EDIT_USERS");
+  routeBuffer.push("editUsers");
   next();
 });
 router.use('/edit', passport.authenticate('jwt', {session: false}));
@@ -125,6 +143,18 @@ router.get("/edit/list", (req, res) => {
     });
     res.send(users);
   });
+
+});
+
+router.post('/edit/permission', (req, res) => {
+  const query = req.body;
+
+
+  User.updateOne({_id: query.id}, {
+    $set: {
+      [`permissions.${query.type}`]: query.value
+    }
+  }).then(() => res.status(200).json({success: true})).catch(err => res.status(400).json(err));
 
 });
 module.exports = router;

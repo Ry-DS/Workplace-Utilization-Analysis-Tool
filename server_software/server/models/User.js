@@ -24,9 +24,9 @@ const UserSchema = new Schema({
     default: ''
   },
   permissions:{
-    type: Array,
-    default: [],
-    //TODO
+    type: Object,
+    default: {editUsers: false, editMonitors: false, editSettings: false},
+    required: true
   }
 });
 module.exports = Account = mongoose.model("users", UserSchema);

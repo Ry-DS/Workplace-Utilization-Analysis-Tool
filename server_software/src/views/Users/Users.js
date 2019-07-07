@@ -37,9 +37,9 @@ class Users extends Component {
         //make sure all the data is pretty for displaying to user
         user.lastLogin = new Date(user.lastLogin).toDateString();
         user.creationDate = new Date(user.creationDate).toDateString();
-        user.editUsers = user.permissions.includes("EDIT_USERS");
-        user.editSettings = user.permissions.includes("EDIT_SETTINGS");
-        user.editMonitors = user.permissions.includes("EDIT_MONITORS");
+        user.editUsers = user.permissions.editUsers;
+        user.editSettings = user.permissions.editSettings;
+        user.editMonitors = user.permissions.editMonitors;
         data.push(user)
 
       });
@@ -48,8 +48,15 @@ class Users extends Component {
   }
 
   editedData(data) {
-    //TODO
-
+    let cell = data._cell;
+    let type = cell.column.field;
+    let id = cell.row.data._id;
+    let value = cell.value;
+    console.log("s");
+    axios.post('/api/users/edit/permission', {id, type, value}).catch(err => {
+      console.log(err);
+      this.componentDidMount();
+    });
   }
   render() {
 
@@ -71,7 +78,7 @@ class Users extends Component {
                       columns={columns}
                       tooltips={true}
                       layout={"fitData"}
-                      dataEdited={(data) => this.editedData(data)}
+                      cellEdited={(data) => this.editedData(data)}
                     />
                 }
 

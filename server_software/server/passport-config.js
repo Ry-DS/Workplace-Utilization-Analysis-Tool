@@ -17,7 +17,7 @@ module.exports = {
       if (!userCache[jwt_payload.id])
         User.findById(jwt_payload.id)
           .then(user => {
-            if (user && (routeBuffer.length === 0 || user.permissions.includes(routeBuffer.pop()))) {
+            if (user && (routeBuffer.length === 0 || user.permissions[routeBuffer.pop()])) {
               userCache[jwt_payload.id] = user;
               setTimeout(() => {
                 delete userCache[jwt_payload.id]
@@ -29,7 +29,7 @@ module.exports = {
           .catch(err => {
             console.log(err)
           });
-      else if (routeBuffer.length === 0 || userCache[jwt_payload.id].permissions.includes(routeBuffer.pop()))
+      else if (routeBuffer.length === 0 || userCache[jwt_payload.id].permissions[routeBuffer.pop()])
         done(null, userCache[jwt_payload.id]);
       else done(null, false);
     })
