@@ -35,13 +35,18 @@ const DefaultHeader = React.lazy(() => import('./DefaultHeader'));
 class DefaultLayout extends Component {
 
 
-  signOut(e) {
+  signOut(e) {//signs out the user
     e.preventDefault();
     this.props.logoutUser();
-    this.props.history.push('/login')
+    this.props.history.push('/login')//redirect to login screen after logout
   }
 
   render() {
+    //here, we remove navigation items if the user doesn't have perms to access them
+    let navItems = navigation.items;
+    if (!this.props.auth.user.permissions.editUsers)
+      navItems = [...navigation.items.slice(0, 4), ...navigation.items.slice(5)];//an immutable array instance so we don't affect the real one.
+    //render html to user
     return (
       <div className="app">
         <AppHeader fixed>
@@ -58,7 +63,7 @@ class DefaultLayout extends Component {
 
               <img src={wuatLogo} alt="WUAT Logo" className="center-art"/>
               {/*The sidebar object*/}
-            <AppSidebarNav navConfig={navigation} {...this.props} router={router}/>
+              <AppSidebarNav navConfig={{items: navItems}} {...this.props} router={router}/>
             </Suspense>
             <AppSidebarFooter />
             <AppSidebarMinimizer />

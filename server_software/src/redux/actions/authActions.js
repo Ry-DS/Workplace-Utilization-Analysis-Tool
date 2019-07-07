@@ -2,17 +2,6 @@ import axios from "axios";
 import setAuthToken from "../../utils/authToken";
 import jwt_decode from "jwt-decode";
 import {GET_ERRORS, SET_CURRENT_USER} from "./types";
-// Register User
-export const registerUser = (userData, history) => dispatch => {
-  axios.post("/api/users/register", userData)
-    //.then(res => history.push("/login")) // re-direct to login on successful register
-    .catch(err =>
-      dispatch({
-        type: GET_ERRORS,
-        payload: err.response.data
-      })
-    );
-};
 // Login - get user token
 export const loginUser = userData => dispatch => {
 
@@ -30,7 +19,7 @@ export const loginUser = userData => dispatch => {
       dispatch(setCurrentUser(decoded));
     })
     .catch(err => {
-      dispatch({
+      dispatch({//set errors to state if failed login
         type: GET_ERRORS,
         payload: err.response.data
       });

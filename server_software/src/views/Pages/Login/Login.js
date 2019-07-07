@@ -1,4 +1,5 @@
 //https://blog.bitsrc.io/build-a-login-auth-app-with-the-mern-stack-part-3-react-components-88190f8db718
+//link above assisted in the construction of this component
 import React, {Component} from 'react';
 import PropTypes from "prop-types";
 import {connect} from "react-redux";
@@ -50,9 +51,9 @@ class Login extends Component {
     }
     if (nextProps.errors) {
       this.setState({
-        errors: nextProps.errors, loading: false//when we receive an error, stop the loading animation
+        errors: nextProps.errors, loading: false//when we receive an error, stop the loading animation amd show errors
       });
-    } else this.setState({loading: false});
+    } else this.setState({loading: false});//likely won't happen since if there are no errors, they should be in the dashboard by now.
   }
   onChange=e=>{
     this.setState({[e.target.id]: e.target.value});//edit email and password fields while also storing it in state
@@ -76,6 +77,7 @@ class Login extends Component {
     const logoStyle={
       width: '8em'
     };
+    //custom button style
     const buttonStyle={
       backgroundColor: getStyle('--theme-light'),
       borderColor: getStyle('--theme-bland'),
