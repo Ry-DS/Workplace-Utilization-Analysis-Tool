@@ -167,4 +167,9 @@ router.post('/edit/permission', (req, res) => {
   }).then(() => res.status(200).json({success: true})).catch(err => res.status(400).json(err));
 
 });
+router.post('/edit/delete', (req, res) => {
+  const id = req.body.id;
+  User.deleteOne({_id: id}).then(() => res.status(200).json({success: true})).catch(err => res.status(400).json(err));
+
+});
 module.exports = router;

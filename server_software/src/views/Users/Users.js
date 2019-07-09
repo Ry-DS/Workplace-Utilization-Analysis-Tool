@@ -22,15 +22,31 @@ import {connect} from "react-redux";
 import PropTypes from "prop-types";
 import {getStyle} from "@coreui/coreui/dist/js/coreui-utilities";
 
-const columns = [//define columns for the table
+const editButtons = function (value, data, cell, row, options) { //plain text value
+  return "<Button class='btn btn-danger' style='width: 100%'><i class='cui-ban'/></Button>"
+};
+
+const columns = (container) => {
+  return [//define columns for the table, we pass the Users component, so we can perform actions on click
   {title: "Name", field: "name"},
   {title: "Email", field: "email"},
   {title: "Last Login", field: "lastLogin", align: "center"},
   {title: "Created on", field: "creationDate", align: "center"},
   {title: "Edit Users", field: "editUsers", align: "center", formatter: "tickCross", editor: true},
   {title: "Edit Settings", field: "editSettings", align: "center", formatter: "tickCross", editor: true},
-  {title: "Edit Monitors", field: "editMonitors", align: "center", formatter: "tickCross", editor: true}
-];
+    {title: "Edit Monitors", field: "editMonitors", align: "center", formatter: "tickCross", editor: true},
+    {
+      title: "Del.", sortable: false, width: 70, formatter: editButtons, cellClick: function (e, cell, value, data) {
+        if (window.confirm(`You are about to delete ${cell._cell.row.data.name}'s account`)) {//on delete button, make sure they want to delete
+          container.setState({loading: true});//start loading animation
+          axios.post('/api/users/edit/delete', {id: cell._cell.row.data._id})//start server request for delete
+            .finally(() => container.componentDidMount());//TODO maybe error handling?
+          //even if it failed, lets just refresh the latest from the db, the user can then decide if the delete was sucessful. 
+        }
+      }
+    }
+  ]
+};
 
 
 
@@ -124,7 +140,7 @@ class Users extends Component {
                     <div className="text-center text-muted">Add a user to get started</div> :
                     <ReactTabulator
                       data={this.state.data}
-                      columns={columns}
+                      columns={columns(this)}
                       tooltips={true}
                       layout={"fitData"}
                       cellEdited={(data) => this.editedData(data)}
