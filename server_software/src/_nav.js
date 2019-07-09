@@ -44,7 +44,7 @@ export default {//defines everything in the sidebar
     },
     {
       name: 'Monitor Groups',
-      url: '/groups',
+      url: '/monitor-groups',
       icon: 'cui-laptop',
     },
     {

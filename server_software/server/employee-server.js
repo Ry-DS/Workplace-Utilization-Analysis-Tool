@@ -49,7 +49,7 @@ module.exports = class EmployeeServer {
                   lastLogin: Date.now()
                 }
               }
-            }, {/*upsert: true*/}, (err, doc) => {
+            }, {/*upsert: true/*Testing only*/}, (err, doc) => {
               if (!doc) {
                 socket.write("INIT");//TODO parse team names
               }

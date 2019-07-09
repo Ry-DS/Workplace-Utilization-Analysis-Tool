@@ -22,7 +22,7 @@ import {connect} from "react-redux";
 import PropTypes from "prop-types";
 import {getStyle} from "@coreui/coreui/dist/js/coreui-utilities";
 
-const editButtons = function (value, data, cell, row, options) { //plain text value
+const editButtons = function (value, data, cell, row, options) { //plain text value, so we cant use react jsx. Instead, just a plain html button for deletion
   return "<Button class='btn btn-danger' style='width: 100%'><i class='cui-ban'/></Button>"
 };
 
@@ -41,7 +41,7 @@ const columns = (container) => {
           container.setState({loading: true});//start loading animation
           axios.post('/api/users/edit/delete', {id: cell._cell.row.data._id})//start server request for delete
             .finally(() => container.componentDidMount());//TODO maybe error handling?
-          //even if it failed, lets just refresh the latest from the db, the user can then decide if the delete was sucessful. 
+          //even if it failed, lets just refresh the latest from the db, the user can then decide if the delete was successful.
         }
       }
     }
@@ -54,20 +54,20 @@ class Users extends Component {
   constructor(props){
     super(props);
     this.state={
-      loading: true,//whether the table is loading, initially true
+      loading: true,//whether the table is loading, initially true, controls loading animation
       data: [],//table data to display
       errors: {},//errors and fields listed for the register form
       name: '',
       email: '',
       password: '',
       passwordRetype: '',
-      formLoading: false//whether the form is processing, disables the submit button
+      formLoading: false//whether the registration form is processing, disables the submit button
     }
 
   }
   componentDidMount() {//on component mount, we try fetch data from db
     this.setState({loading: true});//make the loading animation begin
-    axios('/api/users/edit/list').then(dat => {//try fetch data
+    axios('/api/users/edit/list').then(dat => {//try fetch user data
       let data = [];
       dat.data.forEach(user => {//for every user given from the backend
         if (user._id === this.props.auth.user.id)//don't include the currently logged in user, no point

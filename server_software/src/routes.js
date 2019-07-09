@@ -34,8 +34,12 @@ const Modals = React.lazy(() => import('./views/Notifications/Modals'));
 const Colors = React.lazy(() => import('./views/Theme/Colors'));
 const Typography = React.lazy(() => import('./views/Theme/Typography'));
 const Widgets = React.lazy(() => import('./views/Widgets/Widgets'));
-const Users = React.lazy(() => import('./views/Users/Users'));
-const User = React.lazy(() => import('./views/Users/User'));
+
+//CUSTOM
+const Users = React.lazy(() => import('./views/Users'));
+const Teams = React.lazy(() => import('./views/Teams'));
+const MonitorGroups = React.lazy(() => import('./views/MonitorGroups'));
+
 
 // https://github.com/ReactTraining/react-router/tree/master/packages/react-router-config
 const routes = [
@@ -72,14 +76,20 @@ const routes = [
   { path: '/icons/flags', name: 'Flags', component: Flags },
   { path: '/icons/font-awesome', name: 'Font Awesome', component: FontAwesome },
   { path: '/icons/simple-line-icons', name: 'Simple Line Icons', component: SimpleLineIcons },
-  { path: '/notifications', exact: true, name: 'Notifications', component: Alerts },
+  {
+    path: '/notifications',
+    exact: true/*Only redirect if exactly this route, not like /notifications/random cause there are subroutes*/,
+    name: 'Notifications',
+    component: Alerts
+  },
   { path: '/notifications/alerts', name: 'Alerts', component: Alerts },
   { path: '/notifications/badges', name: 'Badges', component: Badges },
   { path: '/notifications/modals', name: 'Modals', component: Modals },
   { path: '/widgets', name: 'Widgets', component: Widgets },
   { path: '/charts', name: 'Charts', component: Charts },
-  { path: '/users', exact: true,  name: 'Users', component: Users },
-  { path: '/users/:id', exact: true, name: 'User Details', component: User },
+  {path: '/users', name: 'Users', component: Users},
+  {path: '/teams', name: 'Teams', component: Teams},
+  {path: '/monitor-groups', name: 'Monitor Groups', component: MonitorGroups},
 ];
 
 export default routes;
