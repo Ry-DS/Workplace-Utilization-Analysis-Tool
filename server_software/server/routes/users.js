@@ -13,22 +13,27 @@ const validateLoginInput = require("../validation/login");
 const User = require("../models/User");
 
 const {routeBuffer, userCache} = require('../passport-config');//authenticate specific routes
+//a 400 status means the client is sending invalid data.
+// a 401 means the client is unauthorised to perform a specific action.
+// a 200 means everything is ok and there are no errors on either side.
+
+
 
 // @route POST api/users/register
 // @desc Register user
 // @access Public
-router.use('/register', (req, res, next) => {
-  User.count({}, (err, count) => {
-    if (count === 0) {
-      req.body.firstUser = true;
-      next();
-    } else {
-      routeBuffer.push('editUsers');
-      passport.authenticate('jwt', {session: false})(req, res, next);
+router.use('/register', (req, res, next) => {//register middleware defining different behaviour based if a user already exists
+  User.count({}, (err, count) => {//check how many users registered currently
+    if (count === 0) {//if there are none, means its the first user, so..
+      req.body.firstUser = true;//let the next method check for it,
+      next();//execute next method, no authentication required.
+    } else {//otherwise
+      routeBuffer.push('editUsers');//ensure user has edit permissions
+      passport.authenticate('jwt', {session: false})(req, res, next);//and also if they are authorised and logged in.
     }
   })
 });
-router.post("/register", (req, res) => {
+router.post("/register", (req, res) => {//begin registering from above method
   // Form validation
   const query = req.body;
   const {errors, isValid} = validateRegistrationInput(query);
@@ -37,13 +42,14 @@ router.post("/register", (req, res) => {
   if (!isValid) {
     return res.status(400).json(errors);
   }
+  //method to add user
   const addUser = (firstUser, query) => {
-    const permissions = {
+    const permissions = {//if they are the first user, they should have access to everything. otherwise, nothing
       editMonitors: firstUser,
       editSettings: firstUser,
       editUsers: firstUser
     };
-    const newUser = new User({
+    const newUser = new User({//setup new user
       name: query.name,
       email: query.email.toLowerCase(),
       password: query.password,
@@ -55,19 +61,19 @@ router.post("/register", (req, res) => {
         if (err) throw err;
         newUser.password = hash;
         newUser
-          .save()
+          .save()//save to database and let registeree know.
           .then(user => res.json({name: user.name, email: user.email.toLowerCase()}))
           .catch(err => console.log(err));
       });
     });
   };
-  if (req.body.firstUser)
+  if (req.body.firstUser)//if first user, don't need to check if a conflicting user exists
       addUser(true, query);
     else
-      User.findOne({email: query.email.toLowerCase()}).then(user => {
-        if (user) {
+    User.findOne({email: query.email.toLowerCase()}).then(user => {//otherwise, check
+      if (user) {//if found, let user know
           return res.status(400).json({email: "Email already exists"});
-        } else {
+      } else {//otherwise, add like before with differing attributes.
           addUser(false, query);
 
         }
