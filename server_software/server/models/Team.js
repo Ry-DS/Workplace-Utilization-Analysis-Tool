@@ -18,6 +18,7 @@ const WorkingDateSchema = new Schema({
 
 const EmployeeSchema = new Schema({
   _id: {type: String, required: true},//mac address of employees network card
+  lastLogin: Date,
   usageData: [WorkingDateSchema]
 
 });

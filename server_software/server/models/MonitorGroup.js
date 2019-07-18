@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 const QuotaScheme = new Schema({
-  amount: Number,//amount of monitors available to this team set
+  amount: {type: Number, required: true},//amount of monitors available to this team set
   sharedWith: [Schema.Types.ObjectId]//teams quota is shared with. If more than one team, means these teams share the quota
 
 });

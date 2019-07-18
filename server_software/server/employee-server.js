@@ -26,8 +26,10 @@ module.exports = class EmployeeServer {
         let data = chunk.toString();
         console.log(`Data received from client: ${data}`);
         switch (data.includes(":") ? data.split(':')[0] : data) {
-          case "ID":
+          case "ID":{
             let id = data.split(':')[1];
+            if(socket.employeeId)
+              return;//already logged in
             socket.employeeId = id;
             Team.findOneAndUpdate({'employees._id': id}, {$set: {'employees.$.lastLogin': Date.now()}}, {}, (err, doc) => {
 
@@ -38,14 +40,21 @@ module.exports = class EmployeeServer {
 
             });
             break;
+          }
           case "REGISTER":
             let teamName = data.split(':')[1];
-            let id2 = data.split(':')[2];//TODO use the one stored in socket.
+            let id=socket.employeeId;
 
+            if(!id){
+              socket.destroy();
+              console.log("Invalid register occurred: No attached MAC ID");
+              return;
+            }
+            Team.findOneAndUpdate({'employees._id':id},{$pull:{employees:{_id: id}}});//remove the old employee
             Team.findOneAndUpdate({_id: teamName}, {
               $push: {
                 employees: {
-                  _id: id2,
+                  _id: id,
                   lastLogin: Date.now()
                 }
               }
