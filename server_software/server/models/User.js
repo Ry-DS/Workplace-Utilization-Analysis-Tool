@@ -1,8 +1,15 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
-// Create Schema
-const UserSchema = new Schema({
+const PermissionScheme = new Schema({
+  editMonitors: {type: Boolean, required: true, default: false},//default permissions are nothing
+  editUsers: {type: Boolean, required: true, default: false},
+  editSettings: {type: Boolean, required: true, default: false},
+
+
+});
+// User account to access data,
+const UserSchema = new Schema({//typical things an account would have
   name: {
     type: String,
     required: true
@@ -23,10 +30,9 @@ const UserSchema = new Schema({
     type: Date,
     default: ''
   },
-  permissions:{
-    type: Object,
-    default: {editUsers: false, editMonitors: false, editSettings: false},
+  permissions: {//outlines what the user can and can't do on the website
+    type: PermissionScheme,
     required: true
   }
 });
-module.exports = Account = mongoose.model("users", UserSchema);
+module.exports = User = mongoose.model("user", UserSchema);
