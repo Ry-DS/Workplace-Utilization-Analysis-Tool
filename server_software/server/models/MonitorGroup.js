@@ -18,4 +18,4 @@ const MonitorGroupSchema = new Schema({
   quota: [QuotaScheme]//quota is like the amount of these monitors in the building
 
 });
-module.exports = MonitorGroup = mongoose.model("monitor", MonitorGroupSchema);
+module.exports = MonitorGroup = mongoose.model("monitors", MonitorGroupSchema);

@@ -35,4 +35,4 @@ const UserSchema = new Schema({//typical things an account would have
     required: true
   }
 });
-module.exports = User = mongoose.model("user", UserSchema);
+module.exports = User = mongoose.model("users", UserSchema);

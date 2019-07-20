@@ -30,4 +30,4 @@ const TeamSchema = new Schema({
     type: [EmployeeSchema]
   }
 });
-module.exports = Team = mongoose.model("team", TeamSchema);
+module.exports = Team = mongoose.model("teams", TeamSchema);
