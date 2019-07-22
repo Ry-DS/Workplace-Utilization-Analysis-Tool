@@ -83,7 +83,8 @@ namespace WUAT {
         public static void Main()
         {
             Application.EnableVisualStyles();
-            new Program();
+            Application.Run(new TeamChooser());
+            //new Program();
 
         }
         
