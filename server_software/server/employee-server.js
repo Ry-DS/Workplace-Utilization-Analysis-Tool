@@ -26,7 +26,7 @@ module.exports = class EmployeeServer {
         let data = chunk.toString();
         console.log(`Data received from client: ${data}`);
         switch (data.includes(":") ? data.split(':')[0] : data) {
-          case "ID":{
+          case "ID":
             let id = data.split(':')[1];
             if(socket.employeeId)
               return;//already logged in
@@ -40,10 +40,10 @@ module.exports = class EmployeeServer {
 
             });
             break;
-          }
+          
           case "REGISTER":
             let teamName = data.split(':')[1];
-            let id=socket.employeeId;
+            id=socket.employeeId;
 
             if(!id){
               socket.destroy();

@@ -83,3 +83,6 @@ client_software/\.idea/\.idea\.WUAT/\.idea/
 server_software/\.vscode/
 
 server_software/server/keys\.js
+
+client_software/\.vs/
+

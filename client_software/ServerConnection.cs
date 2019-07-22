@@ -4,14 +4,13 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System.Windows.Forms;
+using WUAT.Properties;
 
 namespace WUAT
 {
     public class ServerConnection //we manage the connection to the WUAT server here. Only the connection however. 
     {
         //Location of server on the network
-        private const string HOST = "localhost";
-        private const int PORT = 7250;
 
 
         //client instance
@@ -41,18 +40,17 @@ namespace WUAT
             try
             {
                 //try connecting, if we fail, print error and try connecting again 
-                client.Connect(HOST, PORT);
+                client.Connect(Resources.server_ip, 7250);
                 Console.WriteLine("Connected");
                 SendData("ID:" + NetworkInterface.GetAllNetworkInterfaces()[0]
                              .GetPhysicalAddress()); //send computer's unique ID
-                Application.Run(new TeamChooser());
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.StackTrace);
                 Console.WriteLine("Failed to Connect");
-                Console.WriteLine("Retrying in 10 min");
-                if (connectionUpdater.WaitOne( /*10 * 60 * 1000*/1000)
+                Console.WriteLine("Retrying in "+Resources.server_failed_connection_retry_delay_ms/1000+" sec");
+                if (connectionUpdater.WaitOne( /*10 * 60 * 1000*/Resources.server_failed_connection_retry_delay_ms)
                 ) //wait for 10 min or when the network state changes TODO change to 10 min after testing 
                     Console.WriteLine("Network change detected! Retrying...");
 
