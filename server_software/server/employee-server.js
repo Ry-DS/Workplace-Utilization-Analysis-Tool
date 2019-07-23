@@ -40,7 +40,7 @@ module.exports = class EmployeeServer {
 
             });
             break;
-          
+
           case "REGISTER":
             let teamName = data.split(':')[1];
             id=socket.employeeId;

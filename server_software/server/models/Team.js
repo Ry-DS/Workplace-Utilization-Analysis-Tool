@@ -26,6 +26,7 @@ const EmployeeSchema = new Schema({
 // Create Schema
 const TeamSchema = new Schema({
   name: {type: String, required: true},
+  creationDate: {type: Date, required: true, default: Date.now},
   employees: {
     type: [EmployeeSchema]
   }
