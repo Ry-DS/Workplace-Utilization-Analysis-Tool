@@ -28,7 +28,7 @@ const TeamSchema = new Schema({
   name: {type: String, required: true},
   creationDate: {type: Date, required: true, default: Date.now},
   employees: {
-    type: [EmployeeSchema]
+    type: [EmployeeSchema], default: []
   }
 });
 module.exports = Team = mongoose.model("teams", TeamSchema);

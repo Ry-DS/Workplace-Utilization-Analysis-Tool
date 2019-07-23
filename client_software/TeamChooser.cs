@@ -9,7 +9,7 @@ namespace WUAT
     public partial class TeamChooser : Form
     {
         private readonly ServerConnection _connection;
-        private static string response;
+        private string response;
         public TeamChooser(string[] teams, ServerConnection connection)
         {
             _connection = connection;

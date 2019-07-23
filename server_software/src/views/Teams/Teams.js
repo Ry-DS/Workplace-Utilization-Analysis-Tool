@@ -26,16 +26,18 @@ const editButtons = function (value, data, cell, row, options) { //plain text va
 
 const columns = (container) => {
   return [//define columns for the table, we pass the Users component, so we can perform actions on click
-    {title: "Name", field: "name"},
+    {title: "Name", field: "name", editor: true},
     {title: "Created on", field: "creationDate", align: "center"},
-    {title: "Employee Count", field: "editMonitors", align: "center", formatter: "tickCross", editor: true},
+    {title: "Employee Count", field: "employeeCount", align: "center"},
     {
       title: "Del.", sortable: false, width: 70, formatter: editButtons, cellClick: function (e, cell, value, data) {
-        if (window.confirm(`You are about to delete ${cell._cell.row.data.name}'s account`)) {//on delete button, make sure they want to delete
+        if (window.confirm(`You are about to delete ${cell._cell.row.data.name}. This action will permanently delete ALL employee data attached with this team`)) {//on delete button, make sure they want to delete
+          if (window.confirm('Valuable data MAY BE DELETED if you perform this action and all affected employees will need to re-choose their team. Select OK if you wish to continue')) {
           container.setState({loading: true});//start loading animation
           axios.post('/api/teams/edit/delete', {id: cell._cell.row.data._id})//start server request for delete
             .finally(() => container.componentDidMount());//TODO maybe error handling?
           //even if it failed, lets just refresh the latest from the db, the user can then decide if the delete was successful.
+          }
         }
       }
     }
@@ -62,6 +64,7 @@ class Teams extends Component {
       dat.data.forEach(team => {//for every team given from the backend
         //make sure all the data is pretty for displaying to user
         team.creationDate = new Date(team.creationDate).toDateString();
+        team.employeeCount = team.employees ? team.employees.length : 0;
         data.push(team)
 
       });
@@ -82,7 +85,7 @@ class Teams extends Component {
   register = (e) => {//when the user tries to register a new user
     e.preventDefault();//prevent the default HTML form submit
     this.setState({formLoading: true, errors: {}});//start loading animation
-    axios.post('/api/teams/create', {//try register team with form data form state
+    axios.post('/api/teams/edit/create', {//try register team with form data form state
       name: this.state.name
     }).then(res => {//success?
       this.setState({formLoading: false});//remove loading animation
