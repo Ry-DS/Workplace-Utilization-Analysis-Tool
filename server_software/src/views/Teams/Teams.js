@@ -1,5 +1,6 @@
 import React, {Component} from 'react';
 import {
+  Alert,
   Button,
   Card,
   CardBody,
@@ -19,6 +20,7 @@ import 'react-tabulator/css/tabulator_simple.min.css'
 import {ReactTabulator} from 'react-tabulator';
 import LoadingAnimation from "../../utils/LoadingAnimation";
 import {getStyle} from "@coreui/coreui/dist/js/coreui-utilities";
+import tutorial from './../../utils/tutorial';
 
 const editButtons = function (value, data, cell, row, options) { //plain text value, so we cant use react jsx. Instead, just a plain html button for deletion
   return "<Button class='btn btn-danger' style='width: 100%'><i class='cui-ban'/></Button>"
@@ -52,6 +54,7 @@ class Teams extends Component {
       data: [],//table data to display
       errors: {},//errors and fields listed for the register form
       name: '',
+      hint: !tutorial.isFinished('edit_team_names'),
       formLoading: false//whether the registration form is processing, disables the submit button
     }
 
@@ -122,13 +125,23 @@ class Teams extends Component {
                 {this.state.loading ? <LoadingAnimation/> :
                   this.state.data.length === 0 ?
                     <div className="text-center text-muted">Add a team to get started</div> :
-                    <ReactTabulator
-                      data={this.state.data}
-                      columns={columns(this)}
-                      tooltips={true}
-                      layout={"fitData"}
-                      cellEdited={(data) => this.editedData(data)}
-                    />
+                    <div>
+                      <ReactTabulator
+                        data={this.state.data}
+                        columns={columns(this)}
+                        tooltips={true}
+                        layout={"fitData"}
+                        cellEdited={(data) => this.editedData(data)}
+                      />
+                      <Alert color="primary" isOpen={this.state.hint}
+                             toggle={() => {
+                               this.setState({hint: false});
+                               tutorial.addFinished("edit_team_names")
+                             }}>
+                        <h6>Did you know?</h6>
+                        You can rename teams by clicking on their names within the table. Try it out!
+                      </Alert>
+                    </div>
                 }
 
               </CardBody>

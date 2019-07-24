@@ -130,7 +130,8 @@ class Login extends Component {
                           <Button color="link" className="px-0" id="forgotPassword" onClick={this.toggle}>Forgot
                             password?</Button>
                           <div className="fadeIn">
-                            <Popover placement="right" isOpen={this.state.popoverOpen} target="forgotPassword">
+                            <Popover placement="right" isOpen={this.state.popoverOpen} target="forgotPassword"
+                                     className="animated fadeIn">
                             <PopoverHeader>Forgot your Password?</PopoverHeader>
                             <PopoverBody>Make sure to contact an admin in order to reset your password</PopoverBody>
                             </Popover></div>

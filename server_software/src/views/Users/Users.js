@@ -1,5 +1,6 @@
 import React, {Component} from 'react';
 import {
+  Alert,
   Button,
   Card,
   CardBody,
@@ -21,6 +22,7 @@ import LoadingAnimation from "../../utils/LoadingAnimation";
 import {connect} from "react-redux";
 import PropTypes from "prop-types";
 import {getStyle} from "@coreui/coreui/dist/js/coreui-utilities";
+import tutorial from './../../utils/tutorial';
 
 const editButtons = function (value, data, cell, row, options) { //plain text value, so we cant use react jsx. Instead, just a plain html button for deletion
   return "<Button class='btn btn-danger' style='width: 100%'><i class='cui-ban'/></Button>"
@@ -61,12 +63,15 @@ class Users extends Component {
       email: '',
       password: '',
       passwordRetype: '',
+      hint: !tutorial.isFinished("edit_permissions"),
       formLoading: false//whether the registration form is processing, disables the submit button
     }
+
 
   }
   componentDidMount() {//on component mount, we try fetch data from db
     this.setState({loading: true});//make the loading animation begin
+
     axios('/api/users/edit/list').then(dat => {//try fetch user data
       let data = [];
       dat.data.forEach(user => {//for every user given from the backend
@@ -84,6 +89,9 @@ class Users extends Component {
 
       });
       this.setState({data, loading: false});//update table and stop loading animation
+      setTimeout(() => {
+        this.setState({popoverOpen: true})
+      }, 3000)
     });
   }
 
@@ -138,14 +146,30 @@ class Users extends Component {
                 {this.state.loading ? <LoadingAnimation/> :
                   this.state.data.length === 0 ?
                     <div className="text-center text-muted">Add a user to get started</div> :
-                    <ReactTabulator
-                      data={this.state.data}
-                      columns={columns(this)}
-                      tooltips={true}
-                      layout={"fitData"}
-                      cellEdited={(data) => this.editedData(data)}
-                    />
+                    <div>
+                      <ReactTabulator
+                        data={this.state.data}
+                        className="animated fadeIn"
+                        columns={columns(this)}
+                        tooltips={true}
+                        layout={"fitData"}
+                        cellEdited={(data) => this.editedData(data)}
+                      />
+                      <Alert color="primary" isOpen={this.state.hint}
+                             toggle={() => {
+                               this.setState({hint: false});
+                               tutorial.addFinished("edit_permissions")
+                             }}>
+                        <h6>Did you know?</h6>
+                        You can change user permissions by clicking the check marks. Try it out!
+                      </Alert>
+                    </div>
+
+
+
+
                 }
+
 
               </CardBody>
             </Card>

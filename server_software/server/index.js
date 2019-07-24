@@ -36,7 +36,6 @@ function startupExpressServer() {
   app.use(pino);//this one gives better looking logs to console
   app.use(bodyParser.json());//this one allows us to parse json instantly in the response
 
-
   //setup login stuff
   // Passport middleware
   app.use(passport.initialize());
@@ -71,7 +70,10 @@ function startupMongoConnection() {
     {useNewUrlParser: true}
   )
     .then(() => console.log("MongoDB successfully connected"))
-    .catch(err => console.log(err));
+    .catch(err => {
+      console.log(err);
+      setTimeout(startupMongoConnection, 1000)
+    });
 }
 
 
