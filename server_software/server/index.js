@@ -72,7 +72,8 @@ function startupMongoConnection() {
     .then(() => console.log("MongoDB successfully connected"))
     .catch(err => {
       console.log(err);
-      setTimeout(startupMongoConnection, 1000)
+      console.log("Failed to connect to MongoDB");
+      setTimeout(()=>{console.log('Retrying...');startupMongoConnection();}, 1000)
     });
 }
 

@@ -30,6 +30,7 @@ namespace WUAT {
                 if (!_connection.IsConnected())
                 {
                     Console.WriteLine("Lost connection to server! Reconnecting...");
+                    _active = false;
                     _connection.OpenConnection();//blocks everything else, program useless without server connection
                     
                 }

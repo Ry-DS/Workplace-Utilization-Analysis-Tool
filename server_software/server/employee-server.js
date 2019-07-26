@@ -21,6 +21,7 @@ module.exports = class EmployeeServer {
       // Now that a TCP connection has been established, the server can send data to
       // the client by writing to its socket.
       this.connectionCount++;
+      socket.firstUpdate=true;//detect first update
 
       // The server can also receive data from the client by reading from its socket.
       socket.on('data', function (chunk) {
@@ -49,7 +50,7 @@ module.exports = class EmployeeServer {
                   }
 
                 });
-              }else socket.write('SUCCESS');
+              }else {socket.write('SUCCESS');socket.active=true}
 
 
             });
@@ -82,7 +83,7 @@ module.exports = class EmployeeServer {
 
                 });
               }
-              else socket.write('SUCCESS');
+              else {socket.write('SUCCESS');socket.active=true};
             });
             break;
           case 'UPDATE':
@@ -92,24 +93,56 @@ module.exports = class EmployeeServer {
               console.log("Invalid update occurred: No attached MAC ID");
               return;
             }
-            Team.findOneAndUpdate({'employees._id': id}, {/*$set: {'employees.$.lastLogin': Date.now()}*/}, {}, (err, doc) => {
+            if(!socket.active){
+              socket.destroy();
+              console.log("Invalid update occurred: Client wasn't registered");
+              return;
+            }
+            let date=new Date();
+            let dateString=`${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
+            let firstUpdate=socket.firstUpdate;
+            socket.firstUpdate=false;
+            Team.findOne({'employees._id': id})//find employee in teams db
+              .then(team=>{//this promise is overly complex, even I find it hard to comprehend/write. Maybe there's a better way
+                if(!team){//if team doesn't exist
+                  socket.destroy();
+                  console.log("Invalid connection on client during update. ID: "+socket.employeeId);
+                  return;//destroy connection, it didn't register properly or team deleted, they should reconnect
+                }
+                let addEvent=(d)=>{//helper function to add event to a usage date.
+                  if(!d.events)
+                    d.events=[];
+                  d.events.push({/*monitorGroup_id: '',TODO*/wasCheckin: firstUpdate});//time should be added automatically
+                };
+                for (let employee of team.employees){//find the employee in the team
+                  if(employee._id===id){
+                    let recordDate;//find the date to add the event
+                    for(let d of employee.usageData){
 
-            /*  if (!doc) {
-                Team.find({},{name: 1,_id: 0},(err,teams)=>{
-                  if(teams&&teams.length!==0){
-                    teams=teams.map(team=>team.name);
-                    socket.write('INIT:'+teams.join(':'))
+                      if(d._id===dateString){
+                          recordDate=d;
+                          break;//found it, exit this 'for' loop
+                      }
+                    }
+                    if(!recordDate){//doesn't exist? create a new one
+                      recordDate={_id: dateString};
+                      addEvent(recordDate);
+                      employee.usageData.push(recordDate);//it didn't exist before so we need to push it.
+                    }else addEvent(recordDate);//otherwise, we can just add it and object reference should update
+                    team.save().catch(err=>{//finally, save
+                      console.log(err);
+                      console.log(`Failed to save event. ID: ${id}`)
+                    });
+
+
+
+
+                    return;
                   }
+                }
 
-                });
-              }else socket.write('SUCCESS');
-*/
-
-            });
-
-
-
-
+              })
+              .catch(err=>{console.log(err);});
         }
       });
 

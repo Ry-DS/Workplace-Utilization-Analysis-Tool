@@ -5,9 +5,9 @@ const Schema = mongoose.Schema;
 //Structure:
 //Team->Employees->usage data->Dates employee was on->Events triggered while at work->monitor plugins or login/offs
 const MonitorEventSchema = new Schema({
-  monitorGroup_id: {type: String},//the object id of the monitor group interacted with
+  monitorGroup_id: {type: Schema.Types.ObjectId},//the object id of the monitor group interacted with
   wasCheckin: {type: Boolean, required: true, default: false},//if the event was a login to server or logout
-  time: {type: String, required: true}//time monitor plugin/out event occurred
+  time: {type: Date, required: true,default: Date.now}//time monitor plugin/out event occurred
 });
 const WorkingDateSchema = new Schema({
   _id: {type: String, required: true},//date
