@@ -8,6 +8,7 @@ const QuotaScheme = new Schema({
 });
 //A monitor group is a like all monitors of a specific model, holds their unique id and info on how many there are.
 const MonitorGroupSchema = new Schema({
+  _id: {type: Number, required: true},
   name: {
     type: String,//the specific model name the monitor has
     required: true

@@ -1,48 +1,52 @@
-//this server accepts connections from the employees in order to store usage data and allow the other server to access.
+//this server accepts connections from the employees in order to store usage data in mongodb
 
 const Net = require('net');
-//server test
+//mongodb data models
 const Team = require('./models/Team');
+const MonitorGroup = require('./models/MonitorGroup');
 
 
-const port = 7250;
+const port = 7250;//port to listen to
 module.exports = class EmployeeServer {
   constructor() {
+    //server creation
     this.server = Net.createServer();
     this.connectionCount = 0;
     this.server.listen(port, () => {
       console.log("Server Listening on port: " + port);
     });
-    this.server.on('connection', socket => {
+    this.server.on('connection', socket => {//connection listener
       console.log('A new connection has been established.');
-      socket.oldWrite=socket.write;
+      socket.oldWrite = socket.write;//we are going to rewrite the write method in the api next line, so store the old one.
       socket.write=function(s){console.log(`Writing: ${s}`);this.oldWrite(s+'\r')};//make sure everything is appended with \r signifying new command
 
       // Now that a TCP connection has been established, the server can send data to
       // the client by writing to its socket.
+      //count the connection, provides live count of active connections
       this.connectionCount++;
       socket.firstUpdate=true;//detect first update
 
       // The server can also receive data from the client by reading from its socket.
       socket.on('data', function (chunk) {
         let data = chunk.toString();
+        let params = data.split(':');
         console.log(`Data received from client: ${data}`);
         let id;
-        switch (data.includes(":") ? data.split(':')[0] : data) {
+        switch (data.includes(":") ? params[0] : data) {//parse the request the employee sent
           case "ID":
 
-            if(socket.employeeId){
+            if (socket.employeeId) {//see if they already sent an ID command
               socket.destroy();
               console.log(`Employee ${socket.employeeId} tried registering twice`);
               return;//already logged in
             }
-            id = data.split(':')[1];
+            id = params[1];//read parameters
 
             socket.employeeId = id;
-            console.log(id);
+            //try find the employee in mongodb, if found, update last login time and perform function
             Team.findOneAndUpdate({'employees._id': id}, {$set: {'employees.$.lastLogin': Date.now()}}, {}, (err, doc) => {
 
-              if (!doc) {
+              if (!doc) {//doesn't exist? Send team list to the employee to register as a new client
                 Team.find({},{name: 1,_id: 0},(err,teams)=>{
                   if(teams&&teams.length!==0){
                     teams=teams.map(team=>team.name);
@@ -50,14 +54,17 @@ module.exports = class EmployeeServer {
                   }
 
                 });
-              }else {socket.write('SUCCESS');socket.active=true}
+              } else {
+                socket.write('SUCCESS');
+                socket.active = true
+              }//let employee know they are a go and accept update messages
 
 
             });
             break;
 
           case "REGISTER":
-            let teamName = data.split(':')[1];
+            let teamName = params[1];
             id=socket.employeeId;
 
             if(!id){
@@ -82,12 +89,15 @@ module.exports = class EmployeeServer {
                   }
 
                 });
+              } else {
+                socket.write('SUCCESS');
+                socket.active = true
               }
-              else {socket.write('SUCCESS');socket.active=true};
             });
             break;
           case 'UPDATE':
             id=socket.employeeId;
+
             if(!id){
               socket.destroy();
               console.log("Invalid update occurred: No attached MAC ID");
@@ -98,10 +108,37 @@ module.exports = class EmployeeServer {
               console.log("Invalid update occurred: Client wasn't registered");
               return;
             }
+            //monitor identifying...
+            let monitorType = {
+              friendlyName: params[1],
+              machineCode: params[2],
+              machineId: parseInt(params[3]),
+              productId: parseInt(params[4])
+            };
+            let monitorId = pair(monitorType.machineId, monitorType.productId);
+            MonitorGroup.findOne({_id: monitorId}).then(monitor => {//create new monitor if it doesn't exist
+              if (!monitor) {
+                let monitor = new MonitorGroup({
+                  name: monitorType.friendlyName ? monitorType.friendlyName : monitorType.machineCode,
+                  friendlyName: this.name,
+                  _id: monitorId
+                });
+                monitor.save();
+
+              }
+            });
+            //date identifying...
             let date=new Date();
             let dateString=`${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
+            //identify whether it was the first update after a checkin
             let firstUpdate=socket.firstUpdate;
             socket.firstUpdate=false;
+            let addEvent = (d) => {//helper function to add event to a usage date.
+              if (!d.events)
+                d.events = [];
+
+              d.events.push({monitorGroup_id: monitorId, wasCheckin: firstUpdate});//time should be added automatically
+            };
             Team.findOne({'employees._id': id})//find employee in teams db
               .then(team=>{//this promise is overly complex, even I find it hard to comprehend/write. Maybe there's a better way
                 if(!team){//if team doesn't exist
@@ -109,11 +146,7 @@ module.exports = class EmployeeServer {
                   console.log("Invalid connection on client during update. ID: "+socket.employeeId);
                   return;//destroy connection, it didn't register properly or team deleted, they should reconnect
                 }
-                let addEvent=(d)=>{//helper function to add event to a usage date.
-                  if(!d.events)
-                    d.events=[];
-                  d.events.push({/*monitorGroup_id: '',TODO*/wasCheckin: firstUpdate});//time should be added automatically
-                };
+
                 for (let employee of team.employees){//find the employee in the team
                   if(employee._id===id){
                     let recordDate;//find the date to add the event
@@ -165,4 +198,9 @@ module.exports = class EmployeeServer {
 
 };
 
+//https://en.wikipedia.org/wiki/Pairing_function
+function pair(mId, pId) {//pairs two numbers in a unique fashion
+  return ((mId + pId) * (mId + pId + 1)) / 2 + pId;
+
+}
 
