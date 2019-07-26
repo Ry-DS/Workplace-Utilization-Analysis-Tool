@@ -1,7 +1,13 @@
 class Tutorial {
 
   constructor() {
-    this.tutorial = localStorage.tutorial ? JSON.parse(localStorage.tutorial) : null;
+    try {
+      this.tutorial = localStorage.tutorial ? JSON.parse(localStorage.tutorial) : null;
+    } catch (e) {
+      console.error('Failed loading tutorial, progress will be reset');
+      console.error(e);
+      this.tutorial = null;
+    }
     //tutorial system
     if (!this.tutorial) {
       this.tutorial = [];

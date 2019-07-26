@@ -121,7 +121,7 @@ module.exports = class EmployeeServer {
                 let monitor = new MonitorGroup({
                   name: monitorType.friendlyName ? monitorType.friendlyName : monitorType.machineCode,
                   friendlyName: this.name,
-                  _id: monitorId
+                  _id: monitorId//type set by default to be set later
                 });
                 monitor.save();
 
