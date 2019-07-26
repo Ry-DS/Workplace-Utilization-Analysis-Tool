@@ -2,7 +2,6 @@
 
 const Net = require('net');
 //server test
-const employeesConnected=[];
 const Team = require('./models/Team');
 
 
@@ -16,6 +15,8 @@ module.exports = class EmployeeServer {
     });
     this.server.on('connection', socket => {
       console.log('A new connection has been established.');
+      socket.oldWrite=socket.write;
+      socket.write=function(s){console.log(`Writing: ${s}`);this.oldWrite(s+'\r')};//make sure everything is appended with \r signifying new command
 
       // Now that a TCP connection has been established, the server can send data to
       // the client by writing to its socket.
@@ -25,17 +26,30 @@ module.exports = class EmployeeServer {
       socket.on('data', function (chunk) {
         let data = chunk.toString();
         console.log(`Data received from client: ${data}`);
+        let id;
         switch (data.includes(":") ? data.split(':')[0] : data) {
           case "ID":
-            let id = data.split(':')[1];
-            if(socket.employeeId)
+
+            if(socket.employeeId){
+              socket.destroy();
+              console.log(`Employee ${socket.employeeId} tried registering twice`);
               return;//already logged in
+            }
+            id = data.split(':')[1];
+
             socket.employeeId = id;
+            console.log(id);
             Team.findOneAndUpdate({'employees._id': id}, {$set: {'employees.$.lastLogin': Date.now()}}, {}, (err, doc) => {
 
               if (!doc) {
-                socket.write("INIT");//TODO parse team names
-              }
+                Team.find({},{name: 1,_id: 0},(err,teams)=>{
+                  if(teams&&teams.length!==0){
+                    teams=teams.map(team=>team.name);
+                    socket.write('INIT:'+teams.join(':'))
+                  }
+
+                });
+              }else socket.write('SUCCESS');
 
 
             });
@@ -51,7 +65,7 @@ module.exports = class EmployeeServer {
               return;
             }
             Team.findOneAndUpdate({'employees._id':id},{$pull:{employees:{_id: id}}});//remove the old employee
-            Team.findOneAndUpdate({_id: teamName}, {
+            Team.findOneAndUpdate({name: teamName}, {
               $push: {
                 employees: {
                   _id: id,
@@ -60,9 +74,40 @@ module.exports = class EmployeeServer {
               }
             }, {/*upsert: true/*Testing only*/}, (err, doc) => {
               if (!doc) {
-                socket.write("INIT");//TODO parse team names
+                Team.find({},{name: 1,_id: 0},(err,teams)=>{
+                  if(teams&&teams.length!==0){
+                    teams=teams.map(team=>team.name);
+                    socket.write('INIT:'+teams.join(':'))
+                  }
+
+                });
               }
+              else socket.write('SUCCESS');
             });
+            break;
+          case 'UPDATE':
+            id=socket.employeeId;
+            if(!id){
+              socket.destroy();
+              console.log("Invalid update occurred: No attached MAC ID");
+              return;
+            }
+            Team.findOneAndUpdate({'employees._id': id}, {/*$set: {'employees.$.lastLogin': Date.now()}*/}, {}, (err, doc) => {
+
+            /*  if (!doc) {
+                Team.find({},{name: 1,_id: 0},(err,teams)=>{
+                  if(teams&&teams.length!==0){
+                    teams=teams.map(team=>team.name);
+                    socket.write('INIT:'+teams.join(':'))
+                  }
+
+                });
+              }else socket.write('SUCCESS');
+*/
+
+            });
+
+
 
 
         }

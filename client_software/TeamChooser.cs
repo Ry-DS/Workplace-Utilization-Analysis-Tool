@@ -14,7 +14,6 @@ namespace WUAT
         {
             _connection = connection;
             InitializeComponent();
-            Console.WriteLine(teams.Length);
             foreach (string teamName in teams)
             {
                 

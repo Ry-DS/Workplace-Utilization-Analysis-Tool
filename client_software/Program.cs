@@ -40,24 +40,24 @@ namespace WUAT {
                     var bytes = new byte[bufferSize];
                     ns.Read(bytes, 0, bufferSize);             
                     var msg = Encoding.ASCII.GetString(bytes).Replace("\0",""); //the message incoming, also remove null char from empty buffer
-                    Console.WriteLine(msg);
                     foreach (string cmd in msg.Split('\r'))//\r sent at end of every command in case we get multiple
                     {
-                        ExecuteServerInstruction(cmd);
+                        if(cmd.Length!=0)//check valid command, sometimes it splits with an empty line
+                            ExecuteServerInstruction(cmd);
                     }
                     
                 }
                 if (!state.Equals(oldState)&&state.IsValid()&&_active)
                 {
-                    //TODO send new monitor state to server
+                    oldState = state;
                     _connection.SendData("UPDATE"+state);
+                     PrintDisplayInfo();
                 }
 
                 if (DateTimeOffset.Now.ToUnixTimeMilliseconds() - state.CaptureTime > Resources.monitor_check_delay_ms&&_active)//check for monitor changes every 10 seconds
                 {
-                    oldState = state;
                     state = CaptureState();
-                    PrintDisplayInfo();//TODO testing
+                    
                     
                 }
 
@@ -75,7 +75,7 @@ namespace WUAT {
         }
 
             private void ExecuteServerInstruction(string msg)
-            {
+            {    Console.WriteLine("Executing Instruction: "+msg);
                 string[] cmds = msg.Split(':');
                 
                 switch (cmds[0])
@@ -113,10 +113,7 @@ namespace WUAT {
                 Console.WriteLine("Manufacture ID: "+state.MId);
                 Console.WriteLine("Manufacture Code: "+state.MCode);
                 Console.WriteLine("Product Code: "+state.ProductId);
-                Console.WriteLine();
-
-
-            Console.WriteLine("Display Amount: "+ PathDisplayTarget.GetDisplayTargets().Count());
+                Console.WriteLine("Display Amount: "+ PathDisplayTarget.GetDisplayTargets().Count());
         }
 
         public static void Main()
