@@ -1,4 +1,7 @@
 import React, {Component} from 'react';
+import $ from 'jquery';
+import flatpickr from 'flatpickr/dist/flatpickr.min.js';
+import 'flatpickr/dist/flatpickr.min.css'
 import {
   Alert,
   Button,
@@ -22,15 +25,68 @@ import LoadingAnimation from "../../utils/LoadingAnimation";
 import {getStyle} from "@coreui/coreui/dist/js/coreui-utilities";
 import tutorial from './../../utils/tutorial';
 
-const editButtons = function (value, data, cell, row, options) { //plain text value, so we cant use react jsx. Instead, just a plain html button for deletion
-  return "<Button class='btn btn-danger' style='width: 100%'><i class='cui-ban'/></Button>"
+const editButtons = function () { //plain text value, so we cant use react jsx. Instead, just a plain html button for deletion
+  return "<Button class='btn btn-danger' style='width: 100%'><i class='fa fa-trash-o'/></Button>"
 };
+function flatpickerEditor(cell, onRendered, success, cancel)
+{
+  let input = $("<input type='text'/>");
 
+  flatpickr(input,{
+    enableTime: true,
+    noCalendar: true,
+    dateFormat: "H:i",
+    time_24hr: false,
+    minDate:cell.getField()==='endTime'?cell.getRow().getData().startTime:undefined,
+    maxDate:cell.getField()==='startTime'?cell.getRow().getData().endTime:undefined,
+   // locale: "en", // global variable with locale 'en', 'fr', ...
+    defaultDate: cell.getValue(),
+    onClose: function (selectedDates, dateStr, instance) {
+      let evt = window.event;//gotta use it, we can't get the event anyway else
+      let isEscape = false;
+      if ("key" in evt)
+      {
+        isEscape = (evt.key === "Escape" || evt.key === "Esc");
+      } else
+      {
+        isEscape = (evt.keyCode === 27);
+      }
+      if (isEscape)
+      {
+        // user hit escape
+        cancel();
+      } else
+      {
+        success(dateStr);
+      }
+    }
+  });
+
+  input.css({
+    "border": "1px",
+    "background": "transparent",
+    "padding": "4px",
+    "width": "100%",
+    "box-sizing": "border-box",
+    "text-align": "center"
+  });
+
+  input.val(cell.getValue());
+
+
+  onRendered(function () {
+    input.focus();
+  });
+
+  return input.get()[0];
+}
 const columns = (container) => {
   return [//define columns for the table, we pass the Users component, so we can perform actions on click
     {title: "Name", field: "name", editor: true},
     {title: "Created on", field: "creationDate", align: "center"},
-    {title: "Employee Count", field: "employeeCount", align: "center"},
+    {title: "Registered", field: "employeeCount", align: "center"},
+    {title: "Start Tracking",field:'startTime',align: 'center', editor: flatpickerEditor},
+    {title: "Stop Tracking",field:'endTime',align: 'center', editor: flatpickerEditor},
     {
       title: "Del.", sortable: false, width: 70, formatter: editButtons, cellClick: function (e, cell, value, data) {
         if (window.confirm(`You are about to delete ${cell._cell.row.data.name}. This action will permanently delete ALL employee data attached with this team`)) {//on delete button, make sure they want to delete
@@ -76,11 +132,10 @@ class Teams extends Component {
   }
 
   editedData(data) {//when a cell is edited
-    let cell = data._cell;
-    let type = cell.column.field;
-    let id = cell.row.data._id;
-    let value = cell.value;
-    axios.post('/api/teams/edit/name', {id, value}).catch(err => {//try update the relevant permission
+    let type = data.getField();
+    let id = data.getRow().getData()._id;
+    let value = data.getValue();
+    axios.post('/api/teams/edit', {id, type,value}).catch(err => {//try update the relevant permission
       this.componentDidMount();//if we failed, try refresh the table instead of showing false success
     });
   }
@@ -116,7 +171,7 @@ class Teams extends Component {
     return (
       <div className="animated fadeIn">
         <Row>
-          <Col xs="12" sm="8">
+          <Col xs="12" sm="9">
             <Card>
               <CardHeader>
                 <i className="fa fa-user"/> Teams
@@ -139,7 +194,8 @@ class Teams extends Component {
                                tutorial.addFinished("edit_team_names")
                              }}>
                         <h6>Did you know?</h6>
-                        You can rename teams by clicking on their names within the table. Try it out!
+                        You can rename teams and change their tracking times by clicking the respective fields. Try it out!<br/><br/>
+                        <i>The tracking times define when WUAT should actively track data from employees, don't want outliers from 12 at midnight!</i>
                       </Alert>
                     </div>
                 }
@@ -149,7 +205,7 @@ class Teams extends Component {
 
 
           </Col>
-          <Col xs="12" sm="4">
+          <Col xs="12" sm="3">
             <Card>
               <CardHeader>
                 <i className="fa fa-plus"/> Add a Team

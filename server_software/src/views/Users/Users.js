@@ -25,7 +25,7 @@ import {getStyle} from "@coreui/coreui/dist/js/coreui-utilities";
 import tutorial from './../../utils/tutorial';
 
 const editButtons = function (value, data, cell, row, options) { //plain text value, so we cant use react jsx. Instead, just a plain html button for deletion
-  return "<Button class='btn btn-danger' style='width: 100%'><i class='cui-ban'/></Button>"
+  return "<Button class='btn btn-danger' style='width: 100%'><i class='fa fa-trash-o'/></Button>"
 };
 
 const columns = (container) => {
@@ -96,10 +96,9 @@ class Users extends Component {
   }
 
   editedData(data) {//when a cell is edited
-    let cell = data._cell;
-    let type = cell.column.field;
-    let id = cell.row.data._id;
-    let value = cell.value;
+    let type = data.getField();
+    let id = data.getRow().getData()._id;
+    let value = data.getValue();
     axios.post('/api/users/edit/permission', {id, type, value}).catch(err => {//try update the relevant permission
       this.componentDidMount();//if we failed, try refresh the table instead of showing false success
     });

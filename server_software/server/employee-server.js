@@ -54,10 +54,12 @@ module.exports = class EmployeeServer {
                   }
 
                 });
-              } else {
-                socket.write('SUCCESS');
-                socket.active = true
-              }//let employee know they are a go and accept update messages
+              } else if(checkTime(doc.startTime,doc.endTime)) {//check tracking time is imminent
+                  socket.write('SUCCESS');//let employee know they are a go and accept update messages
+                  socket.active = true;
+
+
+              } else socket.destroy();//end connection, let them try again later
 
 
             });
@@ -146,6 +148,11 @@ module.exports = class EmployeeServer {
                   console.log("Invalid connection on client during update. ID: "+socket.employeeId);
                   return;//destroy connection, it didn't register properly or team deleted, they should reconnect
                 }
+                if(!checkTime(team.startTime,team.endTime)){//update wasn't within tracking time
+                  //end their connection
+                  socket.destroy();
+                  return;
+                }
 
                 for (let employee of team.employees){//find the employee in the team
                   if(employee._id===id){
@@ -202,5 +209,28 @@ module.exports = class EmployeeServer {
 function pair(mId, pId) {//pairs two numbers in a unique fashion
   return ((mId + pId) * (mId + pId + 1)) / 2 + pId;
 
+
+}
+//https://stackoverflow.com/questions/9081220/how-to-check-if-current-time-falls-within-a-specific-range-on-a-week-day-using-j/32896572#32896572
+function checkTime (start,end){
+  let time=new Date();
+  start=start.split(':');
+  end=end.split(':');
+  let h=time.getHours(),m=time.getMinutes()
+    ,a=start[0],b=start[1]
+    ,c=end[0],d=end[1];
+  if (a > c || ((a == c) && (b > d))) {
+    // not a valid input
+  } else {
+    if (h > a && h < c) {
+      return true;
+    } else if (h == a && m >= b) {
+      return true;
+    } else if (h == c && m <= d) {
+      return true;
+    } else {
+      return false;
+    }
+  }
 }
 

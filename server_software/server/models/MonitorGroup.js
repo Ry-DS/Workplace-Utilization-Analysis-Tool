@@ -18,6 +18,7 @@ const MonitorGroupSchema = new Schema({
   friendlyName: {//name given by the user
     type: String,
   },
+  creationDate: {type: Date, required: true, default: Date.now},
   quota: [QuotaScheme]//quota is like the amount of these monitors in the building
 
 });

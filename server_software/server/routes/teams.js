@@ -54,9 +54,9 @@ router.post('/edit/delete', (req, res) => {
   Team.deleteOne({_id: id}).then(() => res.status(200).json({success: true})).catch(err => res.status(400).json(err));
 
 });
-router.post('/edit/name', (req, res) => {
+router.post('/edit', (req, res) => {
   const query = req.body;
-
+  if(query.type==='name'){//editing name, need to check it doesn't exist
   Team.findOne({name: query.value}).then((doc) => {
     if (doc) {
       res.status(400).json({name: 'Name already exists'});
@@ -69,6 +69,13 @@ router.post('/edit/name', (req, res) => {
 
     }
   });
+  }else{
+    Team.updateOne({_id: query.id},{$set:{
+        [query.type]: query.value
+
+      }}).then(()=>res.status(200).json({success: true})).catch(err=>res.status(400).json(err));
+
+  }
 
 });
 module.exports = router;

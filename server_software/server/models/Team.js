@@ -5,7 +5,7 @@ const Schema = mongoose.Schema;
 //Structure:
 //Team->Employees->usage data->Dates employee was on->Events triggered while at work->monitor plugins or login/offs
 const MonitorEventSchema = new Schema({
-  monitorGroup_id: {type: Schema.Types.ObjectId},//the object id of the monitor group interacted with
+  monitorGroup_id: {type: Number},//the object id of the monitor group interacted with
   wasCheckin: {type: Boolean, required: true, default: false},//if the event was a login to server or logout
   time: {type: Date, required: true,default: Date.now}//time monitor plugin/out event occurred
 });
@@ -27,8 +27,11 @@ const EmployeeSchema = new Schema({
 const TeamSchema = new Schema({
   name: {type: String, required: true},
   creationDate: {type: Date, required: true, default: Date.now},
+  startTime:{type:String, default: '00:00',required: true},
+  endTime: {type: String,default: '23:59',required: true},
   employees: {
     type: [EmployeeSchema], default: []
-  }
+  },
+
 });
 module.exports = Team = mongoose.model("teams", TeamSchema);

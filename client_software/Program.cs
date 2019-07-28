@@ -51,7 +51,7 @@ namespace WUAT {
                 if (!state.Equals(oldState)&&state.IsValid()&&_active)
                 {
                     oldState = state;
-                    _connection.SendData("UPDATE"+state);
+                    _connection.SendData("UPDATE:"+state);
                      PrintDisplayInfo();
                 }
 

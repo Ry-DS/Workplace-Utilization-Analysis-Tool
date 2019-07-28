@@ -2,7 +2,6 @@ import React, {Component} from 'react';
 import {HashRouter, Route, Switch} from 'react-router-dom';
 // import { renderRoutes } from 'react-router-config';
 import './App.scss';
-
 import loading from './utils/LoadingAnimation';
 //redux
 import {Provider} from "react-redux";
