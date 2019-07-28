@@ -1,12 +1,12 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
-
+const EVENT_TYPE = require('./../eventType');
 
 //Structure:
 //Team->Employees->usage data->Dates employee was on->Events triggered while at work->monitor plugins or login/offs
 const MonitorEventSchema = new Schema({
   monitorGroup_id: {type: Number},//the object id of the monitor group interacted with
-  wasCheckin: {type: Boolean, required: true, default: false},//if the event was a login to server or logout
+  type: {type: String, required: true, default: EVENT_TYPE.PLUG_IN},//if the event was a login to server or logout
   time: {type: Date, required: true,default: Date.now}//time monitor plugin/out event occurred
 });
 const WorkingDateSchema = new Schema({

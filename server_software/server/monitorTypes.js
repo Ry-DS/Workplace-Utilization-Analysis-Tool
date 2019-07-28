@@ -1,6 +1,6 @@
-const MONITOR_TYPES = {
+const MONITOR_TYPE = {
   LAPTOP: 'Laptop',
   PROJECTOR: 'Projector',
   DESK: 'Desk Monitor'
 };
-module.exports = MONITOR_TYPES;
+module.exports = MONITOR_TYPE;

@@ -28,6 +28,8 @@ import tutorial from './../../utils/tutorial';
 const editButtons = function () { //plain text value, so we cant use react jsx. Instead, just a plain html button for deletion
   return "<Button class='btn btn-danger' style='width: 100%'><i class='fa fa-trash-o'/></Button>"
 };
+
+//https://github.com/olifolkerd/tabulator/issues/640
 function flatpickerEditor(cell, onRendered, success, cancel)
 {
   let input = $("<input type='text'/>");
@@ -80,13 +82,27 @@ function flatpickerEditor(cell, onRendered, success, cancel)
 
   return input.get()[0];
 }
+
+//https://stackoverflow.com/questions/13898423/javascript-convert-24-hour-time-of-day-string-to-12-hour-time-with-am-pm-and-no
+function timeFormatter(cell) {
+  // Check correct time format and split into components
+  let time = cell.getValue().toString().match(/^([01]\d|2[0-3])(:)([0-5]\d)(:[0-5]\d)?$/) || [cell.getValue()];
+
+  if (time.length > 1) { // If time format correct
+    time = time.slice(1);  // Remove full string match value
+    time[5] = +time[0] < 12 ? ' AM' : ' PM'; // Set AM/PM
+    time[0] = +time[0] % 12 || 12; // Adjust hours
+  }
+  return time.join(''); // return adjusted time or original string
+}
+
 const columns = (container) => {
   return [//define columns for the table, we pass the Users component, so we can perform actions on click
     {title: "Name", field: "name", editor: true},
     {title: "Created on", field: "creationDate", align: "center"},
     {title: "Registered", field: "employeeCount", align: "center"},
-    {title: "Start Tracking",field:'startTime',align: 'center', editor: flatpickerEditor},
-    {title: "Stop Tracking",field:'endTime',align: 'center', editor: flatpickerEditor},
+    {title: "Start Tracking", field: 'startTime', align: 'center', editor: flatpickerEditor, formatter: timeFormatter},
+    {title: "Stop Tracking", field: 'endTime', align: 'center', editor: flatpickerEditor, formatter: timeFormatter},
     {
       title: "Del.", sortable: false, width: 70, formatter: editButtons, cellClick: function (e, cell, value, data) {
         if (window.confirm(`You are about to delete ${cell._cell.row.data.name}. This action will permanently delete ALL employee data attached with this team`)) {//on delete button, make sure they want to delete

@@ -14,10 +14,10 @@ namespace WUAT
 
 
         //client instance
-        private readonly TcpClient client;
+        private TcpClient client;
 
         //used to tell the server to try connecting to the server when the computer connects to a new network
-        private readonly AutoResetEvent connectionUpdater = new AutoResetEvent(false);
+        public readonly AutoResetEvent connectionUpdater = new AutoResetEvent(false);
 
 
         public ServerConnection()
@@ -40,6 +40,7 @@ namespace WUAT
             try
             {
                 //try connecting, if we fail, print error and try connecting again 
+                client = new TcpClient();
                 client.Connect(Resources.server_ip, 7250);
                 Console.WriteLine("Connected");
                 SendData("ID:" + NetworkInterface.GetAllNetworkInterfaces()[0]
@@ -75,6 +76,7 @@ namespace WUAT
                 var nwStream = client.GetStream();
                 var bytes = Encoding.ASCII.GetBytes(data);
                 nwStream.Write(bytes, 0, bytes.Length);
+                if(data.Length!=0)
                 Console.WriteLine("Sent data: " + data);
             }
             catch (Exception e)
@@ -92,6 +94,11 @@ namespace WUAT
         internal TcpClient GetClient()
         {
             return client;
+        }
+
+        public void ping()
+        {
+           SendData("PING");
         }
     }
 }

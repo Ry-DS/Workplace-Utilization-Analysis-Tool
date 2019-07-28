@@ -14,6 +14,7 @@ namespace WUAT {
     {
         private readonly ServerConnection _connection;
         private MonitorState state,oldState;
+        private long lastPing = DateTimeOffset.Now.ToUnixTimeMilliseconds();
         private bool _active;//default false, says whether the software is authorised by the server to start sending requests. 
         Program()
         {
@@ -26,11 +27,19 @@ namespace WUAT {
             _connection.OpenConnection();
             while (true)//main app loop
             {
+                if (DateTimeOffset.Now.ToUnixTimeMilliseconds() - lastPing > 3000)
+                {
+                    _connection.ping();
+                    lastPing = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+                }
+
                 //make sure connection remains active
                 if (!_connection.IsConnected())
                 {
-                    Console.WriteLine("Lost connection to server! Reconnecting...");
+                    Console.WriteLine("Lost connection to server!");
+                    Console.WriteLine("Retrying in "+Resources.server_failed_connection_retry_delay_ms/1000+" sec");
                     _active = false;
+                    _connection.connectionUpdater.WaitOne(Resources.server_failed_connection_retry_delay_ms);
                     _connection.OpenConnection();//blocks everything else, program useless without server connection
                     
                 }

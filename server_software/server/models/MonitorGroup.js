@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
-const MONITOR_TYPES = require('./../monitorTypes');
+const MONITOR_TYPE = require('./../monitorTypes');
 
 const QuotaScheme = new Schema({
   amount: {type: Number, required: true},//amount of monitors available to this team set
@@ -14,7 +14,7 @@ const MonitorGroupSchema = new Schema({
     type: String,//the specific model name the monitor has
     required: true
   },
-  type: {type: String, required: true, default: MONITOR_TYPES.LAPTOP},
+  type: {type: String, required: true, default: MONITOR_TYPE.LAPTOP},
   friendlyName: {//name given by the user
     type: String,
   },

@@ -4,6 +4,7 @@ const Net = require('net');
 //mongodb data models
 const Team = require('./models/Team');
 const MonitorGroup = require('./models/MonitorGroup');
+const EVENT_TYPE = require('./eventType');
 
 
 const port = 7250;//port to listen to
@@ -19,7 +20,11 @@ module.exports = class EmployeeServer {
       console.log('A new connection has been established.');
       socket.oldWrite = socket.write;//we are going to rewrite the write method in the api next line, so store the old one.
       socket.write=function(s){console.log(`Writing: ${s}`);this.oldWrite(s+'\r')};//make sure everything is appended with \r signifying new command
-
+      socket.oldDestroy = socket.destroy;
+      socket.destroy = function (e) {//same for destroy, I wanna know when a connection is destroyed
+        console.log("Destroying connection...");
+        this.oldDestroy(e);
+      };
       // Now that a TCP connection has been established, the server can send data to
       // the client by writing to its socket.
       //count the connection, provides live count of active connections
@@ -30,6 +35,8 @@ module.exports = class EmployeeServer {
       socket.on('data', function (chunk) {
         let data = chunk.toString();
         let params = data.split(':');
+        if (data === 'PING')//stupid thing we need to do cause c# needs a ping message to verify connection health
+          return;
         console.log(`Data received from client: ${data}`);
         let id;
         switch (data.includes(":") ? params[0] : data) {//parse the request the employee sent
@@ -117,9 +124,9 @@ module.exports = class EmployeeServer {
               machineId: parseInt(params[3]),
               productId: parseInt(params[4])
             };
-            let monitorId = pair(monitorType.machineId, monitorType.productId);
+            let monitorId = pair(monitorType.machineId, monitorType.productId);//generates a unique code to identify this monitor
             MonitorGroup.findOne({_id: monitorId}).then(monitor => {//create new monitor if it doesn't exist
-              if (!monitor) {
+              if (!monitor) {//TODO limit on if employees can add new monitors
                 let monitor = new MonitorGroup({
                   name: monitorType.friendlyName ? monitorType.friendlyName : monitorType.machineCode,
                   friendlyName: this.name,
@@ -139,7 +146,7 @@ module.exports = class EmployeeServer {
               if (!d.events)
                 d.events = [];
 
-              d.events.push({monitorGroup_id: monitorId, wasCheckin: firstUpdate});//time should be added automatically
+              d.events.push({monitorGroup_id: monitorId, type: firstUpdate ? EVENT_TYPE.LOG_IN : EVENT_TYPE.PLUG_IN});//time should be added automatically
             };
             Team.findOne({'employees._id': id})//find employee in teams db
               .then(team=>{//this promise is overly complex, even I find it hard to comprehend/write. Maybe there's a better way
@@ -189,9 +196,62 @@ module.exports = class EmployeeServer {
       // When the client requests to end the TCP connection with the server, the server
       // ends the connection.
 
+      function closeEvent(id) {
+        if (!socket.active)//they never were sending updates in the first place, don't bother
+          return;
+        //date identifying...
+        let date = new Date();
+        let dateString = `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
+        let addEvent = (d) => {//helper function to add event to a usage date.
+          if (!d.events)
+            d.events = [];
+
+          d.events.push({type: EVENT_TYPE.LOG_OUT});//time should be added automatically
+        };
+        Team.findOne({'employees._id': id})//find employee in teams db
+          .then(team => {//this promise is overly complex, even I find it hard to comprehend/write. Maybe there's a better way
+            if (!team) {//if team doesn't exist
+              return;
+            }
+            if (!checkTime(team.startTime, team.endTime)) {//update wasn't within tracking time
+              return;
+            }
+
+            for (let employee of team.employees) {//find the employee in the team
+              if (employee._id === id) {
+                let recordDate;//find the date to add the event
+                for (let d of employee.usageData) {
+
+                  if (d._id === dateString) {
+                    recordDate = d;
+                    break;//found it, exit this 'for' loop
+                  }
+                }
+                if (!recordDate) {//doesn't exist? create a new one
+                  recordDate = {_id: dateString};
+                  addEvent(recordDate);
+                  employee.usageData.push(recordDate);//it didn't exist before so we need to push it.
+                } else addEvent(recordDate);//otherwise, we can just add it and object reference should update
+                team.save().catch(err => {//finally, save
+                  console.log(err);
+                  console.log(`Failed to save event. ID: ${id}`)
+                });
+
+
+                return;
+              }
+            }
+
+          })
+          .catch(err => {
+            console.log(err);
+          });
+
+      }
       socket.on('end', () => {
         console.log('Closing connection with the client');
         this.connectionCount--;
+        closeEvent(socket.employeeId);
       });
 
       // Don't forget to catch error, for your own sake.
@@ -199,7 +259,9 @@ module.exports = class EmployeeServer {
       socket.on('error', err => {
         console.log(`Error: ${err}`);
         this.connectionCount--;
+        closeEvent(socket.employeeId);
       });
+
     });
   }
 
