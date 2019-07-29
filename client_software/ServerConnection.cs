@@ -76,7 +76,7 @@ namespace WUAT
                 var nwStream = client.GetStream();
                 var bytes = Encoding.ASCII.GetBytes(data);
                 nwStream.Write(bytes, 0, bytes.Length);
-                if(data.Length!=0)
+                if(data.Length!=0&&!data.Equals("PING"))
                 Console.WriteLine("Sent data: " + data);
             }
             catch (Exception e)

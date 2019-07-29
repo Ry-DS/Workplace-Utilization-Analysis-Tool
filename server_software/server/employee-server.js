@@ -36,7 +36,14 @@ module.exports = class EmployeeServer {
         let data = chunk.toString();
         let params = data.split(':');
         if (data === 'PING')//stupid thing we need to do cause c# needs a ping message to verify connection health
+        {
+          if (socket.active && !checkTime(socket.startTime, socket.endTime)) {//we can disconnect them once the time passes
+            socket.destroy();
+            if (socket.employeeId)
+              closeEvent(socket.employeeId);
+          }
           return;
+        }
         console.log(`Data received from client: ${data}`);
         let id;
         switch (data.includes(":") ? params[0] : data) {//parse the request the employee sent
@@ -44,6 +51,7 @@ module.exports = class EmployeeServer {
 
             if (socket.employeeId) {//see if they already sent an ID command
               socket.destroy();
+
               console.log(`Employee ${socket.employeeId} tried registering twice`);
               return;//already logged in
             }
@@ -63,8 +71,10 @@ module.exports = class EmployeeServer {
                 });
               } else if(checkTime(doc.startTime,doc.endTime)) {//check tracking time is imminent
                   socket.write('SUCCESS');//let employee know they are a go and accept update messages
-                  socket.active = true;
 
+                  socket.active = true;
+                socket.endTime = doc.endTime;//say when the socket should disconnects
+                socket.startTime = doc.startTime;
 
               } else socket.destroy();//end connection, let them try again later
 
@@ -158,6 +168,8 @@ module.exports = class EmployeeServer {
                 if(!checkTime(team.startTime,team.endTime)){//update wasn't within tracking time
                   //end their connection
                   socket.destroy();
+                  closeEvent(id);
+
                   return;
                 }
 
@@ -213,9 +225,7 @@ module.exports = class EmployeeServer {
             if (!team) {//if team doesn't exist
               return;
             }
-            if (!checkTime(team.startTime, team.endTime)) {//update wasn't within tracking time
-              return;
-            }
+
 
             for (let employee of team.employees) {//find the employee in the team
               if (employee._id === id) {

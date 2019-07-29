@@ -15,7 +15,10 @@ namespace WUAT {
         private readonly ServerConnection _connection;
         private MonitorState state,oldState;
         private long lastPing = DateTimeOffset.Now.ToUnixTimeMilliseconds();
-        private bool _active;//default false, says whether the software is authorised by the server to start sending requests. 
+
+        private bool
+            _active, //default false, says whether the software is authorised by the server to start sending requests. 
+            _loggedIn = true;
         Program()
         {
             Console.WriteLine("WUAT: Employee Software. By Ryan Samarakoon");
@@ -27,47 +30,76 @@ namespace WUAT {
             _connection.OpenConnection();
             while (true)//main app loop
             {
-                if (DateTimeOffset.Now.ToUnixTimeMilliseconds() - lastPing > 3000)
+               
+
+                //make sure connection remains active
+                if (!_connection.IsConnected()&&_loggedIn)
+                {
+                    Console.WriteLine("Lost connection to server!");
+                    Console.WriteLine("Retrying in "+Resources.server_failed_connection_retry_delay_ms/1000+" sec");
+                    if(!_active)
+                    _connection.connectionUpdater.WaitOne(Resources.server_failed_connection_retry_delay_ms);
+                    _active = false;
+                    _connection.OpenConnection();//blocks everything else, program useless without server connection
+                    
+                }
+                if (DateTimeOffset.Now.ToUnixTimeMilliseconds() - lastPing > 3000&&_loggedIn)
                 {
                     _connection.ping();
                     lastPing = DateTimeOffset.Now.ToUnixTimeMilliseconds();
                 }
-
-                //make sure connection remains active
-                if (!_connection.IsConnected())
-                {
-                    Console.WriteLine("Lost connection to server!");
-                    Console.WriteLine("Retrying in "+Resources.server_failed_connection_retry_delay_ms/1000+" sec");
-                    _active = false;
-                    _connection.connectionUpdater.WaitOne(Resources.server_failed_connection_retry_delay_ms);
-                    _connection.OpenConnection();//blocks everything else, program useless without server connection
-                    
-                }
                 //parse any response from the server
-                var ns = _connection.GetClient().GetStream();
-                var bufferSize = _connection.GetClient().ReceiveBufferSize;
-                if(bufferSize> 0&&ns.DataAvailable){
-                    var bytes = new byte[bufferSize];
-                    ns.Read(bytes, 0, bufferSize);             
-                    var msg = Encoding.ASCII.GetString(bytes).Replace("\0",""); //the message incoming, also remove null char from empty buffer
-                    foreach (string cmd in msg.Split('\r'))//\r sent at end of every command in case we get multiple
-                    {
-                        if(cmd.Length!=0)//check valid command, sometimes it splits with an empty line
-                            ExecuteServerInstruction(cmd);
-                    }
-                    
-                }
-                if (!state.Equals(oldState)&&state.IsValid()&&_active)
+                if (_loggedIn&&_connection.IsConnected())
                 {
-                    oldState = state;
-                    _connection.SendData("UPDATE:"+state);
-                     PrintDisplayInfo();
-                }
+                    var ns = _connection.GetClient().GetStream();
+                    var bufferSize = _connection.GetClient().ReceiveBufferSize;
+                    if (bufferSize > 0 && ns.DataAvailable)
+                    {
+                        var bytes = new byte[bufferSize];
+                        ns.Read(bytes, 0, bufferSize);
+                        var msg = Encoding.ASCII.GetString(bytes)
+                            .Replace("\0", ""); //the message incoming, also remove null char from empty buffer
+                        foreach (string cmd in msg.Split('\r')
+                        ) //\r sent at end of every command in case we get multiple
+                        {
+                            if (cmd.Length != 0) //check valid command, sometimes it splits with an empty line
+                                ExecuteServerInstruction(cmd);
+                        }
 
+                    }
+                }
+                //update the state once in awhile, dont' wanna check too fast.
                 if (DateTimeOffset.Now.ToUnixTimeMilliseconds() - state.CaptureTime > Resources.monitor_check_delay_ms&&_active)//check for monitor changes every 10 seconds
                 {
                     state = CaptureState();
                     
+                    
+                }
+
+                //if the state changed from last time, and the server gave the go, 
+                if (!state.Equals(oldState)&&state.IsValid()&&_active&&_loggedIn)
+                {
+                    //we store the state as the new old
+                    oldState = state;
+                    //send update to the server
+                    _connection.SendData("UPDATE:"+state);
+                     PrintDisplayInfo();//debug print
+                }
+              
+
+                if (IdleTimeFinder.GetIdleTime() > 5000&&_loggedIn)
+                {
+                    Console.WriteLine("Inactivity detected, logging off");
+                    _loggedIn = false;
+                    oldState = null;
+                    //close connection, will put a logout event on server
+                    _connection.GetClient().Close();
+                    
+                }else if (!_loggedIn && IdleTimeFinder.GetIdleTime() < 5000)
+                {
+                    Console.WriteLine("User returned");
+                    _loggedIn = true;
+                    //next loop we try connect again
                     
                 }
 
