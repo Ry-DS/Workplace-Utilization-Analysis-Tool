@@ -9,6 +9,7 @@ const pino = require('express-pino-logger')();//better looking server logs
 const passport=require('passport');
 const users=require('./routes/users');
 const teams = require('./routes/teams');
+const monitors = require('./routes/monitors');
 
 
 const EmployeeServer = require('./employee-server');//employee server for employees to connect and give data
@@ -45,6 +46,7 @@ function startupExpressServer() {
   // Routes
   app.use("/api/users", users);
   app.use('/api/teams', teams);
+  app.use('/api/monitors', monitors);
 //setup default request stuff
   app.get('/api/greeting', (req, res) => {
     const name = req.query.name || 'World';

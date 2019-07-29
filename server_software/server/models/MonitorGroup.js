@@ -19,6 +19,7 @@ const MonitorGroupSchema = new Schema({
     type: String,
   },
   creationDate: {type: Date, required: true, default: Date.now},
+  createdBy: String,
   quota: [QuotaScheme]//quota is like the amount of these monitors in the building
 
 });
