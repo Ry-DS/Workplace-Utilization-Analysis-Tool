@@ -11,6 +11,8 @@ import {
   Input,
   InputGroup,
   Label,
+  ListGroup,
+  ListGroupItem,
   Row
 } from 'reactstrap';
 import axios from "axios";
@@ -58,6 +60,11 @@ class Monitor extends Component {
       borderColor: getStyle('--theme-bland'),
       color: '#fff'
     };
+    const addButtonStyle = {//submit button style, with better colors to match theme
+      backgroundColor: getStyle('--theme-bland'),
+      borderColor: getStyle('--theme-light'),
+      color: '#fff'
+    };
     const options = [];
     for (let type in MONITOR_TYPE) {
       options.push({value: MONITOR_TYPE[type], label: MONITOR_TYPE[type]});
@@ -75,18 +82,19 @@ class Monitor extends Component {
           <Col lg={6}>
             <Card>
               <CardHeader>
-                <strong><i className="icon-info pr-1"/>Monitor ID: {this.props.match.params.id}}</strong>
+                <strong><i className="icon-info pr-1"/>Edit Monitor</strong>
               </CardHeader>
               <CardBody>
                 {this.state.loading ? <LoadingAnimation/> :
-                  <Form noValidate>
+                  <Form noValidate className="animated fadeIn">
                     <FormGroup>
                       <Label>Name</Label>
                       <InputGroup>
-                        <Input value={this.state.data.name} onChange={this.onChange}
-                               className={this.state.errors.name ? 'is-invalid' : ''} type="text" id="name" name="name"
+                        <Input value={this.state.data.friendlyName} onChange={this.onChange}
+                               className={this.state.errors.friendlyName ? 'is-invalid' : ''} type="text"
+                               id="friendlyName" name="friendlyName"
                                placeholder="Name"/>
-                        <FormFeedback>{this.state.errors.name}</FormFeedback>
+                        <FormFeedback>{this.state.errors.friendlyName}</FormFeedback>
                       </InputGroup>
                     </FormGroup>
                     <FormGroup>
@@ -98,7 +106,6 @@ class Monitor extends Component {
                         styles={customStyles}
                       />
                     </FormGroup>
-
 
                     <FormGroup>
                       <Button type="submit" color="success" onClick={this.update} style={buttonStyle}
@@ -112,7 +119,75 @@ class Monitor extends Component {
               </CardBody>
             </Card>
           </Col>
+          <Col>
+            <Card>
+              <CardHeader>
+                <strong><i className="icon-info pr-1"/>Edit Floors</strong>
+              </CardHeader>
+              <CardBody>
+                {this.state.loading ? <LoadingAnimation/> :
+                  <Form noValidate className="animated fadeIn">
+
+                    <FormGroup>
+                      <Label>Thing</Label>
+                      <Select
+                        value={{label: this.state.data.type, value: this.state.data.type}}
+                        onChange={this.onTypeSelect}
+                        options={options}
+                        styles={customStyles}
+                      />
+                    </FormGroup>
+
+                    <FormGroup>
+                      <Button type="add" color="success" style={addButtonStyle}
+                              disabled={this.state.formLoading}>
+                        <i className="fa fa-plus"/> Add Floor
+                      </Button>
+                    </FormGroup>
+                  </Form>
+
+                }
+              </CardBody>
+            </Card>
+          </Col>
+
+
         </Row>
+        <Row><Col><Card>
+          <CardHeader>
+            <strong><i className="icon-info pr-1"/>Monitor Details</strong>
+          </CardHeader>
+          <CardBody>
+            {this.state.loading ? <LoadingAnimation/> :
+              <Form noValidate className="animated fadeIn">
+
+
+                <FormGroup>
+                  <Label>Created By</Label>
+                  <ListGroup><ListGroupItem>{this.state.data.createdBy ? this.state.data.createdBy : "Unknown"}</ListGroupItem></ListGroup>
+
+                </FormGroup>
+                <FormGroup>
+                  <Label>Created on</Label>
+                  <ListGroup><ListGroupItem>{new Date(this.state.data.creationDate).toDateString()}</ListGroupItem></ListGroup>
+
+                </FormGroup>
+                <FormGroup>
+                  <Label>Model</Label>
+                  <ListGroup><ListGroupItem>{this.state.data.name}</ListGroupItem></ListGroup>
+
+                </FormGroup>
+                <FormGroup>
+                  <Label>ID</Label>
+                  <ListGroup><ListGroupItem>{this.state.data._id}</ListGroupItem></ListGroup>
+
+                </FormGroup>
+
+              </Form>
+
+            }
+          </CardBody>
+        </Card></Col></Row>
       </div>
     )
   }
