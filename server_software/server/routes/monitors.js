@@ -10,13 +10,7 @@ const MonitorGroup = require("../models/MonitorGroup");
 const {routeBuffer} = require('../passport-config');//authenticate specific routes
 
 
-//list all teams and data registered within the program
-router.get("/list", (req, res) => {//TODO
-  MonitorGroup.find({}, (err, teams) => {
-    res.send(teams);
-  });
 
-});
 //make everything a protected route. Only users with perms can perform operations here
 router.use('/edit', (req, res, next) => {
   routeBuffer.push("editMonitors");
@@ -32,7 +26,6 @@ router.post('/edit/delete', (req, res) => {
 });
 router.post('/edit', (req, res) => {
   const query = req.body;
-  console.log(query);
   MonitorGroup.updateOne({_id: query.id}, {
     $set: {
       [query.type]: query.value
@@ -40,6 +33,22 @@ router.post('/edit', (req, res) => {
     }
   }).then(() => res.status(200).json({success: true})).catch(err => res.status(400).json(err));
 
+
+});
+//list all teams and data registered within the program
+router.get("/edit/list", (req, res) => {
+  const query = req.query;
+  console.log(query);
+  if (!query.id)
+    MonitorGroup.find({}, (err, teams) => {
+      res.send(teams);
+    });
+  else MonitorGroup.findOne({_id: query.id}, (err, team) => {
+    if (!team) {
+      res.status(400).send({failed: true});
+    } else
+      res.send(team);
+  });
 
 });
 module.exports = router;

@@ -134,7 +134,7 @@ class Teams extends Component {
 
   componentDidMount() {//on component mount, we try fetch data from db
     this.setState({loading: true});//make the loading animation begin
-    axios('/api/teams/list').then(dat => {//try fetch user data
+    axios('/api/teams/edit/list').then(dat => {//try fetch user data
       let data = [];
       dat.data.forEach(team => {//for every team given from the backend
         //make sure all the data is pretty for displaying to user

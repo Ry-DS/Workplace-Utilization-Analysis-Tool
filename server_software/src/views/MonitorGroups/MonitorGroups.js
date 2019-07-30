@@ -12,12 +12,20 @@ const monitorTypeDropdown = {};
 for (let type in MONITOR_TYPES) {
   monitorTypeDropdown[MONITOR_TYPES[type]] = MONITOR_TYPES[type];
 }
+const editButtons = function () { //plain text value, so we cant use react jsx. Instead, just a plain html button for deletion
+  return "<Button class='btn btn-primary' style='width: 100%'><i class='fa fa-pencil-square-o'/></Button>"
+};
 const columns = (container) => {
   return [
-    {title: "Name", field: "friendlyName", editor: true, align: "center"},
+    {title: "Name", field: "friendlyName", editor: true},
     {title: "Type", field: "type", editor: "select", align: "center", editorParams: {values: monitorTypeDropdown}},
     {title: "Created on", field: "creationDate", align: "center"},
     {title: "Model", field: "name", align: "center"},
+    {
+      title: "Edit", sortable: false, width: 70, formatter: editButtons, cellClick: function (e, cell, value, data) {
+        container.props.history.push(`/monitor-groups/${cell.getData()._id}`)
+      }
+    }
   ]
 };
 
@@ -30,14 +38,16 @@ class MonitorGroups extends Component {
       errors: {},//errors and fields listed for the register form
       name: '',
       hint: !tutorial.isFinished('edit_team_names'),
-      formLoading: false//whether the registration form is processing, disables the submit button
+      formLoading: false,//whether the registration form is processing, disables the submit button
     }
 
   }
 
-  componentDidMount() {//on component mount, we try fetch data from db
+  componentDidMount() {
+
+    //on component mount, we try fetch data from db
     this.setState({loading: true});//make the loading animation begin
-    axios('/api/monitors/list').then(dat => {//try fetch user data
+    axios('/api/monitors/edit/list').then(dat => {//try fetch user data
       let data = [];
       dat.data.forEach(monitor => {//for every monitor given from the backend
         //make sure all the data is pretty for displaying to user
@@ -57,6 +67,12 @@ class MonitorGroups extends Component {
     axios.post('/api/monitors/edit', {id, value, type}).catch(err => {//try update the relevant permission
       this.componentDidMount();//if we failed, try refresh the table instead of showing false success
     });
+  }
+
+  monitorSelected(row) {
+    console.log(row.getData().name);
+    this.setState({selected: row});
+
   }
 
 
@@ -82,8 +98,8 @@ class MonitorGroups extends Component {
                         data={this.state.data}
                         columns={columns(this)}
                         tooltips={true}
-                        layout={"fitData"}
                         cellEdited={(data) => this.editedData(data)}
+                        rowSelected={(row) => this.monitorSelected(row)}
                       />
                       <Alert color="primary" isOpen={this.state.hint}
                              toggle={() => {

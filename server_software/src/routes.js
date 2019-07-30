@@ -39,6 +39,7 @@ const Widgets = React.lazy(() => import('./views/Widgets/Widgets'));
 const Users = React.lazy(() => import('./views/Users'));
 const Teams = React.lazy(() => import('./views/Teams'));
 const MonitorGroups = React.lazy(() => import('./views/MonitorGroups'));
+const MonitorGroup = React.lazy(() => import('./views/MonitorGroups/Monitor'));
 
 
 // https://github.com/ReactTraining/react-router/tree/master/packages/react-router-config
@@ -89,7 +90,8 @@ const routes = [
   { path: '/charts', name: 'Charts', component: Charts },
   {path: '/users', name: 'Users', component: Users},
   {path: '/teams', name: 'Teams', component: Teams},
-  {path: '/monitor-groups', name: 'Monitor Groups', component: MonitorGroups},
+  {path: '/monitor-groups', name: 'Monitor Groups', exact: true, component: MonitorGroups},
+  {path: '/monitor-groups/:id', name: 'Monitor', exact: true, component: MonitorGroup},
 ];
 
 export default routes;

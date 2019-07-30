@@ -38,6 +38,7 @@
     "react-redux": "^7.1.0",
     "react-router-config": "^5.0.0",
     "react-router-dom": "^5.0.0",
+    "react-select": "^3.0.4",
     "react-tabulator": "^0.9.1",
     "react-test-renderer": "^16.8.6",
     "reactstrap": "^7.1.0",
