@@ -18,13 +18,16 @@ import {
 import {CustomTooltips} from '@coreui/coreui-plugin-chartjs-custom-tooltips';
 import {getStyle, hexToRgba} from '@coreui/coreui/dist/js/coreui-utilities'
 import DashboardCard from "./DashboardCard";
+//data stuff
+import axios from 'axios';
+import MONITOR_TYPE from '../../utils/monitorTypes';
+
 
 //fetch color themes from css
 const brandDark = getStyle('--theme-dark');
 const brandLight = getStyle('--theme-light');
 const brandNorm = getStyle('--theme-norm');
 const brandBland = getStyle('--theme-bland');
-
 
 // Card Chart 1
 const cardChartData1 = {
@@ -401,6 +404,46 @@ class Dashboard extends Component {
       dropdownOpen: false,
       radioSelected: 2
     };
+  }
+
+  componentDidMount() {
+    axios('/api/data/list').then(dat => {
+      let totalMonitors = {};
+      let monitors = dat.data.monitors;
+      let teams = dat.data.teams;
+      let teamIndex = {};
+      let monitorIndex = {};
+      //setup indexes
+      teams.forEach(team => teamIndex[team._id] = team);
+      monitors.forEach(monitor => monitorIndex[monitor._id] = monitor);
+      //calculate total monitors in building+assign total monitors accessible to each team.
+      for (let type in MONITOR_TYPE) {
+        monitors.forEach(monitor => {
+          if (monitor.type !== MONITOR_TYPE[type]) {
+            return;
+
+          }
+          monitor.quota.forEach(floor => {
+            if (typeof totalMonitors[MONITOR_TYPE[type]] === 'number')
+              totalMonitors[MONITOR_TYPE[type]] += floor.amount;
+            else totalMonitors[MONITOR_TYPE[type]] = floor.amount;
+            floor.sharedWith.forEach(id => {
+              let team = teamIndex[id];
+              if (!team.totalMonitors)
+                team.totalMonitors = {};
+              if (typeof team.totalMonitors[MONITOR_TYPE[type]] === 'number')
+                team.totalMonitors[MONITOR_TYPE[type]] += floor.amount;
+              else team.totalMonitors[MONITOR_TYPE[type]] = floor.amount;
+
+
+            });
+          });
+        });
+      }
+      this.setState({data: dat.data});
+
+      console.log(dat.data, totalMonitors);
+    })
   }
 
   onRadioBtnClick(radioSelected) {
