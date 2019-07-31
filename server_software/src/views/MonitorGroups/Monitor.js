@@ -21,6 +21,10 @@ import {getStyle} from "@coreui/coreui/dist/js/coreui-utilities";
 import Select from 'react-select';
 import MONITOR_TYPE from '../../utils/monitorTypes';
 import CardFooter from "reactstrap/es/CardFooter";
+import toast from 'toasted-notes'
+import 'toasted-notes/src/styles.css';
+
+//notifications
 
 
 class Monitor extends Component {
@@ -38,12 +42,7 @@ class Monitor extends Component {
 
   componentDidMount() {//on component mount, we try fetch data from db
     this.setState({loading: true});//make the loading animation begin
-    let data;
-    axios.get('/api/monitors/edit/list', {params: {id: this.props.match.params.id}}).then(data => {//try fetch user data
-      data = data.data;
-    }).catch(err => {
-      this.props.history.push('/404');//go back, invalid ID to show
-    });
+    //we'll hope they finish ok in the event loop since idk about waiting for one to finish to start the next
     axios('/api/teams/list').then(data => {//fetch teams.
       let teamIndex = {};
       data.data.forEach(team => teamIndex[team._id] = team.name);
@@ -53,24 +52,53 @@ class Monitor extends Component {
         }),
         teamIndex//helps find name of team from ID
       });
+      axios.get('/api/monitors/edit/list', {params: {id: this.props.match.params.id}}).then(data => {//try fetch user data
+        data.data.quota.forEach(floor => {
+          if (Array.isArray(floor.sharedWith)) {
+            floor.sharedWith = floor.sharedWith.filter(value => {
+              return !!this.state.teamIndex[value];//only keep if id is in teams index
+
+            });
+          } else floor.sharedWith = [];
+        });
+        this.setState({data: data.data, loading: false});//update and stop loading animation
+      }).catch(err => {
+        console.log(err);
+        this.props.history.push('/404');//go back, invalid ID to show
+      });
+
     });
-    //this.setState({data: data.data, loading: false});//update and stop loading animation
-    data.quota.forEach()
+
 
   }
+
+  componentWillUnmount() {
+    this.update();
+  }
+
 
   onChange = e => {
     this.setState({data: {...this.state.data, [e.target.id]: e.target.value}});//edit fields while also storing it in state
 
   };
   update = (e) => {
-    e.preventDefault();
-    this.setState({formLoading: true});
+    //we want to check if the update was called while the component was still in use.
+    if (e) {
+      e.preventDefault();
+      this.setState({formLoading: true});
+    }
     axios.post('/api/monitors/edit/replace', this.state.data).then(() => {
-      this.setState({formLoading: false});
+      toast.notify("Successfully Saved!");
+      if (e)
+        this.setState({formLoading: false});
+
     }).catch(err => {
-      this.setState({formLoading: false});
-      this.componentDidMount()
+      toast.notify("There was an issue saving.");
+      if (e) {
+        this.setState({formLoading: false});
+        this.componentDidMount();
+      }
+
     });
   };
   render() {

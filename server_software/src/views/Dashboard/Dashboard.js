@@ -395,19 +395,12 @@ class Dashboard extends Component {
   constructor(props) {
     super(props);
 
-    this.toggle = this.toggle.bind(this);
     this.onRadioBtnClick = this.onRadioBtnClick.bind(this);
 
     this.state = {
       dropdownOpen: false,
       radioSelected: 2
     };
-  }
-
-  toggle() {
-    this.setState({
-      dropdownOpen: !this.state.dropdownOpen,
-    });
   }
 
   onRadioBtnClick(radioSelected) {
@@ -723,10 +716,7 @@ class Dashboard extends Component {
                           <Progress className="progress-xs" color="success" value="8" />
                         </div>
                       </div>
-                      <div className="divider text-center">
-                        <Button color="link" size="sm" className="text-muted" data-toggle="tooltip" data-placement="top"
-                                title="" data-original-title="show more"><i className="icon-options"></i></Button>
-                      </div>
+
                     </ul>
                   </Col>
                 </Row>

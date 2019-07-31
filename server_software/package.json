@@ -45,7 +45,8 @@
     "redux": "^4.0.1",
     "redux-devtools-extension": "^2.13.8",
     "redux-thunk": "^2.3.0",
-    "simple-line-icons": "^2.4.1"
+    "simple-line-icons": "^2.4.1",
+    "toasted-notes": "^2.1.6"
   },
   "devDependencies": {
     "bcryptjs": "^2.4.3",
