@@ -4,8 +4,8 @@ const MONITOR_TYPE = require('./../monitorTypes');
 
 const QuotaScheme = new Schema({
   amount: {type: Number, required: true},//amount of monitors available to this team set
-  sharedWith: [Schema.Types.ObjectId]//teams quota is shared with. If more than one team, means these teams share the quota
-
+  sharedWith: [Schema.Types.ObjectId],//teams quota is shared with. If more than one team, means these teams share the quota
+  name: String
 });
 //A monitor group is a like all monitors of a specific model, holds their unique id and info on how many there are.
 const MonitorGroupSchema = new Schema({

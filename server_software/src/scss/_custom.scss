@@ -100,3 +100,15 @@
     transform: rotate(360deg);
   }
 }
+
+//close button for monitor list items
+.close {
+  cursor: pointer;
+  position: absolute;
+  top: 10%;
+  right: -10px;
+  font-size: 1.3em;
+  padding: 12px 16px;
+  transform: translate(0%, -40%);
+  color: indianred;
+}

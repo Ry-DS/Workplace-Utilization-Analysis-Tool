@@ -9,6 +9,15 @@ const Team = require("../models/Team");
 
 const {routeBuffer} = require('../passport-config');//authenticate specific routes
 
+//auth list teams route
+router.use('/list', passport.authenticate('jwt', {session: false}));
+//list all teams and data registered within the program
+router.get("/list", (req, res) => {//TODO
+  Team.find({}, (err, teams) => {
+    res.send(teams);
+  });
+
+});
 
 
 //make everything a protected route. Only users with perms can perform operations here
@@ -42,13 +51,6 @@ router.post("/edit/create", (req, res) => {//begin registering from above method
 
 });
 
-//list all teams and data registered within the program
-router.get("/edit/list", (req, res) => {//TODO
-  Team.find({}, (err, teams) => {
-    res.send(teams);
-  });
-
-});
 
 router.post('/edit/delete', (req, res) => {
   const id = req.body.id;

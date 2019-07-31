@@ -38,7 +38,6 @@ router.post('/edit', (req, res) => {
 //list all teams and data registered within the program
 router.get("/edit/list", (req, res) => {
   const query = req.query;
-  console.log(query);
   if (!query.id)
     MonitorGroup.find({}, (err, teams) => {
       res.send(teams);
