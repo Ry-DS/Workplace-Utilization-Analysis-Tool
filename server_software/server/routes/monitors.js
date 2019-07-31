@@ -35,6 +35,19 @@ router.post('/edit', (req, res) => {
 
 
 });
+router.post('/edit/replace', (req, res) => {
+  const query = req.body;
+  try {
+    MonitorGroup.updateOne({_id: query._id}, {$set: query}).then(() => res.status(200).json({success: true}))
+      .catch(err => {
+        res.status(400).json(err);
+        console.error(err)
+      });
+  } catch (e) {
+    res.status(400).json(e);
+    console.error(e);
+  }
+});
 //list all teams and data registered within the program
 router.get("/edit/list", (req, res) => {
   const query = req.query;
@@ -50,4 +63,5 @@ router.get("/edit/list", (req, res) => {
   });
 
 });
+
 module.exports = router;

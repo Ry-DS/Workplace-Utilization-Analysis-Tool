@@ -38,27 +38,40 @@ class Monitor extends Component {
 
   componentDidMount() {//on component mount, we try fetch data from db
     this.setState({loading: true});//make the loading animation begin
+    let data;
     axios.get('/api/monitors/edit/list', {params: {id: this.props.match.params.id}}).then(data => {//try fetch user data
-      this.setState({data: data.data, loading: false});//update and stop loading animation
+      data = data.data;
     }).catch(err => {
       this.props.history.push('/404');//go back, invalid ID to show
     });
     axios('/api/teams/list').then(data => {//fetch teams.
-
+      let teamIndex = {};
+      data.data.forEach(team => teamIndex[team._id] = team.name);
       this.setState({
         teams: data.data.map(team => {
           return {label: team.name, value: team._id};
-        })
+        }),
+        teamIndex//helps find name of team from ID
       });
     });
+    //this.setState({data: data.data, loading: false});//update and stop loading animation
+    data.quota.forEach()
+
   }
 
   onChange = e => {
     this.setState({data: {...this.state.data, [e.target.id]: e.target.value}});//edit fields while also storing it in state
 
   };
-  update = (e) => {//TODO should update the monitor in the DB
+  update = (e) => {
     e.preventDefault();
+    this.setState({formLoading: true});
+    axios.post('/api/monitors/edit/replace', this.state.data).then(() => {
+      this.setState({formLoading: false});
+    }).catch(err => {
+      this.setState({formLoading: false});
+      this.componentDidMount()
+    });
   };
   render() {
     const buttonStyle = {//submit button style, with better colors to match theme
@@ -109,7 +122,7 @@ class Monitor extends Component {
                       <Label>Type</Label>
                       <Select
                         value={{label: this.state.data.type, value: this.state.data.type}}
-                        onChange={(selected) => this.onChange({target: {id: 'type', value: selected}})}
+                        onChange={(selected) => this.onChange({target: {id: 'type', value: selected.value}})}
                         options={options}
                         styles={customStyles}
                       />
@@ -123,7 +136,7 @@ class Monitor extends Component {
               <CardFooter>
                 <Button type="submit" onClick={this.update} style={buttonStyle}
                         disabled={this.state.formLoading || this.state.loading}>
-                  {this.state.formLoading ? <span className="lds-tiny-dual-ring"/> : 'Submit'}
+                  {this.state.formLoading ? <span className="lds-tiny-dual-ring"/> : 'Save'}
                 </Button>
               </CardFooter>
             </Card>
@@ -136,10 +149,16 @@ class Monitor extends Component {
               <CardBody>
                 {this.state.loading ? <LoadingAnimation/> :
 
-                  <ListGroup className="animated fadeIn">
-                    {this.state.data.quota && this.state.data.quota.length > 0 ? this.state.data.quota.map(floor => {
-                      return (<ListGroupItem key={0}>
-                        <span className="close"><i className="cui-circle-x"/></span>
+                  <ListGroup>
+                    {this.state.data.quota && this.state.data.quota.length > 0 ? this.state.data.quota.map((floor, index) => {
+                      return (<ListGroupItem key={index} className="animated fadeIn">
+                        <span className="close" onClick={(e) => {
+                          e.preventDefault();
+                          let quota = [...this.state.data.quota];
+                          quota.splice(quota.indexOf(floor), 1);
+                          this.setState({data: {...this.state.data, quota}});
+                        }
+                        }><i className="cui-circle-x"/></span>
                         <FormGroup>
                           <Label>Name</Label>
                           <Input
@@ -160,7 +179,7 @@ class Monitor extends Component {
                             styles={customStyles}
                             isMulti={true}
                             value={floor.sharedWith.map(team => {
-                              return {value: team, label: team}
+                              return {value: team, label: this.state.teamIndex[team]}
                             })}
                             onChange={(options) => {
                               floor.sharedWith = options ? options.map(v => v.value) : [];
@@ -174,9 +193,13 @@ class Monitor extends Component {
                           <Input
                             type="number"
                             name="amount"
-                            value={floor.amount}
+                            value={floor.amount ? floor.amount : ''}
                             onChange={(e) => {
-                              floor.amount = e.target.value;
+                              if (e.target.value < 0 || isNaN(e.target.value)) {
+                                e.preventDefault();
+                                return;
+                              }
+                              floor.amount = parseInt(e.target.value);
                               this.setState({...this.state})
                             }}
                           />
@@ -206,7 +229,7 @@ class Monitor extends Component {
                 </Button>
                 <Button type="submit" onClick={this.update} style={buttonStyle}
                         disabled={this.state.formLoading || this.state.loading}>
-                  {this.state.formLoading ? <span className="lds-tiny-dual-ring"/> : 'Submit'}
+                  {this.state.formLoading ? <span className="lds-tiny-dual-ring"/> : 'Save'}
                 </Button>
               </CardFooter>
             </Card>

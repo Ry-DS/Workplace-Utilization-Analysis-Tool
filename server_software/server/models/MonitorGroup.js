@@ -3,7 +3,7 @@ const Schema = mongoose.Schema;
 const MONITOR_TYPE = require('./../monitorTypes');
 
 const QuotaScheme = new Schema({
-  amount: {type: Number, required: true},//amount of monitors available to this team set
+  amount: {type: Number, required: true, default: 0},//amount of monitors available to this team set
   sharedWith: [Schema.Types.ObjectId],//teams quota is shared with. If more than one team, means these teams share the quota
   name: String
 });
