@@ -60,10 +60,6 @@ class Monitor extends Component {
   update = (e) => {//TODO should update the monitor in the DB
     e.preventDefault();
   };
-  handleChange = (selectedOptions) => {
-    this.setState({selectedOptions});
-  };
-
   render() {
     const buttonStyle = {//submit button style, with better colors to match theme
       backgroundColor: getStyle('--theme-light'),
@@ -126,7 +122,7 @@ class Monitor extends Component {
               </CardBody>
               <CardFooter>
                 <Button type="submit" onClick={this.update} style={buttonStyle}
-                        disabled={this.state.formLoading}>
+                        disabled={this.state.formLoading || this.state.loading}>
                   {this.state.formLoading ? <span className="lds-tiny-dual-ring"/> : 'Submit'}
                 </Button>
               </CardFooter>
@@ -141,33 +137,56 @@ class Monitor extends Component {
                 {this.state.loading ? <LoadingAnimation/> :
 
                   <ListGroup className="animated fadeIn">
-                    <ListGroupItem>
-                      <FormGroup>
-                        <Label>Teams</Label>
-                        <Select
-                          options={this.state.teams}
-                          styles={customStyles}
-                          isMulti={true}
-                          value={this.state.selectedOptions}
-                          onChange={this.handleChange}
-                        />
+                    {this.state.data.quota && this.state.data.quota.length > 0 ? this.state.data.quota.map(floor => {
+                      return (<ListGroupItem key={0}>
+                        <span className="close"><i className="cui-circle-x"/></span>
+                        <FormGroup>
+                          <Label>Name</Label>
+                          <Input
+                            type="text"
+                            name="name"
+                            value={floor.name}
+                            onChange={(e) => {
+                              floor.name = e.target.value;
+                              this.setState({...this.state})
+                            }}
+                          />
 
-                      </FormGroup>
-                    </ListGroupItem>
-                    <ListGroupItem>
-                      <span className="close"><i className="cui-circle-x"/></span>
-                      <FormGroup>
-                        <Label>Teams</Label>
-                        <Select
-                          options={this.state.teams}
-                          styles={customStyles}
-                          isMulti={true}
-                          value={this.state.selectedOptions}
-                          onChange={this.handleChange}
-                        />
+                        </FormGroup>
+                        <FormGroup>
+                          <Label>Teams</Label>
+                          <Select
+                            options={this.state.teams}
+                            styles={customStyles}
+                            isMulti={true}
+                            value={floor.sharedWith.map(team => {
+                              return {value: team, label: team}
+                            })}
+                            onChange={(options) => {
+                              floor.sharedWith = options ? options.map(v => v.value) : [];
+                              this.setState({...this.state})
+                            }}
+                          />
 
-                      </FormGroup>
-                    </ListGroupItem>
+                        </FormGroup>
+                        <FormGroup>
+                          <Label>Amount</Label>
+                          <Input
+                            type="number"
+                            name="amount"
+                            value={floor.amount}
+                            onChange={(e) => {
+                              floor.amount = e.target.value;
+                              this.setState({...this.state})
+                            }}
+                          />
+
+                        </FormGroup>
+
+                      </ListGroupItem>);
+                    }) : <div className="text-center text-muted">Add a floor to get started</div>}
+
+
                   </ListGroup>
 
 
@@ -175,12 +194,18 @@ class Monitor extends Component {
                 }
               </CardBody>
               <CardFooter>
-                <Button type="add" style={addButtonStyle} onClick={(e) => e.preventDefault()}
-                        disabled={this.state.formLoading}>
+                <Button type="add" style={addButtonStyle} onClick={(e) => {
+                  e.preventDefault();
+                  let quota = this.state.data.quota.slice(0);
+                  quota.push({name: "Floor " + (quota.length + 1), sharedWith: [], amount: 0});
+                  this.setState({data: {...this.state.data, quota}});
+
+                }}
+                        disabled={this.state.formLoading || this.state.loading}>
                   <i className="fa fa-plus"/> Add Floor
                 </Button>
                 <Button type="submit" onClick={this.update} style={buttonStyle}
-                        disabled={this.state.formLoading}>
+                        disabled={this.state.formLoading || this.state.loading}>
                   {this.state.formLoading ? <span className="lds-tiny-dual-ring"/> : 'Submit'}
                 </Button>
               </CardFooter>
