@@ -191,20 +191,21 @@ const cardChartOpts3 = {
   },
 };
 
-// Card Chart 4
-const cardChartData4 = {
-  labels: ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''],
+// Online Employees
+const employeesOnlineCardData = {
+  labels: ['12am', '1am', '2am', '3am', '4am', '5am', '6am', '7am', '8am', '9am', '10am', '11am', '12pm', '1pm',
+    '2pm', '3pm', '4pm', '5pm', '6pm', '7pm', '8pm', '9pm', '10pm', '11pm'],
   datasets: [
     {
-      label: 'My First dataset',
+      label: '# of Employees Online',
       backgroundColor: 'rgba(255,255,255,.3)',
       borderColor: 'transparent',
-      data: [78, 81, 80, 45, 34, 12, 40, 75, 34, 89, 32, 68, 54, 72, 18, 98],
+      data: Array(24).fill(0),
     },
   ],
 };
 
-const cardChartOpts4 = {
+const employeesOnlineCardOpts = {
   tooltips: {
     enabled: false,
     custom: CustomTooltips
@@ -360,8 +361,8 @@ const mainChartOpts = {
     mode: 'index',
     position: 'nearest',
     callbacks: {
-      labelColor: function(tooltipItem, chart) {
-        return { backgroundColor: chart.data.datasets[tooltipItem.datasetIndex].borderColor }
+      labelColor: function (tooltipItem, chart) {
+        return {backgroundColor: chart.data.datasets[tooltipItem.datasetIndex].borderColor}
       }
     }
   },
@@ -410,54 +411,12 @@ class Dashboard extends Component {
 
   extractStuffFromEmployee(employee) {
 
+
   }
+
   componentDidMount() {
     axios('/api/data/list').then(dat => {
-      let totalMonitors = {};
-      let monitors = dat.data.monitors;
-      let teams = dat.data.teams;
-      let teamIndex = {};
-      let monitorIndex = {};
-      //setup indexes
-      teams.forEach(team => teamIndex[team._id] = team);
-      let newMonitor = false;
-      monitors.forEach(monitor => {
-
-        monitorIndex[monitor._id] = monitor;
-        newMonitor = monitor.new;
-
-      });
-      if (newMonitor) {
-        toast.notify("A new Monitor has been discovered, make sure to review it!");
-      }
-
-      //calculate total monitors in building+assign total monitors accessible to each team.
-      for (let type in MONITOR_TYPE) {
-        monitors.forEach(monitor => {
-          if (monitor.type !== MONITOR_TYPE[type]) {
-            return;
-
-          }
-          monitor.quota.forEach(floor => {
-            if (typeof totalMonitors[MONITOR_TYPE[type]] === 'number')
-              totalMonitors[MONITOR_TYPE[type]] += floor.amount;
-            else totalMonitors[MONITOR_TYPE[type]] = floor.amount;
-            floor.sharedWith.forEach(id => {
-              let team = teamIndex[id];
-              if (!team.totalMonitors)
-                team.totalMonitors = {};
-              if (typeof team.totalMonitors[MONITOR_TYPE[type]] === 'number')
-                team.totalMonitors[MONITOR_TYPE[type]] += floor.amount;
-              else team.totalMonitors[MONITOR_TYPE[type]] = floor.amount;
-
-
-            });
-          });
-        });
-      }
-      this.setState({data: dat.data});
-
-      console.log(dat.data, totalMonitors);
+      this.processData(dat);
     })
   }
 
@@ -467,6 +426,148 @@ class Dashboard extends Component {
     });
   }
 
+  processData(dat) {
+    //total count of all monitors
+    let totalMonitors = {};
+    let monitors = dat.data.monitors;
+    let teams = dat.data.teams;
+    //quick lookup of teams and monitors based off ids
+    let teamIndex = {};
+    let monitorIndex = {};
+    //setup indexes
+    teams.forEach(team => teamIndex[team._id] = team);
+    let newMonitor = false;
+    monitors.forEach(monitor => {
+
+      monitorIndex[monitor._id] = monitor;
+      newMonitor = monitor.new;//also detect new monitors
+
+    });
+    if (newMonitor) {//and send alerting message if they exist
+      toast.notify("A new Monitor has been discovered, make sure to review it!");
+    }
+
+    //calculate total monitors in building+assign total monitors accessible to each team.
+    for (let type in MONITOR_TYPE) {
+      monitors.forEach(monitor => {
+        if (monitor.type !== MONITOR_TYPE[type]) {
+          return;
+
+        }
+        monitor.quota.forEach(floor => {
+          if (typeof totalMonitors[MONITOR_TYPE[type]] === 'number')
+            totalMonitors[MONITOR_TYPE[type]] += floor.amount;
+          else totalMonitors[MONITOR_TYPE[type]] = floor.amount;
+          floor.sharedWith.forEach(id => {
+            let team = teamIndex[id];
+            if (!team.totalMonitors)
+              team.totalMonitors = {};
+            if (typeof team.totalMonitors[MONITOR_TYPE[type]] === 'number')
+              team.totalMonitors[MONITOR_TYPE[type]] += floor.amount;
+            else team.totalMonitors[MONITOR_TYPE[type]] = floor.amount;
+
+
+          });
+        });
+      });
+    }
+    let date = new Date();
+    let dateString = `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
+
+    //today
+    let onlineToday = Array(24).fill(0);//key: hour of day, value: array of employees online at that time.
+    teams.forEach(team => {
+      team.employees.forEach(employee => {
+        employee.usageData.forEach(date => {
+          date.sessions = processSessions(date);
+          if (date._id === dateString) {
+            for (let i = 0; i < 24; i++) {
+              date.sessions.forEach(session => {
+
+                if (checkTime(i, 0, session.startTime, session.endTime)) {
+                  onlineToday[i]++;
+                }
+              })
+            }
+
+          }
+        })
+
+      })
+    });
+    employeesOnlineCardData.datasets[0].data = onlineToday;
+
+    function processSessions(date) {
+      let sessions = [];
+      date.events.forEach((event, index) => {
+        event.time = new Date(event.time);
+        if (event.type === 'LOG_IN') {
+          //find logout
+          let logoutPair = null;
+          let monitorsUsed = [];
+          let monitor = monitorIndex[event.monitorGroup_id];
+          if (monitor) {
+            monitorsUsed.push({startTime: event.time, monitor});
+          }
+          for (let i = index + 1; i < date.events.length; i++) {
+            if (i >= date.events.length)
+              break;
+            let other = date.events[i];
+            other.time = new Date(other.time);
+            if ((other.type === 'PLUG_IN' || other.type === 'LOG_OUT') && monitorsUsed.length !== 0) {//set time durations of monitor usages
+              monitorsUsed[monitorsUsed.length - 1].duration = other.time - monitorsUsed[monitorsUsed.length - 1].startTime;
+              monitorsUsed[monitorsUsed.length - 1].endTime = other.time;
+            }
+            if (other.type === 'PLUG_IN') {
+              let monitor = monitorIndex[other.monitorGroup_id];
+              if (monitor) {
+                monitorsUsed.push({startTime: other.time, monitor});
+              }
+            }
+            if (other.type === 'LOG_OUT') {
+              logoutPair = other;
+              break;
+            }
+          }
+          if (logoutPair != null)
+            sessions.push({
+              startTime: event.time,
+              endTime: logoutPair.time,
+              duration: logoutPair.time - event.time,
+              monitorsUsed
+            });
+
+
+        }
+      });
+      return sessions;
+    }
+
+    function checkTime(ch, cm, start, end) {
+      let h = ch, m = cm
+        , a = start.getHours(), b = start.getMinutes()
+        , c = end.getHours(), d = end.getMinutes();
+      if (a > c || ((a == c) && (b > d))) {
+        // not a valid input
+      } else {
+        if (h > a && h < c) {
+          return true;
+        } else if (h == a && m >= b) {
+          return true;
+        } else if (h == c && m <= d) {
+          return true;
+        } else {
+          return false;
+        }
+      }
+    }
+
+
+    this.setState({data: dat.data});
+
+
+    console.log(dat.data, totalMonitors);
+  }
 
   render() {
 
@@ -475,7 +576,7 @@ class Dashboard extends Component {
         <Row>
           <Col xs="12" sm="6" lg="3">
             <DashboardCard className="text-white card-1-bg" title="Total Hours on Laptop">
-              <div className="chart-wrapper mx-3" style={{ height: '70px' }}>
+              <div className="chart-wrapper mx-3" style={{height: '70px'}}>
                 <Line data={cardChartData1} options={cardChartOpts1} height={70}/>
               </div>
 
@@ -485,7 +586,7 @@ class Dashboard extends Component {
           <Col xs="12" sm="6" lg="3">
             <DashboardCard className="text-white card-2-bg" title="Total Hours on Desk Monitor">
 
-              <div className="chart-wrapper mx-3" style={{ height: '70px' }}>
+              <div className="chart-wrapper mx-3" style={{height: '70px'}}>
                 <Line data={cardChartData2} options={cardChartOpts2} height={70}/>
               </div>
             </DashboardCard>
@@ -494,16 +595,17 @@ class Dashboard extends Component {
 
           <Col xs="12" sm="6" lg="3">
             <DashboardCard className="text-white card-3-bg" title="Total Hours on Projector">
-              <div className="chart-wrapper" style={{ height: '70px' }}>
-                <Line data={cardChartData3} options={cardChartOpts3} height={70} />
+              <div className="chart-wrapper" style={{height: '70px'}}>
+                <Line data={cardChartData3} options={cardChartOpts3} height={70}/>
               </div>
             </DashboardCard>
           </Col>
 
           <Col xs="12" sm="6" lg="3">
-            <DashboardCard className="text-white card-4-bg" title="Average Employees" request="employees/online">
-              <div className="chart-wrapper mx-3" style={{ height: '70px' }}>
-                <Bar data={cardChartData4} options={cardChartOpts4} height={70} />
+            <DashboardCard className="text-white card-4-bg" title="Employees Currently Online"
+                           request="employees/online">
+              <div className="chart-wrapper mx-3" style={{height: '70px'}}>
+                <Bar data={employeesOnlineCardData} options={employeesOnlineCardOpts} height={70}/>
               </div>
             </DashboardCard>
           </Col>
@@ -521,15 +623,18 @@ class Dashboard extends Component {
                     <Button color="primary" className="float-right"><i className="icon-cloud-download"></i></Button>
                     <ButtonToolbar className="float-right" aria-label="Toolbar with button groups">
                       <ButtonGroup className="mr-3" aria-label="First group">
-                        <Button color="outline-secondary" onClick={() => this.onRadioBtnClick(1)} active={this.state.radioSelected === 1}>Day</Button>
-                        <Button color="outline-secondary" onClick={() => this.onRadioBtnClick(2)} active={this.state.radioSelected === 2}>Month</Button>
-                        <Button color="outline-secondary" onClick={() => this.onRadioBtnClick(3)} active={this.state.radioSelected === 3}>Year</Button>
+                        <Button color="outline-secondary" onClick={() => this.onRadioBtnClick(1)}
+                                active={this.state.radioSelected === 1}>Day</Button>
+                        <Button color="outline-secondary" onClick={() => this.onRadioBtnClick(2)}
+                                active={this.state.radioSelected === 2}>Month</Button>
+                        <Button color="outline-secondary" onClick={() => this.onRadioBtnClick(3)}
+                                active={this.state.radioSelected === 3}>Year</Button>
                       </ButtonGroup>
                     </ButtonToolbar>
                   </Col>
                 </Row>
-                <div className="chart-wrapper" style={{ height: 300 + 'px', marginTop: 40 + 'px' }}>
-                  <Line data={mainChart} options={mainChartOpts} height={300} />
+                <div className="chart-wrapper" style={{height: 300 + 'px', marginTop: 40 + 'px'}}>
+                  <Line data={mainChart} options={mainChartOpts} height={300}/>
                 </div>
               </CardBody>
               <CardFooter>
@@ -537,27 +642,27 @@ class Dashboard extends Component {
                   <Col sm={12} md className="mb-sm-2 mb-0">
                     <div className="text-muted">Visits</div>
                     <strong>29.703 Users (40%)</strong>
-                    <Progress className="progress-xs mt-2" color="success" value="40" />
+                    <Progress className="progress-xs mt-2" color="success" value="40"/>
                   </Col>
                   <Col sm={12} md className="mb-sm-2 mb-0 d-md-down-none">
                     <div className="text-muted">Unique</div>
                     <strong>24.093 Users (20%)</strong>
-                    <Progress className="progress-xs mt-2" color="info" value="20" />
+                    <Progress className="progress-xs mt-2" color="info" value="20"/>
                   </Col>
                   <Col sm={12} md className="mb-sm-2 mb-0">
                     <div className="text-muted">Pageviews</div>
                     <strong>78.706 Views (60%)</strong>
-                    <Progress className="progress-xs mt-2" color="warning" value="60" />
+                    <Progress className="progress-xs mt-2" color="warning" value="60"/>
                   </Col>
                   <Col sm={12} md className="mb-sm-2 mb-0">
                     <div className="text-muted">New Users</div>
                     <strong>22.123 Users (80%)</strong>
-                    <Progress className="progress-xs mt-2" color="danger" value="80" />
+                    <Progress className="progress-xs mt-2" color="danger" value="80"/>
                   </Col>
                   <Col sm={12} md className="mb-sm-2 mb-0 d-md-down-none">
                     <div className="text-muted">Bounce Rate</div>
                     <strong>Average Rate (40.15%)</strong>
-                    <Progress className="progress-xs mt-2" color="primary" value="40" />
+                    <Progress className="progress-xs mt-2" color="primary" value="40"/>
                   </Col>
                 </Row>
               </CardFooter>
@@ -565,7 +670,7 @@ class Dashboard extends Component {
           </Col>
         </Row>
 
-        
+
         <Row>
           <Col>
             <Card>
@@ -579,7 +684,7 @@ class Dashboard extends Component {
                       <Col sm="6">
                         <div className="callout callout-info">
                           <small className="text-muted">New Clients</small>
-                          <br />
+                          <br/>
                           <strong className="h4">9,123</strong>
                           <div className="chart-wrapper">
                             <Line data={makeSparkLineData(0, brandDark)} options={sparklineChartOpts} width={100}
@@ -590,7 +695,7 @@ class Dashboard extends Component {
                       <Col sm="6">
                         <div className="callout callout-danger">
                           <small className="text-muted">Recurring Clients</small>
-                          <br />
+                          <br/>
                           <strong className="h4">22,643</strong>
                           <div className="chart-wrapper">
                             <Line data={makeSparkLineData(1, brandNorm)} options={sparklineChartOpts} width={100}
@@ -599,7 +704,7 @@ class Dashboard extends Component {
                         </div>
                       </Col>
                     </Row>
-                    <hr className="mt-0" />
+                    <hr className="mt-0"/>
                     <div className="progress-group mb-4">
                       <div className="progress-group-prepend">
                         <span className="progress-group-text">
@@ -607,8 +712,8 @@ class Dashboard extends Component {
                         </span>
                       </div>
                       <div className="progress-group-bars">
-                        <Progress className="progress-xs" color="info" value="34" />
-                        <Progress className="progress-xs" color="danger" value="78" />
+                        <Progress className="progress-xs" color="info" value="34"/>
+                        <Progress className="progress-xs" color="danger" value="78"/>
                       </div>
                     </div>
                     <div className="progress-group mb-4">
@@ -618,8 +723,8 @@ class Dashboard extends Component {
                         </span>
                       </div>
                       <div className="progress-group-bars">
-                        <Progress className="progress-xs" color="info" value="56" />
-                        <Progress className="progress-xs" color="danger" value="94" />
+                        <Progress className="progress-xs" color="info" value="56"/>
+                        <Progress className="progress-xs" color="danger" value="94"/>
                       </div>
                     </div>
                     <div className="progress-group mb-4">
@@ -629,8 +734,8 @@ class Dashboard extends Component {
                         </span>
                       </div>
                       <div className="progress-group-bars">
-                        <Progress className="progress-xs" color="info" value="12" />
-                        <Progress className="progress-xs" color="danger" value="67" />
+                        <Progress className="progress-xs" color="info" value="12"/>
+                        <Progress className="progress-xs" color="danger" value="67"/>
                       </div>
                     </div>
                     <div className="progress-group mb-4">
@@ -640,8 +745,8 @@ class Dashboard extends Component {
                         </span>
                       </div>
                       <div className="progress-group-bars">
-                        <Progress className="progress-xs" color="info" value="43" />
-                        <Progress className="progress-xs" color="danger" value="91" />
+                        <Progress className="progress-xs" color="info" value="43"/>
+                        <Progress className="progress-xs" color="danger" value="91"/>
                       </div>
                     </div>
                     <div className="progress-group mb-4">
@@ -651,8 +756,8 @@ class Dashboard extends Component {
                         </span>
                       </div>
                       <div className="progress-group-bars">
-                        <Progress className="progress-xs" color="info" value="22" />
-                        <Progress className="progress-xs" color="danger" value="73" />
+                        <Progress className="progress-xs" color="info" value="22"/>
+                        <Progress className="progress-xs" color="danger" value="73"/>
                       </div>
                     </div>
                     <div className="progress-group mb-4">
@@ -662,8 +767,8 @@ class Dashboard extends Component {
                         </span>
                       </div>
                       <div className="progress-group-bars">
-                        <Progress className="progress-xs" color="info" value="53" />
-                        <Progress className="progress-xs" color="danger" value="82" />
+                        <Progress className="progress-xs" color="info" value="53"/>
+                        <Progress className="progress-xs" color="danger" value="82"/>
                       </div>
                     </div>
                     <div className="progress-group mb-4">
@@ -673,8 +778,8 @@ class Dashboard extends Component {
                         </span>
                       </div>
                       <div className="progress-group-bars">
-                        <Progress className="progress-xs" color="info" value="9" />
-                        <Progress className="progress-xs" color="danger" value="69" />
+                        <Progress className="progress-xs" color="info" value="9"/>
+                        <Progress className="progress-xs" color="danger" value="69"/>
                       </div>
                     </div>
                     <div className="legend text-center">
@@ -692,7 +797,7 @@ class Dashboard extends Component {
                       <Col sm="6">
                         <div className="callout callout-warning">
                           <small className="text-muted">Pageviews</small>
-                          <br />
+                          <br/>
                           <strong className="h4">78,623</strong>
                           <div className="chart-wrapper">
                             <Line data={makeSparkLineData(2, brandBland)} options={sparklineChartOpts} width={100}
@@ -703,7 +808,7 @@ class Dashboard extends Component {
                       <Col sm="6">
                         <div className="callout callout-success">
                           <small className="text-muted">Organic</small>
-                          <br />
+                          <br/>
                           <strong className="h4">49,123</strong>
                           <div className="chart-wrapper">
                             <Line data={makeSparkLineData(3, brandLight)} options={sparklineChartOpts} width={100}
@@ -712,7 +817,7 @@ class Dashboard extends Component {
                         </div>
                       </Col>
                     </Row>
-                    <hr className="mt-0" />
+                    <hr className="mt-0"/>
                     <ul>
                       <div className="progress-group">
                         <div className="progress-group-header">
@@ -721,7 +826,7 @@ class Dashboard extends Component {
                           <span className="ml-auto font-weight-bold">43%</span>
                         </div>
                         <div className="progress-group-bars">
-                          <Progress className="progress-xs" color="warning" value="43" />
+                          <Progress className="progress-xs" color="warning" value="43"/>
                         </div>
                       </div>
                       <div className="progress-group mb-5">
@@ -731,54 +836,58 @@ class Dashboard extends Component {
                           <span className="ml-auto font-weight-bold">37%</span>
                         </div>
                         <div className="progress-group-bars">
-                          <Progress className="progress-xs" color="warning" value="37" />
+                          <Progress className="progress-xs" color="warning" value="37"/>
                         </div>
                       </div>
                       <div className="progress-group">
                         <div className="progress-group-header">
                           <i className="icon-globe progress-group-icon"></i>
                           <span className="title">Organic Search</span>
-                          <span className="ml-auto font-weight-bold">191,235 <span className="text-muted small">(56%)</span></span>
+                          <span className="ml-auto font-weight-bold">191,235 <span
+                            className="text-muted small">(56%)</span></span>
                         </div>
                         <div className="progress-group-bars">
-                          <Progress className="progress-xs" color="success" value="56" />
+                          <Progress className="progress-xs" color="success" value="56"/>
                         </div>
                       </div>
                       <div className="progress-group">
                         <div className="progress-group-header">
                           <i className="icon-social-facebook progress-group-icon"></i>
                           <span className="title">Facebook</span>
-                          <span className="ml-auto font-weight-bold">51,223 <span className="text-muted small">(15%)</span></span>
+                          <span className="ml-auto font-weight-bold">51,223 <span
+                            className="text-muted small">(15%)</span></span>
                         </div>
                         <div className="progress-group-bars">
-                          <Progress className="progress-xs" color="success" value="15" />
+                          <Progress className="progress-xs" color="success" value="15"/>
                         </div>
                       </div>
                       <div className="progress-group">
                         <div className="progress-group-header">
                           <i className="icon-social-twitter progress-group-icon"></i>
                           <span className="title">Twitter</span>
-                          <span className="ml-auto font-weight-bold">37,564 <span className="text-muted small">(11%)</span></span>
+                          <span className="ml-auto font-weight-bold">37,564 <span
+                            className="text-muted small">(11%)</span></span>
                         </div>
                         <div className="progress-group-bars">
-                          <Progress className="progress-xs" color="success" value="11" />
+                          <Progress className="progress-xs" color="success" value="11"/>
                         </div>
                       </div>
                       <div className="progress-group">
                         <div className="progress-group-header">
                           <i className="icon-social-linkedin progress-group-icon"></i>
                           <span className="title">LinkedIn</span>
-                          <span className="ml-auto font-weight-bold">27,319 <span className="text-muted small">(8%)</span></span>
+                          <span className="ml-auto font-weight-bold">27,319 <span
+                            className="text-muted small">(8%)</span></span>
                         </div>
                         <div className="progress-group-bars">
-                          <Progress className="progress-xs" color="success" value="8" />
+                          <Progress className="progress-xs" color="success" value="8"/>
                         </div>
                       </div>
 
                     </ul>
                   </Col>
                 </Row>
-                <br />
+                <br/>
                 <Table hover responsive className="table-outline mb-0 d-none d-sm-table">
                   <thead className="thead-light">
                   <tr>
@@ -794,7 +903,7 @@ class Dashboard extends Component {
                   <tr>
                     <td className="text-center">
                       <div className="avatar">
-                        <img src={'assets/img/avatars/1.jpg'} className="img-avatar" alt="admin@bootstrapmaster.com" />
+                        <img src={'assets/img/avatars/1.jpg'} className="img-avatar" alt="admin@bootstrapmaster.com"/>
                         <span className="avatar-status badge-success"></span>
                       </div>
                     </td>
@@ -816,10 +925,10 @@ class Dashboard extends Component {
                           <small className="text-muted">Jun 11, 2015 - Jul 10, 2015</small>
                         </div>
                       </div>
-                      <Progress className="progress-xs" color="success" value="50" />
+                      <Progress className="progress-xs" color="success" value="50"/>
                     </td>
                     <td className="text-center">
-                      <i className="fa fa-cc-mastercard" style={{ fontSize: 24 + 'px' }}></i>
+                      <i className="fa fa-cc-mastercard" style={{fontSize: 24 + 'px'}}></i>
                     </td>
                     <td>
                       <div className="small text-muted">Last login</div>
@@ -829,7 +938,7 @@ class Dashboard extends Component {
                   <tr>
                     <td className="text-center">
                       <div className="avatar">
-                        <img src={'assets/img/avatars/2.jpg'} className="img-avatar" alt="admin@bootstrapmaster.com" />
+                        <img src={'assets/img/avatars/2.jpg'} className="img-avatar" alt="admin@bootstrapmaster.com"/>
                         <span className="avatar-status badge-danger"></span>
                       </div>
                     </td>
@@ -852,10 +961,10 @@ class Dashboard extends Component {
                           <small className="text-muted">Jun 11, 2015 - Jul 10, 2015</small>
                         </div>
                       </div>
-                      <Progress className="progress-xs" color="info" value="10" />
+                      <Progress className="progress-xs" color="info" value="10"/>
                     </td>
                     <td className="text-center">
-                      <i className="fa fa-cc-visa" style={{ fontSize: 24 + 'px' }}></i>
+                      <i className="fa fa-cc-visa" style={{fontSize: 24 + 'px'}}></i>
                     </td>
                     <td>
                       <div className="small text-muted">Last login</div>
@@ -865,7 +974,7 @@ class Dashboard extends Component {
                   <tr>
                     <td className="text-center">
                       <div className="avatar">
-                        <img src={'assets/img/avatars/3.jpg'} className="img-avatar" alt="admin@bootstrapmaster.com" />
+                        <img src={'assets/img/avatars/3.jpg'} className="img-avatar" alt="admin@bootstrapmaster.com"/>
                         <span className="avatar-status badge-warning"></span>
                       </div>
                     </td>
@@ -887,10 +996,10 @@ class Dashboard extends Component {
                           <small className="text-muted">Jun 11, 2015 - Jul 10, 2015</small>
                         </div>
                       </div>
-                      <Progress className="progress-xs" color="warning" value="74" />
+                      <Progress className="progress-xs" color="warning" value="74"/>
                     </td>
                     <td className="text-center">
-                      <i className="fa fa-cc-stripe" style={{ fontSize: 24 + 'px' }}></i>
+                      <i className="fa fa-cc-stripe" style={{fontSize: 24 + 'px'}}></i>
                     </td>
                     <td>
                       <div className="small text-muted">Last login</div>
@@ -900,7 +1009,7 @@ class Dashboard extends Component {
                   <tr>
                     <td className="text-center">
                       <div className="avatar">
-                        <img src={'assets/img/avatars/4.jpg'} className="img-avatar" alt="admin@bootstrapmaster.com" />
+                        <img src={'assets/img/avatars/4.jpg'} className="img-avatar" alt="admin@bootstrapmaster.com"/>
                         <span className="avatar-status badge-secondary"></span>
                       </div>
                     </td>
@@ -922,10 +1031,10 @@ class Dashboard extends Component {
                           <small className="text-muted">Jun 11, 2015 - Jul 10, 2015</small>
                         </div>
                       </div>
-                      <Progress className="progress-xs" color="danger" value="98" />
+                      <Progress className="progress-xs" color="danger" value="98"/>
                     </td>
                     <td className="text-center">
-                      <i className="fa fa-paypal" style={{ fontSize: 24 + 'px' }}></i>
+                      <i className="fa fa-paypal" style={{fontSize: 24 + 'px'}}></i>
                     </td>
                     <td>
                       <div className="small text-muted">Last login</div>
@@ -935,7 +1044,7 @@ class Dashboard extends Component {
                   <tr>
                     <td className="text-center">
                       <div className="avatar">
-                        <img src={'assets/img/avatars/5.jpg'} className="img-avatar" alt="admin@bootstrapmaster.com" />
+                        <img src={'assets/img/avatars/5.jpg'} className="img-avatar" alt="admin@bootstrapmaster.com"/>
                         <span className="avatar-status badge-success"></span>
                       </div>
                     </td>
@@ -957,10 +1066,10 @@ class Dashboard extends Component {
                           <small className="text-muted">Jun 11, 2015 - Jul 10, 2015</small>
                         </div>
                       </div>
-                      <Progress className="progress-xs" color="info" value="22" />
+                      <Progress className="progress-xs" color="info" value="22"/>
                     </td>
                     <td className="text-center">
-                      <i className="fa fa-google-wallet" style={{ fontSize: 24 + 'px' }}></i>
+                      <i className="fa fa-google-wallet" style={{fontSize: 24 + 'px'}}></i>
                     </td>
                     <td>
                       <div className="small text-muted">Last login</div>
@@ -970,7 +1079,7 @@ class Dashboard extends Component {
                   <tr>
                     <td className="text-center">
                       <div className="avatar">
-                        <img src={'assets/img/avatars/6.jpg'} className="img-avatar" alt="admin@bootstrapmaster.com" />
+                        <img src={'assets/img/avatars/6.jpg'} className="img-avatar" alt="admin@bootstrapmaster.com"/>
                         <span className="avatar-status badge-danger"></span>
                       </div>
                     </td>
@@ -992,10 +1101,10 @@ class Dashboard extends Component {
                           <small className="text-muted">Jun 11, 2015 - Jul 10, 2015</small>
                         </div>
                       </div>
-                      <Progress className="progress-xs" color="success" value="43" />
+                      <Progress className="progress-xs" color="success" value="43"/>
                     </td>
                     <td className="text-center">
-                      <i className="fa fa-cc-amex" style={{ fontSize: 24 + 'px' }}></i>
+                      <i className="fa fa-cc-amex" style={{fontSize: 24 + 'px'}}></i>
                     </td>
                     <td>
                       <div className="small text-muted">Last login</div>
