@@ -21,6 +21,8 @@ import DashboardCard from "./DashboardCard";
 //data stuff
 import axios from 'axios';
 import MONITOR_TYPE from '../../utils/monitorTypes';
+import toast from 'toasted-notes'
+import 'toasted-notes/src/styles.css';
 
 
 //fetch color themes from css
@@ -406,6 +408,9 @@ class Dashboard extends Component {
     };
   }
 
+  extractStuffFromEmployee(employee) {
+
+  }
   componentDidMount() {
     axios('/api/data/list').then(dat => {
       let totalMonitors = {};
@@ -415,7 +420,17 @@ class Dashboard extends Component {
       let monitorIndex = {};
       //setup indexes
       teams.forEach(team => teamIndex[team._id] = team);
-      monitors.forEach(monitor => monitorIndex[monitor._id] = monitor);
+      let newMonitor = false;
+      monitors.forEach(monitor => {
+
+        monitorIndex[monitor._id] = monitor;
+        newMonitor = monitor.new;
+
+      });
+      if (newMonitor) {
+        toast.notify("A new Monitor has been discovered, make sure to review it!");
+      }
+
       //calculate total monitors in building+assign total monitors accessible to each team.
       for (let type in MONITOR_TYPE) {
         monitors.forEach(monitor => {

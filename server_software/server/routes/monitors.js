@@ -28,7 +28,8 @@ router.post('/edit', (req, res) => {
   const query = req.body;
   MonitorGroup.updateOne({_id: query.id}, {
     $set: {
-      [query.type]: query.value
+      [query.type]: query.value,
+      new: false
 
     }
   }).then(() => res.status(200).json({success: true})).catch(err => res.status(400).json(err));
@@ -37,6 +38,7 @@ router.post('/edit', (req, res) => {
 });
 router.post('/edit/replace', (req, res) => {
   const query = req.body;
+  query.new = false;
   try {
     MonitorGroup.updateOne({_id: query._id}, {$set: query}).then(() => res.status(200).json({success: true}))
       .catch(err => {

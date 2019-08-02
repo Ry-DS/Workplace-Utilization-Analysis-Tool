@@ -17,7 +17,11 @@ const editButtons = function () { //plain text value, so we cant use react jsx. 
 };
 const columns = (container) => {
   return [
-    {title: "Name", field: "friendlyName", editor: true},
+    {
+      title: "Name", field: "friendlyName", editor: 'input', formatter: (cell) => {
+        return cell.getValue() + (cell.getRow().getData().new ? " <span class='mr-1 badge badge-info'>NEW</span>" : "");
+      }
+    },
     {title: "Type", field: "type", editor: "select", align: "center", editorParams: {values: monitorTypeDropdown}},
     {title: "Created on", field: "creationDate", align: "center"},
     {title: "Model", field: "name", align: "center"},

@@ -37,7 +37,7 @@ module.exports = class EmployeeServer {
         let params = data.split(':');
         if (data === 'PING')//stupid thing we need to do cause c# needs a ping message to verify connection health
         {
-          if (socket.active && !checkTime(socket.startTime, socket.endTime)) {//we can disconnect them once the time passes
+          if (socket.active && socket.startTime && socket.endTime && !checkTime(socket.startTime, socket.endTime)) {//we can disconnect them once the time passes
             socket.destroy();
             if (socket.employeeId)
               closeEvent(socket.employeeId);

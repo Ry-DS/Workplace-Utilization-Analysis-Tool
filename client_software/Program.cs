@@ -87,7 +87,7 @@ namespace WUAT {
                 }
               
 
-                if (IdleTimeFinder.GetIdleTime() > 5000&&_loggedIn)
+                if (IdleTimeFinder.GetIdleTime() >Resources.inactivity_delay_ms &&_loggedIn)
                 {
                     Console.WriteLine("Inactivity detected, logging off");
                     _loggedIn = false;
