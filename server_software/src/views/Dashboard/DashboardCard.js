@@ -13,7 +13,6 @@ class DashboardCard extends Component {
     this.active = true;
 
   }
-
   componentDidMount() {//run on component init
     if (this.props.request != null) {//if the card actually has a request to check from
       let doFetch = () =>
@@ -36,9 +35,14 @@ class DashboardCard extends Component {
   }
 
   render() {
+    let content = this.props.content;
+    if (isNaN(content) && content !== undefined) {
+      content = 'None';
+    }
     return <Card className={this.props.className}>{/*Card design, pass css styles from parent for background colors*/}
       <CardBody className="pb-0">
-        <div className="text-value fadeIn">{this.state.value}</div>
+        <div
+          className="text-value animated fadeIn">{content !== undefined && content !== null ? content : this.state.value}</div>
         {/*We set the value and title based on what is given from the constructor and server*/}
         <div>{this.props.title}</div>
       </CardBody>

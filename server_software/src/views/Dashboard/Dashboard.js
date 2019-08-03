@@ -13,7 +13,6 @@ import {
   Col,
   Progress,
   Row,
-  Table,
 } from 'reactstrap';
 import {CustomTooltips} from '@coreui/coreui-plugin-chartjs-custom-tooltips';
 import {getStyle, hexToRgba} from '@coreui/coreui/dist/js/coreui-utilities'
@@ -30,137 +29,11 @@ const brandDark = getStyle('--theme-dark');
 const brandLight = getStyle('--theme-light');
 const brandNorm = getStyle('--theme-norm');
 const brandBland = getStyle('--theme-bland');
-
-// Card Chart 1
-const cardChartData1 = {
-  labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
-  datasets: [
-    {
-      label: 'My First dataset',
-      backgroundColor: brandDark,
-      borderColor: 'rgba(255,255,255,.55)',
-      data: [65, 59, 84, 84, 51, 55, 40],
-    },
-  ],
-};
-
-const cardChartOpts1 = {
-  tooltips: {
-    enabled: false,
-    custom: CustomTooltips
-  },
-  maintainAspectRatio: false,
-  legend: {
-    display: false,
-  },
-  scales: {
-    xAxes: [
-      {
-        gridLines: {
-          color: 'transparent',
-          zeroLineColor: 'transparent',
-        },
-        ticks: {
-          fontSize: 2,
-          fontColor: 'transparent',
-        },
-
-      }],
-    yAxes: [
-      {
-        display: false,
-        ticks: {
-          display: false,
-          min: Math.min.apply(Math, cardChartData1.datasets[0].data) - 5,
-          max: Math.max.apply(Math, cardChartData1.datasets[0].data) + 5,
-        },
-      }],
-  },
-  elements: {
-    line: {
-      borderWidth: 1,
-    },
-    point: {
-      radius: 4,
-      hitRadius: 10,
-      hoverRadius: 4,
-    },
-  }
-};
+const times = ['12am', '1am', '2am', '3am', '4am', '5am', '6am', '7am', '8am', '9am', '10am', '11am', '12pm', '1pm',
+  '2pm', '3pm', '4pm', '5pm', '6pm', '7pm', '8pm', '9pm', '10pm', '11pm'];
 
 
-// Card Chart 2
-const cardChartData2 = {
-  labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
-  datasets: [
-    {
-      label: 'My First dataset',
-      backgroundColor: brandLight,
-      borderColor: 'rgba(255,255,255,.55)',
-      data: [1, 18, 9, 17, 34, 22, 11],
-    },
-  ],
-};
-
-const cardChartOpts2 = {
-  tooltips: {
-    enabled: false,
-    custom: CustomTooltips
-  },
-  maintainAspectRatio: false,
-  legend: {
-    display: false,
-  },
-  scales: {
-    xAxes: [
-      {
-        gridLines: {
-          color: 'transparent',
-          zeroLineColor: 'transparent',
-        },
-        ticks: {
-          fontSize: 2,
-          fontColor: 'transparent',
-        },
-
-      }],
-    yAxes: [
-      {
-        display: false,
-        ticks: {
-          display: false,
-          min: Math.min.apply(Math, cardChartData2.datasets[0].data) - 5,
-          max: Math.max.apply(Math, cardChartData2.datasets[0].data) + 5,
-        },
-      }],
-  },
-  elements: {
-    line: {
-      tension: 0.00001,
-      borderWidth: 1,
-    },
-    point: {
-      radius: 4,
-      hitRadius: 10,
-      hoverRadius: 4,
-    },
-  },
-};
-
-// Card Chart 3
-const cardChartData3 = {
-  labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
-  datasets: [
-    {
-      label: 'My First dataset',
-      backgroundColor: 'rgba(255,255,255,.2)',
-      borderColor: 'rgba(255,255,255,.55)',
-      data: [78, 81, 80, 45, 34, 12, 40],
-    },
-  ],
-};
-
-const cardChartOpts3 = {
+const freeProjectorsCardOpts = {
   tooltips: {
     enabled: false,
     custom: CustomTooltips
@@ -190,21 +63,8 @@ const cardChartOpts3 = {
     },
   },
 };
-
-// Online Employees
-const employeesOnlineCardData = {
-  labels: ['12am', '1am', '2am', '3am', '4am', '5am', '6am', '7am', '8am', '9am', '10am', '11am', '12pm', '1pm',
-    '2pm', '3pm', '4pm', '5pm', '6pm', '7pm', '8pm', '9pm', '10pm', '11pm'],
-  datasets: [
-    {
-      label: '# of Employees Online',
-      backgroundColor: 'rgba(255,255,255,.3)',
-      borderColor: 'transparent',
-      data: Array(24).fill(0),
-    },
-  ],
-};
-
+const freeLaptopCardOpts = {...freeProjectorsCardOpts};
+const freeDeskMonitorsCardOpts = {...freeProjectorsCardOpts};
 const employeesOnlineCardOpts = {
   tooltips: {
     enabled: false,
@@ -405,13 +265,54 @@ class Dashboard extends Component {
 
     this.state = {
       dropdownOpen: false,
-      radioSelected: 2
+      radioSelected: 2,
+      employeesOnlineCardData: {
+        labels: times,
+        datasets: [
+          {
+            label: '# of Employees Online',
+            backgroundColor: 'rgba(255,255,255,.3)',
+            borderColor: 'transparent',
+            data: Array(24).fill(0),
+          },
+        ],
+      },
+      freeLaptopCardData: {
+        labels: times,
+        datasets: [
+          {
+            label: '% of Laptops Being Used',
+            backgroundColor: 'rgba(255,255,255,.2)',
+            borderColor: 'rgba(255,255,255,.55)',
+            data: Array(24).fill(0),
+          },
+        ],
+      },
+      freeDeskMonitorsCardData: {
+        labels: times,
+        datasets: [
+          {
+            label: '% of Desk Monitors Being Used',
+            backgroundColor: 'rgba(255,255,255,.2)',
+            borderColor: 'rgba(255,255,255,.55)',
+            data: Array(24).fill(0),
+          },
+        ],
+      },
+      freeProjectorsCardData: {
+        labels: times,
+        datasets: [
+          {
+            label: '% of Projectors Being Used',
+            backgroundColor: 'rgba(255,255,255,.2)',
+            borderColor: 'rgba(255,255,255,.55)',
+            data: Array(24).fill(0),
+          },
+        ],
+      },
+
+
     };
-  }
-
-  extractStuffFromEmployee(employee) {
-
-
   }
 
   componentDidMount() {
@@ -427,6 +328,7 @@ class Dashboard extends Component {
   }
 
   processData(dat) {
+    console.time('processData');
     //total count of all monitors
     let totalMonitors = {};
     let monitors = dat.data.monitors;
@@ -478,9 +380,9 @@ class Dashboard extends Component {
     //employees online at a specific hour
     let onlineToday = Array(24).fill(0);//key: hour of day, value: array of employees online at that time.
     //monitors free at a specific hour for each type
-    let monitorsFree = {};
+    let monitorsUsed = {};
     for (let type in MONITOR_TYPE) {//populate with the current amount of monitors per type.
-      monitorsFree[MONITOR_TYPE[type]] = Array(24).fill(totalMonitors[MONITOR_TYPE[type]] ? totalMonitors[MONITOR_TYPE[type]] : 0);
+      monitorsUsed[MONITOR_TYPE[type]] = new Array(date.getHours() + 1).fill(0);
     }
     teams.forEach(team => {
       team.employees.forEach(employee => {
@@ -497,12 +399,14 @@ class Dashboard extends Component {
 
                 }
               }
-              let monitorTypesChecked = [];//make sure we don't recount a specific type.
+              let monitorsChecked = [];//make sure we don't recount a specific type.
               for (let session of date.sessions) {
                 for (let monitorSession of session.monitorsUsed) {
-                  if (checkTime(i, 0, monitorSession.startTime, monitorSession.endTime) && monitorTypesChecked.indexOf(monitorSession.monitor) === -1) {
-                    monitorsFree[monitorSession.monitor.type][i]--;
-                    monitorTypesChecked.push(monitorSession.monitor);
+                  if (checkTime(i, 0, monitorSession.startTime, monitorSession.endTime) && monitorsChecked.indexOf(monitorSession.monitor.type) === -1) {
+
+                    monitorsUsed[monitorSession.monitor.type][i] += 1;
+                    monitorsChecked.push(monitorSession.monitor.type);
+
 
                   }
                 }
@@ -515,8 +419,25 @@ class Dashboard extends Component {
 
       })
     });
+    //convert monitors used to percentages
+    let monitorsUsedPercentages = JSON.parse(JSON.stringify(monitorsUsed));
+    for (let type in monitorsUsedPercentages) {
+      if (!monitorsUsedPercentages.hasOwnProperty(type))
+        continue;
+      for (let i = 0; i < monitorsUsedPercentages[type].length; i++) {
+        monitorsUsedPercentages[type][i] = (monitorsUsedPercentages[type][i] / totalMonitors[type] * 100).toFixed(1);
+      }
+
+    }
+    //set chart data
+    let employeesOnlineCardData = {...this.state.employeesOnlineCardData},
+      freeLaptopCardData = {...this.state.freeLaptopCardData},
+      freeProjectorsCardData = {...this.state.freeProjectorsCardData},
+      freeDeskMonitorsCardData = {...this.state.freeDeskMonitorsCardData};
     employeesOnlineCardData.datasets[0].data = onlineToday;
-    console.log(monitorsFree);
+    freeLaptopCardData.datasets[0].data = monitorsUsedPercentages[MONITOR_TYPE.LAPTOP];
+    freeDeskMonitorsCardData.datasets[0].data = monitorsUsedPercentages[MONITOR_TYPE.DESK];
+    freeProjectorsCardData.datasets[0].data = monitorsUsedPercentages[MONITOR_TYPE.PROJECTOR];
 
     function processSessions(date) {
       let sessions = [];
@@ -568,56 +489,69 @@ class Dashboard extends Component {
       let h = ch, m = cm
         , a = start.getHours(), b = start.getMinutes()
         , c = end.getHours(), d = end.getMinutes();
-      if (a > c || ((a == c) && (b > d))) {
+      if (a > c || ((a === c) && (b > d))) {
         // not a valid input
       } else {
         if (h > a && h < c) {
           return true;
-        } else if (h == a && m >= b) {
+        } else if (h === a && m >= b) {
           return true;
-        } else if (h == c && m <= d) {
-          return true;
-        } else {
-          return false;
-        }
+        } else return h === c && m <= d;
       }
     }
 
 
-    this.setState({data: dat.data});
+    this.setState({
+      data: dat.data,
+      totalMonitors,
+      monitorsUsed,
+      employeesOnlineCardData,
+      freeLaptopCardData,
+      freeProjectorsCardData,
+      freeDeskMonitorsCardData
+    });
 
 
-    console.log(dat.data, totalMonitors);
+    console.log(dat.data, totalMonitors, monitorsUsed);
+    console.timeEnd('processData');
+
   }
 
   render() {
+    let hour = new Date().getHours();
+    let getFree = (type) => {
+      return this.state.monitorsUsed ? this.state.totalMonitors[type] - this.state.monitorsUsed[type][hour] : null;
 
+    };
     return (
       <div className="animated fadeIn">
         <Row>
+
           <Col xs="12" sm="6" lg="3">
-            <DashboardCard className="text-white card-1-bg" title="Total Hours on Laptop">
+            <DashboardCard className="text-white card-1-bg" title="Free Laptops" content={getFree(MONITOR_TYPE.LAPTOP)}>
               <div className="chart-wrapper mx-3" style={{height: '70px'}}>
-                <Line data={cardChartData1} options={cardChartOpts1} height={70}/>
+                <Line data={this.state.freeLaptopCardData} options={freeLaptopCardOpts} height={70}/>
               </div>
 
             </DashboardCard>
           </Col>
 
           <Col xs="12" sm="6" lg="3">
-            <DashboardCard className="text-white card-2-bg" title="Total Hours on Desk Monitor">
+            <DashboardCard className="text-white card-2-bg" title="Free Desk Monitors"
+                           content={getFree(MONITOR_TYPE.DESK)}>
 
               <div className="chart-wrapper mx-3" style={{height: '70px'}}>
-                <Line data={cardChartData2} options={cardChartOpts2} height={70}/>
+                <Line data={this.state.freeDeskMonitorsCardData} options={freeDeskMonitorsCardOpts} height={70}/>
               </div>
             </DashboardCard>
 
           </Col>
 
           <Col xs="12" sm="6" lg="3">
-            <DashboardCard className="text-white card-3-bg" title="Total Hours on Projector">
+            <DashboardCard className="text-white card-3-bg" title="Free Projectors"
+                           content={getFree(MONITOR_TYPE.PROJECTOR)}>
               <div className="chart-wrapper" style={{height: '70px'}}>
-                <Line data={cardChartData3} options={cardChartOpts3} height={70}/>
+                <Line data={this.state.freeProjectorsCardData} options={freeProjectorsCardOpts} height={70}/>
               </div>
             </DashboardCard>
           </Col>
@@ -626,7 +560,7 @@ class Dashboard extends Component {
             <DashboardCard className="text-white card-4-bg" title="Employees Currently Online"
                            request="employees/online">
               <div className="chart-wrapper mx-3" style={{height: '70px'}}>
-                <Bar data={employeesOnlineCardData} options={employeesOnlineCardOpts} height={70}/>
+                <Bar data={this.state.employeesOnlineCardData} options={employeesOnlineCardOpts} height={70}/>
               </div>
             </DashboardCard>
           </Col>
@@ -637,7 +571,7 @@ class Dashboard extends Component {
               <CardBody>
                 <Row>
                   <Col sm="5">
-                    <CardTitle className="mb-0">Monitor Utilization over Time</CardTitle>
+                    <CardTitle className="mb-0">Total Monitor Utilization per Team</CardTitle>
                     <div className="small text-muted">July 2019</div>
                   </Col>
                   <Col sm="7" className="d-none d-sm-inline-block">
@@ -908,232 +842,7 @@ class Dashboard extends Component {
                     </ul>
                   </Col>
                 </Row>
-                <br/>
-                <Table hover responsive className="table-outline mb-0 d-none d-sm-table">
-                  <thead className="thead-light">
-                  <tr>
-                    <th className="text-center"><i className="icon-people"></i></th>
-                    <th>User</th>
-                    <th className="text-center">Country</th>
-                    <th>Usage</th>
-                    <th className="text-center">Payment Method</th>
-                    <th>Activity</th>
-                  </tr>
-                  </thead>
-                  <tbody>
-                  <tr>
-                    <td className="text-center">
-                      <div className="avatar">
-                        <img src={'assets/img/avatars/1.jpg'} className="img-avatar" alt="admin@bootstrapmaster.com"/>
-                        <span className="avatar-status badge-success"></span>
-                      </div>
-                    </td>
-                    <td>
-                      <div>Yiorgos Avraamu</div>
-                      <div className="small text-muted">
-                        <span>New</span> | Registered: Jan 1, 2015
-                      </div>
-                    </td>
-                    <td className="text-center">
-                      <i className="flag-icon flag-icon-us h4 mb-0" title="us" id="us"></i>
-                    </td>
-                    <td>
-                      <div className="clearfix">
-                        <div className="float-left">
-                          <strong>50%</strong>
-                        </div>
-                        <div className="float-right">
-                          <small className="text-muted">Jun 11, 2015 - Jul 10, 2015</small>
-                        </div>
-                      </div>
-                      <Progress className="progress-xs" color="success" value="50"/>
-                    </td>
-                    <td className="text-center">
-                      <i className="fa fa-cc-mastercard" style={{fontSize: 24 + 'px'}}></i>
-                    </td>
-                    <td>
-                      <div className="small text-muted">Last login</div>
-                      <strong>10 sec ago</strong>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="text-center">
-                      <div className="avatar">
-                        <img src={'assets/img/avatars/2.jpg'} className="img-avatar" alt="admin@bootstrapmaster.com"/>
-                        <span className="avatar-status badge-danger"></span>
-                      </div>
-                    </td>
-                    <td>
-                      <div>Avram Tarasios</div>
-                      <div className="small text-muted">
 
-                        <span>Recurring</span> | Registered: Jan 1, 2015
-                      </div>
-                    </td>
-                    <td className="text-center">
-                      <i className="flag-icon flag-icon-br h4 mb-0" title="br" id="br"></i>
-                    </td>
-                    <td>
-                      <div className="clearfix">
-                        <div className="float-left">
-                          <strong>10%</strong>
-                        </div>
-                        <div className="float-right">
-                          <small className="text-muted">Jun 11, 2015 - Jul 10, 2015</small>
-                        </div>
-                      </div>
-                      <Progress className="progress-xs" color="info" value="10"/>
-                    </td>
-                    <td className="text-center">
-                      <i className="fa fa-cc-visa" style={{fontSize: 24 + 'px'}}></i>
-                    </td>
-                    <td>
-                      <div className="small text-muted">Last login</div>
-                      <strong>5 minutes ago</strong>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="text-center">
-                      <div className="avatar">
-                        <img src={'assets/img/avatars/3.jpg'} className="img-avatar" alt="admin@bootstrapmaster.com"/>
-                        <span className="avatar-status badge-warning"></span>
-                      </div>
-                    </td>
-                    <td>
-                      <div>Quintin Ed</div>
-                      <div className="small text-muted">
-                        <span>New</span> | Registered: Jan 1, 2015
-                      </div>
-                    </td>
-                    <td className="text-center">
-                      <i className="flag-icon flag-icon-in h4 mb-0" title="in" id="in"></i>
-                    </td>
-                    <td>
-                      <div className="clearfix">
-                        <div className="float-left">
-                          <strong>74%</strong>
-                        </div>
-                        <div className="float-right">
-                          <small className="text-muted">Jun 11, 2015 - Jul 10, 2015</small>
-                        </div>
-                      </div>
-                      <Progress className="progress-xs" color="warning" value="74"/>
-                    </td>
-                    <td className="text-center">
-                      <i className="fa fa-cc-stripe" style={{fontSize: 24 + 'px'}}></i>
-                    </td>
-                    <td>
-                      <div className="small text-muted">Last login</div>
-                      <strong>1 hour ago</strong>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="text-center">
-                      <div className="avatar">
-                        <img src={'assets/img/avatars/4.jpg'} className="img-avatar" alt="admin@bootstrapmaster.com"/>
-                        <span className="avatar-status badge-secondary"></span>
-                      </div>
-                    </td>
-                    <td>
-                      <div>Enéas Kwadwo</div>
-                      <div className="small text-muted">
-                        <span>New</span> | Registered: Jan 1, 2015
-                      </div>
-                    </td>
-                    <td className="text-center">
-                      <i className="flag-icon flag-icon-fr h4 mb-0" title="fr" id="fr"></i>
-                    </td>
-                    <td>
-                      <div className="clearfix">
-                        <div className="float-left">
-                          <strong>98%</strong>
-                        </div>
-                        <div className="float-right">
-                          <small className="text-muted">Jun 11, 2015 - Jul 10, 2015</small>
-                        </div>
-                      </div>
-                      <Progress className="progress-xs" color="danger" value="98"/>
-                    </td>
-                    <td className="text-center">
-                      <i className="fa fa-paypal" style={{fontSize: 24 + 'px'}}></i>
-                    </td>
-                    <td>
-                      <div className="small text-muted">Last login</div>
-                      <strong>Last month</strong>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="text-center">
-                      <div className="avatar">
-                        <img src={'assets/img/avatars/5.jpg'} className="img-avatar" alt="admin@bootstrapmaster.com"/>
-                        <span className="avatar-status badge-success"></span>
-                      </div>
-                    </td>
-                    <td>
-                      <div>Agapetus Tadeáš</div>
-                      <div className="small text-muted">
-                        <span>New</span> | Registered: Jan 1, 2015
-                      </div>
-                    </td>
-                    <td className="text-center">
-                      <i className="flag-icon flag-icon-es h4 mb-0" title="es" id="es"></i>
-                    </td>
-                    <td>
-                      <div className="clearfix">
-                        <div className="float-left">
-                          <strong>22%</strong>
-                        </div>
-                        <div className="float-right">
-                          <small className="text-muted">Jun 11, 2015 - Jul 10, 2015</small>
-                        </div>
-                      </div>
-                      <Progress className="progress-xs" color="info" value="22"/>
-                    </td>
-                    <td className="text-center">
-                      <i className="fa fa-google-wallet" style={{fontSize: 24 + 'px'}}></i>
-                    </td>
-                    <td>
-                      <div className="small text-muted">Last login</div>
-                      <strong>Last week</strong>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="text-center">
-                      <div className="avatar">
-                        <img src={'assets/img/avatars/6.jpg'} className="img-avatar" alt="admin@bootstrapmaster.com"/>
-                        <span className="avatar-status badge-danger"></span>
-                      </div>
-                    </td>
-                    <td>
-                      <div>Friderik Dávid</div>
-                      <div className="small text-muted">
-                        <span>New</span> | Registered: Jan 1, 2015
-                      </div>
-                    </td>
-                    <td className="text-center">
-                      <i className="flag-icon flag-icon-pl h4 mb-0" title="pl" id="pl"></i>
-                    </td>
-                    <td>
-                      <div className="clearfix">
-                        <div className="float-left">
-                          <strong>43%</strong>
-                        </div>
-                        <div className="float-right">
-                          <small className="text-muted">Jun 11, 2015 - Jul 10, 2015</small>
-                        </div>
-                      </div>
-                      <Progress className="progress-xs" color="success" value="43"/>
-                    </td>
-                    <td className="text-center">
-                      <i className="fa fa-cc-amex" style={{fontSize: 24 + 'px'}}></i>
-                    </td>
-                    <td>
-                      <div className="small text-muted">Last login</div>
-                      <strong>Yesterday</strong>
-                    </td>
-                  </tr>
-                  </tbody>
-                </Table>
               </CardBody>
             </Card>
           </Col>

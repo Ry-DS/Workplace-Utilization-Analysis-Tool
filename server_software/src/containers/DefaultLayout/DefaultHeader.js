@@ -3,7 +3,7 @@ import {Link, NavLink} from 'react-router-dom';
 import {DropdownItem, DropdownMenu, DropdownToggle, Nav, NavItem} from 'reactstrap';
 import PropTypes from 'prop-types';
 
-import {AppAsideToggler, AppHeaderDropdown, AppNavbarBrand, AppSidebarToggler} from '@coreui/react';
+import {AppHeaderDropdown, AppNavbarBrand, AppSidebarToggler} from '@coreui/react';
 import logo from '../../assets/img/brand/bgis.png'
 import miniLogo from '../../assets/img/brand/logo_small.png'
 
@@ -44,7 +44,7 @@ class DefaultHeader extends Component {
 
           <AppHeaderDropdown direction="down">
             <DropdownToggle nav>
-              <img src={'../../assets/img/avatars/6.jpg'} className="img-avatar" alt="admin@bootstrapmaster.com" />
+              <i className="fa fa-2x fa-user-circle"/>
             </DropdownToggle>
             <DropdownMenu right style={{ right: 'auto' }}>
               <DropdownItem header tag="div" className="text-center"><strong>Account</strong></DropdownItem>
@@ -52,8 +52,7 @@ class DefaultHeader extends Component {
             </DropdownMenu>
           </AppHeaderDropdown>
         </Nav>
-        <AppAsideToggler className="d-md-down-none" />
-        {/*<AppAsideToggler className="d-lg-none" mobile />*/}
+
       </React.Fragment>
     );
   }
