@@ -2,43 +2,41 @@ namespace WUAT
 {
     public class MonitorState
     {
-        private string friendlyName, mCode;
-        private int productId, mId;
-        private long captureTime;
-
         public MonitorState(string friendlyName, string mCode, int productId, int mId, long captureTime)
         {
-            this.friendlyName = friendlyName;
-            this.mCode = mCode;
-            this.productId = productId;
-            this.mId = mId;
-            this.captureTime = captureTime;
+            FriendlyName = friendlyName;
+            MCode = mCode;
+            ProductId = productId;
+            MId = mId;
+            CaptureTime = captureTime;
         }
 
-        public string FriendlyName => friendlyName;
+        public string FriendlyName { get; }
 
-        public string MCode => mCode;
+        public string MCode { get; }
 
-        public int ProductId => productId;
+        public int ProductId { get; }
 
-        public int MId => mId;
+        public int MId { get; }
 
-        public long CaptureTime => captureTime;
+        public long CaptureTime { get; }
+
         public override string ToString()
         {
-            return friendlyName+":"+mCode+":"+mId+":"+productId;
+            return FriendlyName + ":" + MCode + ":" + MId + ":" + ProductId;
         }
 
         protected bool Equals(MonitorState other)
         {
-            return string.Equals(friendlyName, other.friendlyName) && string.Equals(mCode, other.mCode) && productId == other.productId && mId == other.mId;
+            return string.Equals(FriendlyName, other.FriendlyName) && string.Equals(MCode, other.MCode) &&
+                   ProductId == other.ProductId && MId == other.MId;
         }
 
         public override bool Equals(object obj)
         {
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
-            if (obj.GetType() != this.GetType()) return false;
+            if (obj.GetType() != GetType()) return false;
             return Equals((MonitorState) obj);
         }
 
@@ -46,17 +44,17 @@ namespace WUAT
         {
             unchecked
             {
-                var hashCode = (friendlyName != null ? friendlyName.GetHashCode() : 0);
-                hashCode = (hashCode * 397) ^ (mCode != null ? mCode.GetHashCode() : 0);
-                hashCode = (hashCode * 397) ^ productId;
-                hashCode = (hashCode * 397) ^ mId;
+                var hashCode = FriendlyName != null ? FriendlyName.GetHashCode() : 0;
+                hashCode = (hashCode * 397) ^ (MCode != null ? MCode.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ ProductId;
+                hashCode = (hashCode * 397) ^ MId;
                 return hashCode;
             }
         }
 
         public bool IsValid()
         {
-            return productId != 0 && mId != 0;
+            return ProductId != 0 || MId != 0;
         }
     }
 }
