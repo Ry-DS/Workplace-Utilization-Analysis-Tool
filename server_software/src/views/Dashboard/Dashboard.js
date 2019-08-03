@@ -475,19 +475,39 @@ class Dashboard extends Component {
     let dateString = `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
 
     //today
+    //employees online at a specific hour
     let onlineToday = Array(24).fill(0);//key: hour of day, value: array of employees online at that time.
+    //monitors free at a specific hour for each type
+    let monitorsFree = {};
+    for (let type in MONITOR_TYPE) {//populate with the current amount of monitors per type.
+      monitorsFree[MONITOR_TYPE[type]] = Array(24).fill(totalMonitors[MONITOR_TYPE[type]] ? totalMonitors[MONITOR_TYPE[type]] : 0);
+    }
     teams.forEach(team => {
       team.employees.forEach(employee => {
         employee.usageData.forEach(date => {
           date.sessions = processSessions(date);
           if (date._id === dateString) {
             for (let i = 0; i < 24; i++) {
-              date.sessions.forEach(session => {
+              for (let session of date.sessions) {
 
                 if (checkTime(i, 0, session.startTime, session.endTime)) {
                   onlineToday[i]++;
+
+                  break;
+
                 }
-              })
+              }
+              let monitorTypesChecked = [];//make sure we don't recount a specific type.
+              for (let session of date.sessions) {
+                for (let monitorSession of session.monitorsUsed) {
+                  if (checkTime(i, 0, monitorSession.startTime, monitorSession.endTime) && monitorTypesChecked.indexOf(monitorSession.monitor) === -1) {
+                    monitorsFree[monitorSession.monitor.type][i]--;
+                    monitorTypesChecked.push(monitorSession.monitor);
+
+                  }
+                }
+              }
+
             }
 
           }
@@ -496,6 +516,7 @@ class Dashboard extends Component {
       })
     });
     employeesOnlineCardData.datasets[0].data = onlineToday;
+    console.log(monitorsFree);
 
     function processSessions(date) {
       let sessions = [];

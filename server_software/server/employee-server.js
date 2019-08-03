@@ -139,7 +139,7 @@ module.exports = class EmployeeServer {
               if (!monitor) {//TODO limit on if employees can add new monitors
                 let monitor = new MonitorGroup({
                   name: monitorType.friendlyName ? monitorType.friendlyName : monitorType.machineCode,
-                  friendlyName: this.name,
+                  friendlyName: monitorType.friendlyName ? monitorType.friendlyName : monitorType.machineCode,
                   _id: monitorId,//type set by default to be set later
                   createdBy: id
                 });
