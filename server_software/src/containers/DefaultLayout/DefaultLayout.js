@@ -4,7 +4,6 @@ import {Redirect, Route, Switch} from 'react-router-dom';
 import {Container} from 'reactstrap';
 import loading from '../../utils/LoadingAnimation';
 import {
-  AppAside,
   AppBreadcrumb2 as AppBreadcrumb,
   AppFooter,
   AppHeader,
@@ -28,7 +27,6 @@ import wuatLogo from '../../assets/img/brand/wuat/WUAT Logo.svg';
 import logoCover from '../../assets/img/brand/logo_small.png';
 
 
-const DefaultAside = React.lazy(() => import('./DefaultAside'));
 const DefaultFooter = React.lazy(() => import('./DefaultFooter'));
 const DefaultHeader = React.lazy(() => import('./DefaultHeader'));
 
@@ -85,18 +83,13 @@ class DefaultLayout extends Component {
                         render={props => (
                           <route.component {...props} />
                         )} />
-                    ) : (null);
+                    ) : null;
                   })}
                   <Redirect from="/" to="/dashboard" />
                 </Switch>
               </Suspense>
             </Container>
           </main>
-          <AppAside fixed>
-            <Suspense fallback={loading()}>
-              <DefaultAside />
-            </Suspense>
-          </AppAside>
         </div>
         <AppFooter>
           <Suspense fallback={loading()}>

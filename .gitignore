@@ -76,7 +76,6 @@ WUAT\.csproj
 
 WUAT\.sln\.DotSettings\.user
 
-Properties/
 
 client_software/\.idea/\.idea\.WUAT/\.idea/
 
@@ -86,3 +85,5 @@ server_software/server/keys\.js
 
 client_software/\.vs/
 
+
+*.user
