@@ -87,3 +87,7 @@ client_software/\.vs/
 
 
 *.user
+
+client_software/installer/WUAT Setup/Debug/
+
+client_software/installer/WUAT Setup/Release/

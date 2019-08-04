@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -148,8 +149,9 @@ namespace WUAT
             Console.WriteLine("Display Amount: " + PathDisplayTarget.GetDisplayTargets().Count());
         }
 
-        public static void Main()
+        public static void Main(string[] args)
         {
+            if (args.Length == 1 && args[0] == "INSTALLER") { Process.Start(Application.ExecutablePath); return; }
             Application.EnableVisualStyles();
             new Program();
         }

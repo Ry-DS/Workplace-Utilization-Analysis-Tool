@@ -1,5 +1,5 @@
 //https://www.twilio.com/blog/react-app-with-node-js-server-proxy
-
+const bootWithFrontend=false;
 //this server sends data to the react application for the admin to view
 const express = require('express');//express server backend
 const bodyParser = require('body-parser');//for parsing requests and data given from users
@@ -31,7 +31,8 @@ function startupEmployeeServer() {
 function startupExpressServer() {
   const app=express();
 
-  //app.use('/',express.static('build'));
+  if(bootWithFrontend)
+  app.use('/',express.static('build'));
   //setup express addins
   //this one allows us to parse/send uris
   app.use(bodyParser.urlencoded({extended: false}));
@@ -60,6 +61,10 @@ function startupExpressServer() {
     res.setHeader('Content-Type', 'text/plain');
     res.send(employeeServer.connectionCount.toString());
 
+  });
+  if(bootWithFrontend)
+  app.get('*', function(req, res){
+    res.redirect('/#/dashboard');
   });
 
   app.listen(3001, () =>
