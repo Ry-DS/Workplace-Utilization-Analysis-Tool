@@ -403,7 +403,6 @@ class Dashboard extends Component {
               for (let session of date.sessions) {
                 for (let monitorSession of session.monitorsUsed) {
                   if (checkTime(i, 0, monitorSession.startTime, monitorSession.endTime) && monitorsChecked.indexOf(monitorSession.monitor.type) === -1) {
-
                     monitorsUsed[monitorSession.monitor.type][i] += 1;
                     monitorsChecked.push(monitorSession.monitor.type);
 
@@ -438,6 +437,7 @@ class Dashboard extends Component {
     freeLaptopCardData.datasets[0].data = monitorsUsedPercentages[MONITOR_TYPE.LAPTOP];
     freeDeskMonitorsCardData.datasets[0].data = monitorsUsedPercentages[MONITOR_TYPE.DESK];
     freeProjectorsCardData.datasets[0].data = monitorsUsedPercentages[MONITOR_TYPE.PROJECTOR];
+
 
     function processSessions(date) {
       let sessions = [];

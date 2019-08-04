@@ -13,10 +13,6 @@ export default {//defines everything in the sidebar
       name: 'Dashboard',//for an actual item, more data is needed
       url: '/dashboard',//link to go to
       icon: 'icon-speedometer',//icon to show
-      badge: {//badge if required
-        variant: 'info',
-        text: 'NEW',
-      },
     },
     {
       name: 'Data Breakdown',
