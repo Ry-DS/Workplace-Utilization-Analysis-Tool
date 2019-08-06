@@ -22,6 +22,9 @@ import axios from 'axios';
 import MONITOR_TYPE from '../../utils/monitorTypes';
 import toast from 'toasted-notes'
 import 'toasted-notes/src/styles.css';
+import './../../scss/flatpickr-bgis.scss'
+
+import Flatpickr from 'react-flatpickr'
 
 
 //fetch color themes from css
@@ -166,52 +169,6 @@ const sparklineChartOpts = {
 
 // Main Chart
 
-//Random Numbers
-function random(min, max) {
-  return Math.floor(Math.random() * (max - min + 1) + min);
-}
-
-const elements = 27;
-const data1 = [];
-const data2 = [];
-const data3 = [];
-
-for (let i = 0; i <= elements; i++) {
-  data1.push(random(50, 200));
-  data2.push(random(80, 100));
-  data3.push(65);
-}
-
-const mainChart = {
-  labels: ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'],
-  datasets: [
-    {
-      label: 'My First dataset',
-      backgroundColor: hexToRgba(brandNorm, 10),
-      borderColor: brandNorm,
-      pointHoverBackgroundColor: '#fff',
-      borderWidth: 2,
-      data: data1,
-    },
-    {
-      label: 'My Second dataset',
-      backgroundColor: 'transparent',
-      borderColor: brandLight,
-      pointHoverBackgroundColor: '#fff',
-      borderWidth: 2,
-      data: data2,
-    },
-    {
-      label: 'My Third dataset',
-      backgroundColor: 'transparent',
-      borderColor: brandNorm,
-      pointHoverBackgroundColor: '#fff',
-      borderWidth: 1,
-      borderDash: [8, 5],
-      data: data3,
-    },
-  ],
-};
 
 const mainChartOpts = {
   tooltips: {
@@ -261,11 +218,10 @@ class Dashboard extends Component {
   constructor(props) {
     super(props);
 
-    this.onRadioBtnClick = this.onRadioBtnClick.bind(this);
 
     this.state = {
       dropdownOpen: false,
-      radioSelected: 2,
+      radioSelected: 1,
       employeesOnlineCardData: {
         labels: times,
         datasets: [
@@ -310,6 +266,36 @@ class Dashboard extends Component {
           },
         ],
       },
+      mainChartData : {
+        labels: [],
+        datasets: [
+          {
+            label: 'My First dataset',
+            backgroundColor: hexToRgba(brandNorm, 10),
+            borderColor: brandNorm,
+            pointHoverBackgroundColor: '#fff',
+            borderWidth: 2,
+            data: [],
+          },
+          {
+            label: 'My Second dataset',
+            backgroundColor: 'transparent',
+            borderColor: brandLight,
+            pointHoverBackgroundColor: '#fff',
+            borderWidth: 2,
+            data: [],
+          },
+          {
+            label: 'My Third dataset',
+            backgroundColor: 'transparent',
+            borderColor: brandDark,
+            pointHoverBackgroundColor: '#fff',
+            borderWidth: 2,
+            data: [],
+          },
+        ],
+      },
+      date: new Date()
 
 
     };
@@ -321,11 +307,15 @@ class Dashboard extends Component {
     })
   }
 
-  onRadioBtnClick(radioSelected) {
+  onRadioBtnClick=(radioSelected)=> {
     this.setState({
       radioSelected: radioSelected,
+      date: radioSelected===1?new Date():this.state.date
     });
-  }
+  };
+  dateChange=(date)=>{
+    this.setState({date});
+  };
 
   processData(dat) {
     console.time('processData');
@@ -429,6 +419,17 @@ class Dashboard extends Component {
       })
     });
     console.log(monitorsUsedPerTeam);
+    for(let team in monitorsUsedPerTeam){
+      if(!monitorsUsedPerTeam.hasOwnProperty(team))
+        continue;
+      for(let date in monitorsUsedPerTeam[team]){
+        if(!monitorsUsedPerTeam[team].hasOwnProperty(date))
+          continue;
+        monitorsUsedPerTeam[team][date]={byHour:monitorsUsedPerTeam[team][date],max: Math.max(...monitorsUsedPerTeam[team][date])};
+      }
+
+    }
+    console.log(monitorsUsedPerTeam);
     //convert monitors used to percentages
     let monitorsUsedPercentages = JSON.parse(JSON.stringify(monitorsUsedToday));
     for (let type in monitorsUsedPercentages) {
@@ -528,12 +529,16 @@ class Dashboard extends Component {
 
   }
 
+
   render() {
     let hour = new Date().getHours();
     let getFree = (type) => {
       return this.state.monitorsUsed ? this.state.totalMonitors[type] - this.state.monitorsUsed[type][hour] : null;
 
     };
+    let dateStyle={
+      width: '40%'
+    }
     return (
       <div className="animated fadeIn">
         <Row>
@@ -583,7 +588,7 @@ class Dashboard extends Component {
                 <Row>
                   <Col sm="5">
                     <CardTitle className="mb-0">Total Monitor Utilization per Team</CardTitle>
-                    <div className="small text-muted">July 2019</div>
+                    <div className="small text-muted"></div>
                   </Col>
                   <Col sm="7" className="d-none d-sm-inline-block">
                     <Button color="primary" className="float-right"><i className="icon-cloud-download"></i></Button>
@@ -592,15 +597,21 @@ class Dashboard extends Component {
                         <Button color="outline-secondary" onClick={() => this.onRadioBtnClick(1)}
                                 active={this.state.radioSelected === 1}>Day</Button>
                         <Button color="outline-secondary" onClick={() => this.onRadioBtnClick(2)}
-                                active={this.state.radioSelected === 2}>Month</Button>
-                        <Button color="outline-secondary" onClick={() => this.onRadioBtnClick(3)}
-                                active={this.state.radioSelected === 3}>Year</Button>
+                                active={this.state.radioSelected === 2}>Dates</Button>
                       </ButtonGroup>
+
                     </ButtonToolbar>
+                    <Flatpickr
+                      className="form-control"
+                      style={dateStyle}
+                      value={this.state.date}
+                      options={{mode: this.state.radioSelected===1?"single":"range",
+                        dateFormat: "Y-m-d"}}
+                      onChange={date => { this.dateChange(date) }} />
                   </Col>
                 </Row>
                 <div className="chart-wrapper" style={{height: 300 + 'px', marginTop: 40 + 'px'}}>
-                  <Line data={mainChart} options={mainChartOpts} height={300}/>
+                  <Line data={this.state.mainChartData} options={mainChartOpts} height={300}/>
                 </div>
               </CardBody>
               <CardFooter>
