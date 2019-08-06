@@ -42,8 +42,9 @@ module.exports = class EmployeeServer {
         {
           if (socket.active && socket.startTime && socket.endTime && !checkTime(socket.startTime, socket.endTime)) {//we can disconnect them once the time passes
             socket.destroy();
+            console.log('Socket disconnected from ping: out of time range');
             if (socket.employeeId)
-              closeEvent(socket.employeeId);
+              this.closeEvent(socket);
           }
           return;
         }
@@ -79,7 +80,9 @@ module.exports = class EmployeeServer {
                 socket.endTime = doc.endTime;//say when the socket should disconnects
                 socket.startTime = doc.startTime;
 
-              } else socket.destroy();//end connection, let them try again later
+              } else{ socket.destroy();
+                console.log('Socket disconnected from login: out of time range');
+              }//end connection, let them try again later
 
 
             });
@@ -172,7 +175,8 @@ module.exports = class EmployeeServer {
                 if(!checkTime(team.startTime,team.endTime)){//update wasn't within tracking time
                   //end their connection
                   socket.destroy();
-                  closeEvent(id);
+                  console.log('Socket disconnected from updating: out of time range');
+                  this.closeEvent(socket);
 
                   return;
                 }
@@ -225,7 +229,6 @@ module.exports = class EmployeeServer {
       socket.on('close', () => {
         console.log('Closing socket...');
         this.connections.splice(this.connections.indexOf(socket), 1);
-        this.closeEvent(socket);
 
       })
 
@@ -305,8 +308,8 @@ function checkTime (start,end){
   start=start.split(':');
   end=end.split(':');
   let h=time.getHours(),m=time.getMinutes()
-    ,a=start[0],b=start[1]
-    ,c=end[0],d=end[1];
+    ,a=parseInt(start[0]),b=parseInt(start[1])
+    ,c=parseInt(end[0]),d=parseInt(end[1]);
   if (a > c || ((a === c) && (b > d))) {
     // not a valid input
   } else {

@@ -544,7 +544,7 @@ class Dashboard extends Component {
         <Row>
 
           <Col xs="12" sm="6" lg="3">
-            <DashboardCard className="text-white card-1-bg" title="Free Laptops" content={getFree(MONITOR_TYPE.LAPTOP)}>
+            <DashboardCard className="text-white card-1-bg" title="Free Laptops this Hour" content={getFree(MONITOR_TYPE.LAPTOP)}>
               <div className="chart-wrapper mx-3" style={{height: '70px'}}>
                 <Line data={this.state.freeLaptopCardData} options={freeLaptopCardOpts} height={70}/>
               </div>
@@ -553,7 +553,7 @@ class Dashboard extends Component {
           </Col>
 
           <Col xs="12" sm="6" lg="3">
-            <DashboardCard className="text-white card-2-bg" title="Free Desk Monitors"
+            <DashboardCard className="text-white card-2-bg" title="Free Desk Monitors this Hour"
                            content={getFree(MONITOR_TYPE.DESK)}>
 
               <div className="chart-wrapper mx-3" style={{height: '70px'}}>
@@ -564,7 +564,7 @@ class Dashboard extends Component {
           </Col>
 
           <Col xs="12" sm="6" lg="3">
-            <DashboardCard className="text-white card-3-bg" title="Free Projectors"
+            <DashboardCard className="text-white card-3-bg" title="Free Projectors this Hour"
                            content={getFree(MONITOR_TYPE.PROJECTOR)}>
               <div className="chart-wrapper" style={{height: '70px'}}>
                 <Line data={this.state.freeProjectorsCardData} options={freeProjectorsCardOpts} height={70}/>
