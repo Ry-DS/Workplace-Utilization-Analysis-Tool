@@ -11,6 +11,7 @@ const users=require('./routes/users');
 const teams = require('./routes/teams');
 const monitors = require('./routes/monitors');
 const data = require('./routes/data');
+const {onShutdown} = require('node-graceful-shutdown');
 
 
 const EmployeeServer = require('./employee-server');//employee server for employees to connect and give data
@@ -22,6 +23,7 @@ const mongoURI = require('./keys').mongoURI;//mongo auth key
 startupMongoConnection();//stored in mongoose dependency
 const expressServer = startupExpressServer();
 const employeeServer = startupEmployeeServer();
+setupQuitHandler();
 
 
 function startupEmployeeServer() {
@@ -59,7 +61,7 @@ function startupExpressServer() {
 
   app.get('/api/employees/online', passport.authenticate('jwt', {session: false}), (req, res) => {//fetch the current amount of employees online
     res.setHeader('Content-Type', 'text/plain');
-    res.send(employeeServer.connectionCount.toString());
+    res.send(employeeServer.connectionAmount().toString());
 
   });
   if(bootWithFrontend)
@@ -84,6 +86,19 @@ function startupMongoConnection() {
       console.log("Failed to connect to MongoDB");
       setTimeout(()=>{console.log('Retrying...');startupMongoConnection();}, 1000)
     });
+}
+
+function setupQuitHandler() {
+  onShutdown('http-server', async () => {
+    console.log("Closing employee server...");
+    for (let conn of employeeServer.connections) {
+      await employeeServer.closeEvent(conn);
+      console.log('Closed Socket: ' + conn.employeeId);
+    }
+    employeeServer.server.close();
+
+  });
+
 }
 
 

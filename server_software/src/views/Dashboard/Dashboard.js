@@ -171,12 +171,12 @@ function random(min, max) {
   return Math.floor(Math.random() * (max - min + 1) + min);
 }
 
-var elements = 27;
-var data1 = [];
-var data2 = [];
-var data3 = [];
+const elements = 27;
+const data1 = [];
+const data2 = [];
+const data3 = [];
 
-for (var i = 0; i <= elements; i++) {
+for (let i = 0; i <= elements; i++) {
   data1.push(random(50, 200));
   data2.push(random(80, 100));
   data3.push(65);
@@ -380,30 +380,40 @@ class Dashboard extends Component {
     //employees online at a specific hour
     let onlineToday = Array(24).fill(0);//key: hour of day, value: array of employees online at that time.
     //monitors free at a specific hour for each type
-    let monitorsUsed = {};
+    let monitorsUsedToday = {}, monitorsUsedPerTeam = {};
     for (let type in MONITOR_TYPE) {//populate with the current amount of monitors per type.
-      monitorsUsed[MONITOR_TYPE[type]] = new Array(date.getHours() + 1).fill(0);
+      monitorsUsedToday[MONITOR_TYPE[type]] = Array(date.getHours() + 1).fill(0);
     }
+    teams.forEach(team => {
+      monitorsUsedPerTeam[team._id] = {};
+    });
     teams.forEach(team => {
       team.employees.forEach(employee => {
         employee.usageData.forEach(date => {
           date.sessions = processSessions(date);
-          if (date._id === dateString) {
+
             for (let i = 0; i < 24; i++) {
-              for (let session of date.sessions) {
+              if (date._id === dateString)
+                for (let session of date.sessions) {
 
-                if (checkTime(i, 0, session.startTime, session.endTime)) {
-                  onlineToday[i]++;
+                  if (checkTime(i, 0, session.startTime, session.endTime)) {
+                    onlineToday[i]++;
 
-                  break;
+                    break;
 
+                  }
                 }
-              }
               let monitorsChecked = [];//make sure we don't recount a specific type.
               for (let session of date.sessions) {
                 for (let monitorSession of session.monitorsUsed) {
                   if (checkTime(i, 0, monitorSession.startTime, monitorSession.endTime) && monitorsChecked.indexOf(monitorSession.monitor.type) === -1) {
-                    monitorsUsed[monitorSession.monitor.type][i] += 1;
+                    if (date._id === dateString)
+                      monitorsUsedToday[monitorSession.monitor.type][i] += 1;
+                    let monitorsUsedThisTeam = monitorsUsedPerTeam[team._id];
+                    if (!monitorsUsedThisTeam[date._id]) {
+                      monitorsUsedThisTeam[date._id] = Array(24).fill(0)
+                    }
+                    monitorsUsedThisTeam[date._id][i] += 1;
                     monitorsChecked.push(monitorSession.monitor.type);
 
 
@@ -413,13 +423,14 @@ class Dashboard extends Component {
 
             }
 
-          }
+
         })
 
       })
     });
+    console.log(monitorsUsedPerTeam);
     //convert monitors used to percentages
-    let monitorsUsedPercentages = JSON.parse(JSON.stringify(monitorsUsed));
+    let monitorsUsedPercentages = JSON.parse(JSON.stringify(monitorsUsedToday));
     for (let type in monitorsUsedPercentages) {
       if (!monitorsUsedPercentages.hasOwnProperty(type))
         continue;
@@ -504,7 +515,7 @@ class Dashboard extends Component {
     this.setState({
       data: dat.data,
       totalMonitors,
-      monitorsUsed,
+      monitorsUsed: monitorsUsedToday,
       employeesOnlineCardData,
       freeLaptopCardData,
       freeProjectorsCardData,
@@ -512,7 +523,7 @@ class Dashboard extends Component {
     });
 
 
-    console.log(dat.data, totalMonitors, monitorsUsed);
+    console.log(dat.data, totalMonitors, monitorsUsedToday);
     console.timeEnd('processData');
 
   }
