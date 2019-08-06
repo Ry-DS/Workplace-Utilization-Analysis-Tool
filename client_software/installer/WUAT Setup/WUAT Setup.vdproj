@@ -100,6 +100,14 @@
             "PrerequisitesLocation" = "2:1"
             "Url" = "8:"
             "ComponentsUrl" = "8:"
+                "Items"
+                {
+                    "{EDC2488A-8267-493A-A98E-7D9C3B36CDF3}:.NETFramework,Version=v4.6.1"
+                    {
+                    "Name" = "8:Microsoft .NET Framework 4.6.1 (x86 and x64)"
+                    "ProductCode" = "8:.NETFramework,Version=v4.6.1"
+                    }
+                }
             }
         }
     }
@@ -263,7 +271,7 @@
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:WUAT"
         "ProductCode" = "8:{E77E09AE-FFD3-4A71-9824-9C77BA1B2D78}"
-        "PackageCode" = "8:{ED010F76-8BE5-4090-9C0A-A2BF7398121E}"
+        "PackageCode" = "8:{7085A9F4-2A89-4744-93B2-55E634A93CA1}"
         "UpgradeCode" = "8:{1395F15D-62B1-4B18-B5B5-91394F8B1657}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"
@@ -276,11 +284,11 @@
         "ARPHELPLINK" = "8:"
         "Title" = "8:WUAT Setup"
         "Subject" = "8:"
-        "ARPCONTACT" = "8:BGIS"
+        "ARPCONTACT" = "8:BGIS, Ryan Samarakoon"
         "Keywords" = "8:"
-        "ARPCOMMENTS" = "8:"
+        "ARPCOMMENTS" = "8:Workplace Utilisation Analysis Tool"
         "ARPURLINFOABOUT" = "8:"
-        "ARPPRODUCTICON" = "8:"
+        "ARPPRODUCTICON" = "8:_E4A3E8FFAA47448782B50B7470B611F6"
         "ARPIconIndex" = "3:0"
         "SearchPath" = "8:"
         "UseSystemSearchPath" = "11:TRUE"

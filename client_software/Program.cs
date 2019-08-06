@@ -151,6 +151,12 @@ namespace WUAT
 
         public static void Main(string[] args)
         {
+            Process[] lprcTestApp = Process.GetProcessesByName("WUAT");
+            
+            if (lprcTestApp.Length > 1)//counting itself
+            {
+                return;//already running, lets not run
+            }
             if (args.Length == 1 && args[0] == "INSTALLER") { Process.Start(Application.ExecutablePath); return; }
             Application.EnableVisualStyles();
             new Program();
