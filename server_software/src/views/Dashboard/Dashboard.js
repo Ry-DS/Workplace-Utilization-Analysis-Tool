@@ -310,14 +310,25 @@ class Dashboard extends Component {
   onRadioBtnClick=(radioSelected)=> {
     this.setState({
       radioSelected: radioSelected,
-      date: radioSelected===1?new Date():this.state.date
+      date: [this.state.date[0]]
     });
+    this.dateChange(this.state.date);
   };
-  dateChange=(date)=>{
-    this.setState({date});
+  dateChange = (date) => {//TODO
+    let datasets = [];
+    let mainChartData = {...this.state.mainChartData};
+    mainChartData.labels = date.length === 1 ? times : date.map(d => {
+      return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`
+
+    });
+    if (this.state.monitorsUsedPerTeam) {
+
+
+    }
+    this.setState({date, mainChartData});
   };
 
-  processData(dat) {
+  processData(dat) {//this method is terrible, and I know no better way of doing it, maybe I would have split it up into nicer methods if I had time.
     console.time('processData');
     //total count of all monitors
     let totalMonitors = {};
@@ -377,10 +388,14 @@ class Dashboard extends Component {
     teams.forEach(team => {
       monitorsUsedPerTeam[team._id] = {};
     });
+    monitorsUsedPerTeam.dates = [];
     teams.forEach(team => {
       team.employees.forEach(employee => {
         employee.usageData.forEach(date => {
           date.sessions = processSessions(date);
+          if (monitorsUsedPerTeam.dates.indexOf(date._id) === -1) {//add it if it isn't already there
+            monitorsUsedPerTeam.dates.push(date._id);
+          }
 
             for (let i = 0; i < 24; i++) {
               if (date._id === dateString)
@@ -418,9 +433,8 @@ class Dashboard extends Component {
 
       })
     });
-    console.log(monitorsUsedPerTeam);
     for(let team in monitorsUsedPerTeam){
-      if(!monitorsUsedPerTeam.hasOwnProperty(team))
+      if (!monitorsUsedPerTeam.hasOwnProperty(team) || team === 'dates')
         continue;
       for(let date in monitorsUsedPerTeam[team]){
         if(!monitorsUsedPerTeam[team].hasOwnProperty(date))
@@ -444,12 +458,12 @@ class Dashboard extends Component {
     let employeesOnlineCardData = {...this.state.employeesOnlineCardData},
       freeLaptopCardData = {...this.state.freeLaptopCardData},
       freeProjectorsCardData = {...this.state.freeProjectorsCardData},
-      freeDeskMonitorsCardData = {...this.state.freeDeskMonitorsCardData};
+      freeDeskMonitorsCardData = {...this.state.freeDeskMonitorsCardData},
+      mainChartData = {...this.state.mainChartData};
     employeesOnlineCardData.datasets[0].data = onlineToday;
     freeLaptopCardData.datasets[0].data = monitorsUsedPercentages[MONITOR_TYPE.LAPTOP];
     freeDeskMonitorsCardData.datasets[0].data = monitorsUsedPercentages[MONITOR_TYPE.DESK];
     freeProjectorsCardData.datasets[0].data = monitorsUsedPercentages[MONITOR_TYPE.PROJECTOR];
-
 
     function processSessions(date) {
       let sessions = [];
@@ -512,16 +526,24 @@ class Dashboard extends Component {
       }
     }
 
-
+    let selectedDates = monitorsUsedPerTeam.dates.map((date, index) => {
+      if (index > 10)//don't select more than 10 dates
+        return undefined;
+      let splitted = date.split('-');
+      return new Date(parseInt(splitted[0]), parseInt(splitted[1]), parseInt(splitted[2]));
+    });
     this.setState({
       data: dat.data,
+      date: selectedDates,
       totalMonitors,
       monitorsUsed: monitorsUsedToday,
+      monitorsUsedPerTeam,
       employeesOnlineCardData,
       freeLaptopCardData,
       freeProjectorsCardData,
       freeDeskMonitorsCardData
     });
+    this.dateChange(selectedDates);
 
 
     console.log(dat.data, totalMonitors, monitorsUsedToday);
@@ -538,7 +560,7 @@ class Dashboard extends Component {
     };
     let dateStyle={
       width: '40%'
-    }
+    };
     return (
       <div className="animated fadeIn">
         <Row>
@@ -605,8 +627,20 @@ class Dashboard extends Component {
                       className="form-control"
                       style={dateStyle}
                       value={this.state.date}
-                      options={{mode: this.state.radioSelected===1?"single":"range",
-                        dateFormat: "Y-m-d"}}
+                      options={{
+                        mode: this.state.radioSelected === 1 ? "multiple" : "range",
+                        dateFormat: "Y-m-d",
+                        disable: [
+                          (date) => {
+                            if (!this.state.monitorsUsedPerTeam)
+                              return true;
+                            let dateString = `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
+                            // return true to disable
+                            return this.state.monitorsUsedPerTeam.dates.indexOf(dateString) === -1;
+
+                          }
+                        ]
+                      }}
                       onChange={date => { this.dateChange(date) }} />
                   </Col>
                 </Row>
