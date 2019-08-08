@@ -506,6 +506,12 @@ class Dashboard extends Component {
           //last element, lets pretend its a completed session
           else if(index===date.events.length-1){
             let date=new Date();
+            monitorsUsed.forEach(monitorSession => {//make sure all monitor sessions are valid
+              if (!monitorSession.endTime) {
+                monitorSession.endTime = date;
+                monitorSession.duration = monitorSession.endTime - monitorSession.startTime;
+              }
+            });
             sessions.push({
               startTime: event.time,
               endTime: date,
