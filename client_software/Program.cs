@@ -9,22 +9,24 @@ using WUAT.Properties;
 
 namespace WUAT
 {
+    //main class
     internal class Program
     {
         private readonly ServerConnection _connection;
 
         private readonly bool
-            _loggedIn = true;
+            _loggedIn = true; //whether we have authenticated with server
 
-        private readonly long lastPing = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+        private readonly long lastPing = DateTimeOffset.Now.ToUnixTimeMilliseconds(); //last ping sent to server
         private readonly MonitorState oldState;
         private readonly MonitorState state;
 
         private bool
-            _active;
+            _active; //whether the server is open to receiving data from us
 
         private Program()
         {
+            //all console writes for debugging, will not appear for final program. 
             Console.WriteLine("WUAT: Employee Software. By Ryan Samarakoon");
             Console.WriteLine("Displaying current monitors:");
             state = CaptureState();
@@ -40,15 +42,16 @@ namespace WUAT
                     Console.WriteLine("Lost connection to server!");
                     Console.WriteLine(
                         "Retrying in " + Resources.server_failed_connection_retry_delay_ms / 1000 + " sec");
-                    if (!_active)
+                    if (!_active) //skip the wait counter if the connection was lost prematurely. 
                         _connection.connectionUpdater.WaitOne(Resources.server_failed_connection_retry_delay_ms);
-                    _active = false;
+                    _active = false; //reset to false as we are making a new connection
                     _connection.OpenConnection(); //blocks everything else, program useless without server connection
                 }
 
-                if (DateTimeOffset.Now.ToUnixTimeMilliseconds() - lastPing > 3000 && _loggedIn)
+                if (DateTimeOffset.Now.ToUnixTimeMilliseconds() - lastPing > 3000 && _loggedIn
+                ) //ping every 3 sec if logged in
                 {
-                    _connection.ping();
+                    _connection.Ping();
                     lastPing = DateTimeOffset.Now.ToUnixTimeMilliseconds();
                 }
 
@@ -64,7 +67,7 @@ namespace WUAT
                         var msg = Encoding.ASCII.GetString(bytes)
                             .Replace("\0", ""); //the message incoming, also remove null char from empty buffer
                         foreach (var cmd in msg.Split('\r')
-                        ) //\r sent at end of every command in case we get multiple
+                        ) //\r sent at end of every command so we know when a new command starts
                             if (cmd.Length != 0) //check valid command, sometimes it splits with an empty line
                                 ExecuteServerInstruction(cmd);
                     }
@@ -86,15 +89,15 @@ namespace WUAT
                 }
 
 
-                if (IdleTimeFinder.GetIdleTime() > Resources.inactivity_delay_ms && _loggedIn)
+                if (IdleTimeFinder.GetIdleTime() > Resources.inactivity_delay_ms && _loggedIn) //user is idle
                 {
                     Console.WriteLine("Inactivity detected, logging off");
                     _loggedIn = false;
                     oldState = null;
-                    //close connection, will put a logout event on server
+                    //close connection, will put a logout event on server. 
                     _connection.GetClient().Close();
                 }
-                else if (!_loggedIn && IdleTimeFinder.GetIdleTime() < 5000)
+                else if (!_loggedIn && IdleTimeFinder.GetIdleTime() < 5000) //Then we reconnect once we detect activity
                 {
                     Console.WriteLine("User returned");
                     _loggedIn = true;
@@ -116,31 +119,32 @@ namespace WUAT
             {
                 case "INIT"
                     : //called when the server can't recognise the computer and is requesting for it to send over a team name to register with
-                    Application.Run(new TeamChooser(cmds.Skip(1).ToArray(), _connection));
+                    Application.Run(new TeamChooser(cmds.Skip(1).ToArray(),
+                        _connection)); //open gui so we can ask the employee what team they are in. Backend also provides team names with INIT command
                     break;
-                case "SUCCESS":
+                case "SUCCESS"
+                    : //called when the server recognises the employee and authorises them to send monitor updates. Also sent after a successful register
                     _active = true;
                     break;
             }
         }
 
-        private MonitorState CaptureState()
+        private MonitorState CaptureState() //returns the monitor currently in use
         {
             string name = "", mCode = "";
             int code = 0, mid = 0;
             var list = PathDisplayTarget.GetDisplayTargets();
-            foreach (var target in list)
-            {
-                name = target.FriendlyName;
-                mCode = target.EDIDManufactureCode;
-                mid = target.EDIDManufactureId;
-                code = target.EDIDProductCode;
-            }
+            var target = list[list.Length - 1]; //last monitor is the one in use
 
+            name = target.FriendlyName;
+            mCode = target.EDIDManufactureCode;
+            mid = target.EDIDManufactureId;
+            code = target.EDIDProductCode;
+            //we also attach the time the snapshot was taken so we know if we need to recheck
             return new MonitorState(name, mCode, code, mid, DateTimeOffset.Now.ToUnixTimeMilliseconds());
         }
 
-        private void PrintDisplayInfo()
+        private void PrintDisplayInfo() //debugging print method
         {
             Console.WriteLine("Friendly Name: " + state.FriendlyName);
             Console.WriteLine("Manufacture ID: " + state.MId);
@@ -151,14 +155,18 @@ namespace WUAT
 
         public static void Main(string[] args)
         {
-            Process[] lprcTestApp = Process.GetProcessesByName("WUAT");
-            
-            if (lprcTestApp.Length > 1)//counting itself
+            //check if this program is already running
+            var lprcTestApp = Process.GetProcessesByName("WUAT");
+
+            if (lprcTestApp.Length > 1) //counting itself
+                return; //already running, lets not run
+            if (args.Length == 1 && args[0] == "INSTALLER")
             {
-                return;//already running, lets not run
-            }
-            if (args.Length == 1 && args[0] == "INSTALLER") { Process.Start(Application.ExecutablePath); return; }
-            Application.EnableVisualStyles();
+                Process.Start(Application.ExecutablePath);
+                return;
+            } //if the program is starting from the installer, we don't want to halt the thread
+
+            Application.EnableVisualStyles(); //enable GUI support
             new Program();
         }
     }

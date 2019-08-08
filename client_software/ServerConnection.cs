@@ -3,21 +3,18 @@ using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
-using System.Windows.Forms;
 using WUAT.Properties;
 
 namespace WUAT
 {
     public class ServerConnection //we manage the connection to the WUAT server here. Only the connection however. 
     {
-        //Location of server on the network
+        //used as a sleep function to either wait to reconnect to the server or retry immediately if a network change is detected
+        public readonly AutoResetEvent connectionUpdater = new AutoResetEvent(false);
 
 
         //client instance
         private TcpClient client;
-
-        //used to tell the server to try connecting to the server when the computer connects to a new network
-        public readonly AutoResetEvent connectionUpdater = new AutoResetEvent(false);
 
 
         public ServerConnection()
@@ -50,9 +47,9 @@ namespace WUAT
             {
                 Console.WriteLine(e.StackTrace);
                 Console.WriteLine("Failed to Connect");
-                Console.WriteLine("Retrying in "+Resources.server_failed_connection_retry_delay_ms/1000+" sec");
-                if (connectionUpdater.WaitOne( /*10 * 60 * 1000*/Resources.server_failed_connection_retry_delay_ms)
-                ) //wait for 10 min or when the network state changes TODO change to 10 min after testing 
+                Console.WriteLine("Retrying in " + Resources.server_failed_connection_retry_delay_ms / 1000 + " sec");
+                if (connectionUpdater.WaitOne(Resources.server_failed_connection_retry_delay_ms)
+                ) //wait for 10 min or when the network state changes
                     Console.WriteLine("Network change detected! Retrying...");
 
                 OpenConnection();
@@ -63,10 +60,10 @@ namespace WUAT
         {
             client.Close();
             Console.WriteLine("Connection Closed");
-            //TODO prob wanna quit here
+            //TODO may want to quit here, but for now this method is never used
         }
 
-        internal void SendData(string data)
+        internal void SendData(string data) //send data to backend
         {
             if (client == null || !client.Connected) throw new InvalidOperationException("Server isn't connected to!");
 
@@ -76,8 +73,9 @@ namespace WUAT
                 var nwStream = client.GetStream();
                 var bytes = Encoding.ASCII.GetBytes(data);
                 nwStream.Write(bytes, 0, bytes.Length);
-                if(data.Length!=0&&!data.Equals("PING"))
-                Console.WriteLine("Sent data: " + data);
+                if (data.Length != 0 && !data.Equals("PING")
+                ) //no point logging a ping command for debugging, pollutes console
+                    Console.WriteLine("Sent data: " + data);
             }
             catch (Exception e)
             {
@@ -96,9 +94,9 @@ namespace WUAT
             return client;
         }
 
-        public void ping()
+        public void Ping() //ping the server. Keeps connection active and lets program be alerted on disconnects
         {
-           SendData("PING");
+            SendData("PING");
         }
     }
 }

@@ -198,9 +198,6 @@ const mainChartOpts = {
       {
         ticks: {
           beginAtZero: true,
-          maxTicksLimit: 5,
-          stepSize: Math.ceil(250 / 5),
-          max: 250,
         },
       }],
   },
@@ -470,6 +467,8 @@ class Dashboard extends Component {
       date.events.forEach((event, index) => {
         event.time = new Date(event.time);
         if (event.type === 'LOG_IN') {
+
+
           //find logout
           let logoutPair = null;
           let monitorsUsed = [];
@@ -504,6 +503,16 @@ class Dashboard extends Component {
               duration: logoutPair.time - event.time,
               monitorsUsed
             });
+          //last element, lets pretend its a completed session
+          else if(index===date.events.length-1){
+            let date=new Date();
+            sessions.push({
+              startTime: event.time,
+              endTime: date,
+              duration: date-event.time,
+              monitorsUsed
+            })
+          }
 
 
         }

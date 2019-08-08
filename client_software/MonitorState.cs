@@ -1,5 +1,7 @@
 namespace WUAT
 {
+    //a Plain Old Object to store the monitor state. Has some equals and hash methods to help compare old monitor states
+
     public class MonitorState
     {
         public MonitorState(string friendlyName, string mCode, int productId, int mId, long captureTime)

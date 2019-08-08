@@ -117,22 +117,23 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="monitor_check_delay_ms" type="System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
+  <assembly alias="mscorlib" name="mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"/>
+  <data name="monitor_check_delay_ms" type="System.Int32, mscorlib">
     <value>3000</value>
   </data>
-  <data name="main_tick_speed_ms" type="System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
+  <data name="main_tick_speed_ms" type="System.Int32, mscorlib">
     <value>100</value>
   </data>
   <data name="server_ip" xml:space="preserve">
     <value>localhost</value>
   </data>
-  <data name="server_port" type="System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
+  <data name="server_port" type="System.Int32, mscorlib">
     <value>7250</value>
   </data>
-  <data name="server_failed_connection_retry_delay_ms" type="System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
+  <data name="server_failed_connection_retry_delay_ms" type="System.Int32, mscorlib">
     <value>600000</value>
   </data>
-  <data name="inactivity_delay_ms" type="System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
+  <data name="inactivity_delay_ms" type="System.Int32, mscorlib">
     <value>300000</value>
   </data>
 </root>
