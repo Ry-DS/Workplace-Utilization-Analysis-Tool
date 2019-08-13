@@ -40,7 +40,7 @@ router.post("/edit/create", (req, res) => {//begin registering from above method
     if (team) {//if found, let user know
       return res.status(400).json({name: "Team already exists"});
     } else {//otherwise, add
-      let team = new Team({name: query.name});
+      let team = new Team({name: query.name, color: query.color});
       team.save().then(team => {
         res.json({team});
       }).catch(err => console.log(err));

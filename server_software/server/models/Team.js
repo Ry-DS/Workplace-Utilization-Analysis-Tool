@@ -32,6 +32,7 @@ const TeamSchema = new Schema({
   employees: {
     type: [EmployeeSchema], default: []
   },
+  color: {type: String, required: true, default: '#0b406c'}
 
 });
 module.exports = Team = mongoose.model("teams", TeamSchema);

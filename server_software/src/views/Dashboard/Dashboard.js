@@ -198,7 +198,12 @@ const mainChartOpts = {
       {
         ticks: {
           beginAtZero: true,
-        },
+          callback: function (value) {
+            if (value % 1 === 0) {
+              return value;
+            }
+          }
+        }
       }],
   },
   elements: {
@@ -311,18 +316,47 @@ class Dashboard extends Component {
     });
     this.dateChange(this.state.date);
   };
-  dateChange = (date) => {//TODO
+  dateChange = (dates) => {
     let datasets = [];
     let mainChartData = {...this.state.mainChartData};
-    mainChartData.labels = date.length === 1 ? times : date.map(d => {
-      return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`
+    mainChartData.labels = dates.length === 1 ? times : dates.sort((a, b) => a - b).map(d => {
+      return createDateString(d)
 
     });
     if (this.state.monitorsUsedPerTeam) {
+      console.log(this.state.monitorsUsedPerTeam);
+      for (let teamId in this.state.monitorsUsedPerTeam) {
+        if (!this.state.monitorsUsedPerTeam.hasOwnProperty(teamId) || teamId === 'dates')
+          continue;
+        let team = this.state.teamIndex[teamId];
+        let data = Array(dates.length === 1 ? 24 : dates.length).fill(0);
+        if (dates.length === 1) {
+          let day = this.state.monitorsUsedPerTeam[teamId][createDateString(dates[0])];
+          if (day) {
+            data = day.byHour;
+          }
+        } else
+          for (let i = 0; i < dates.length; i++) {
+            let dayMax = this.state.monitorsUsedPerTeam[teamId][createDateString(dates[i])];
+            if (dayMax) {
+              data[i] = dayMax.max;
+            }
+          }
+        datasets.push({
+          label: team.name,
+          backgroundColor: hexToRgba(team.color, 10),
+          borderColor: team.color,
+          pointHoverBackgroundColor: '#fff',
+          borderWidth: 2,
+          data: data
 
+        });
+
+      }
+      mainChartData.datasets = datasets;
 
     }
-    this.setState({date, mainChartData});
+    this.setState({date: dates, mainChartData});
   };
 
   processData(dat) {//this method is terrible, and I know no better way of doing it, maybe I would have split it up into nicer methods if I had time.
@@ -355,14 +389,14 @@ class Dashboard extends Component {
 
         }
         monitor.quota.forEach(floor => {
-          if (typeof totalMonitors[MONITOR_TYPE[type]] === 'number')
+          if (typeof totalMonitors[MONITOR_TYPE[type]] === 'number')//if a number is already there, add onto it
             totalMonitors[MONITOR_TYPE[type]] += floor.amount;
-          else totalMonitors[MONITOR_TYPE[type]] = floor.amount;
+          else totalMonitors[MONITOR_TYPE[type]] = floor.amount;//otherwise, initialise it as a new number.
           floor.sharedWith.forEach(id => {
             let team = teamIndex[id];
             if (!team.totalMonitors)
               team.totalMonitors = {};
-            if (typeof team.totalMonitors[MONITOR_TYPE[type]] === 'number')
+            if (typeof team.totalMonitors[MONITOR_TYPE[type]] === 'number')//same as above
               team.totalMonitors[MONITOR_TYPE[type]] += floor.amount;
             else team.totalMonitors[MONITOR_TYPE[type]] = floor.amount;
 
@@ -372,7 +406,7 @@ class Dashboard extends Component {
       });
     }
     let date = new Date();
-    let dateString = `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
+    let dateString = createDateString(date);
 
     //today
     //employees online at a specific hour
@@ -455,8 +489,7 @@ class Dashboard extends Component {
     let employeesOnlineCardData = {...this.state.employeesOnlineCardData},
       freeLaptopCardData = {...this.state.freeLaptopCardData},
       freeProjectorsCardData = {...this.state.freeProjectorsCardData},
-      freeDeskMonitorsCardData = {...this.state.freeDeskMonitorsCardData},
-      mainChartData = {...this.state.mainChartData};
+      freeDeskMonitorsCardData = {...this.state.freeDeskMonitorsCardData};
     employeesOnlineCardData.datasets[0].data = onlineToday;
     freeLaptopCardData.datasets[0].data = monitorsUsedPercentages[MONITOR_TYPE.LAPTOP];
     freeDeskMonitorsCardData.datasets[0].data = monitorsUsedPercentages[MONITOR_TYPE.DESK];
@@ -549,6 +582,8 @@ class Dashboard extends Component {
     });
     this.setState({
       data: dat.data,
+      monitorIndex,
+      teamIndex,
       date: selectedDates,
       totalMonitors,
       monitorsUsed: monitorsUsedToday,
@@ -558,7 +593,7 @@ class Dashboard extends Component {
       freeProjectorsCardData,
       freeDeskMonitorsCardData
     });
-    this.dateChange(selectedDates);
+    this.dateChange(selectedDates);//updates main chart
 
 
     console.log(dat.data, totalMonitors, monitorsUsedToday);
@@ -570,7 +605,7 @@ class Dashboard extends Component {
   render() {
     let hour = new Date().getHours();
     let getFree = (type) => {
-      return this.state.monitorsUsed ? this.state.totalMonitors[type] - this.state.monitorsUsed[type][hour] : null;
+      return this.state.monitorsUsed && this.state.monitorsUsed[type] ? this.state.totalMonitors[type] - this.state.monitorsUsed[type][hour] : null;
 
     };
     let dateStyle={
@@ -581,7 +616,8 @@ class Dashboard extends Component {
         <Row>
 
           <Col xs="12" sm="6" lg="3">
-            <DashboardCard className="text-white card-1-bg" title="Free Laptops this Hour" content={getFree(MONITOR_TYPE.LAPTOP)}>
+            <DashboardCard className="text-white card-1-bg" title="Laptops not in use this Hour"
+                           content={getFree(MONITOR_TYPE.LAPTOP)}>
               <div className="chart-wrapper mx-3" style={{height: '70px'}}>
                 <Line data={this.state.freeLaptopCardData} options={freeLaptopCardOpts} height={70}/>
               </div>
@@ -649,7 +685,7 @@ class Dashboard extends Component {
                           (date) => {
                             if (!this.state.monitorsUsedPerTeam)
                               return true;
-                            let dateString = `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
+                            let dateString = createDateString(date);
                             // return true to disable
                             return this.state.monitorsUsedPerTeam.dates.indexOf(dateString) === -1;
 
@@ -666,27 +702,27 @@ class Dashboard extends Component {
               <CardFooter>
                 <Row className="text-center">
                   <Col sm={12} md className="mb-sm-2 mb-0">
-                    <div className="text-muted">Visits</div>
+                    <div className="text-muted">Team 1</div>
                     <strong>29.703 Users (40%)</strong>
                     <Progress className="progress-xs mt-2" color="success" value="40"/>
                   </Col>
                   <Col sm={12} md className="mb-sm-2 mb-0 d-md-down-none">
-                    <div className="text-muted">Unique</div>
+                    <div className="text-muted">Team 2</div>
                     <strong>24.093 Users (20%)</strong>
                     <Progress className="progress-xs mt-2" color="info" value="20"/>
                   </Col>
                   <Col sm={12} md className="mb-sm-2 mb-0">
-                    <div className="text-muted">Pageviews</div>
+                    <div className="text-muted">Team 3</div>
                     <strong>78.706 Views (60%)</strong>
                     <Progress className="progress-xs mt-2" color="warning" value="60"/>
                   </Col>
                   <Col sm={12} md className="mb-sm-2 mb-0">
-                    <div className="text-muted">New Users</div>
+                    <div className="text-muted">Team 4</div>
                     <strong>22.123 Users (80%)</strong>
                     <Progress className="progress-xs mt-2" color="danger" value="80"/>
                   </Col>
                   <Col sm={12} md className="mb-sm-2 mb-0 d-md-down-none">
-                    <div className="text-muted">Bounce Rate</div>
+                    <div className="text-muted">Team 4</div>
                     <strong>Average Rate (40.15%)</strong>
                     <Progress className="progress-xs mt-2" color="primary" value="40"/>
                   </Col>
@@ -921,6 +957,11 @@ class Dashboard extends Component {
       </div>
     );
   }
+
+}
+
+function createDateString(date) {//easy method to convert a date to a readable string.
+  return `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
 }
 
 export default Dashboard;

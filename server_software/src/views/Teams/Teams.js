@@ -24,7 +24,13 @@ import {ReactTabulator} from 'react-tabulator';
 import LoadingAnimation from "../../utils/LoadingAnimation";
 import {getStyle} from "@coreui/coreui/dist/js/coreui-utilities";
 import tutorial from './../../utils/tutorial';
-
+import Pickr from '@simonwep/pickr';
+import '@simonwep/pickr/dist/themes/classic.min.css';
+//fetch color themes from css
+const brandDark = getStyle('--theme-dark');
+const brandLight = getStyle('--theme-light');
+const brandNorm = getStyle('--theme-norm');
+const brandBland = getStyle('--theme-bland');
 const editButtons = function () { //plain text value, so we cant use react jsx. Instead, just a plain html button for deletion
   return "<Button class='btn btn-danger' style='width: 100%'><i class='fa fa-trash-o'/></Button>"
 };
@@ -83,6 +89,42 @@ function flatpickerEditor(cell, onRendered, success, cancel)
   return input.get()[0];
 }
 
+function colorPickerEditor(cell, onRendered, success, cancel, ref) {
+  let input = ref && ref.current ? ref.current : $(colorFormatter(cell)).get()[0];
+  const pickr = new Pickr({
+    el: input, // Insert query / element
+    default: cell.getValue(),
+    useAsButton: true,
+    swatches: [brandDark, brandLight, brandBland, brandNorm
+    ],
+
+    components: {
+
+      preview: true,
+      opacity: false,
+      hue: true,
+
+      interaction: {
+        input: true,
+        save: true
+      }
+    }
+  });
+  pickr.on('save', color => {
+    success('#' + color.toHEXA().join(''));
+    pickr.hide();
+  });
+  pickr.on('hide', () => cancel());
+
+
+  onRendered(function () {
+    pickr.show();
+  });
+
+  return input;
+}
+
+
 //https://stackoverflow.com/questions/13898423/javascript-convert-24-hour-time-of-day-string-to-12-hour-time-with-am-pm-and-no
 function timeFormatter(cell) {
   // Check correct time format and split into components
@@ -96,13 +138,19 @@ function timeFormatter(cell) {
   return time.join(''); // return adjusted time or original string
 }
 
+function colorFormatter(cell) {
+  return `<div style='background-color: ${cell.getValue()};width: 2em;height: 2em;display: block;margin:auto;border-radius: 3px'></div>`
+}
+
+
 const columns = (container) => {
   return [//define columns for the table, we pass the Users component, so we can perform actions on click
     {title: "Name", field: "name", editor: true},
     {title: "Created on", field: "creationDate", align: "center"},
-    {title: "Registered", field: "employeeCount", align: "center"},
+    {title: "Count", field: "employeeCount", align: "center", width: 100},
     {title: "Start Tracking", field: 'startTime', align: 'center', editor: flatpickerEditor, formatter: timeFormatter},
     {title: "Stop Tracking", field: 'endTime', align: 'center', editor: flatpickerEditor, formatter: timeFormatter},
+    {title: '', field: 'color', align: 'center', editor: colorPickerEditor, formatter: colorFormatter, width: 30},
     {
       title: "Del.", sortable: false, width: 70, formatter: editButtons, cellClick: function (e, cell, value, data) {
         if (window.confirm(`You are about to delete ${cell._cell.row.data.name}. This action will permanently delete ALL employee data attached with this team`)) {//on delete button, make sure they want to delete
@@ -126,9 +174,11 @@ class Teams extends Component {
       data: [],//table data to display
       errors: {},//errors and fields listed for the register form
       name: '',
+      color: brandNorm,
       hint: !tutorial.isFinished('edit_team_names'),
       formLoading: false//whether the registration form is processing, disables the submit button
-    }
+    };
+    this.colorRef = React.createRef();
 
   }
 
@@ -145,6 +195,13 @@ class Teams extends Component {
       });
       this.setState({data, loading: false});//update table and stop loading animation
     });
+    if (this.colorRef.current) {
+
+      colorPickerEditor({getValue: () => this.state.color}, () => {
+      }, (color) => this.setState({color}), () => {
+      }, this.colorRef.current);
+    }
+
   }
 
   editedData(data) {//when a cell is edited
@@ -160,7 +217,8 @@ class Teams extends Component {
     e.preventDefault();//prevent the default HTML form submit
     this.setState({formLoading: true, errors: {}});//start loading animation
     axios.post('/api/teams/edit/create', {//try register team with form data form state
-      name: this.state.name
+      name: this.state.name,
+      color: this.state.color
     }).then(res => {//success?
       this.setState({formLoading: false});//remove loading animation
       this.componentDidMount();//reload table with new user
@@ -181,6 +239,14 @@ class Teams extends Component {
       backgroundColor: getStyle('--theme-light'),
       borderColor: getStyle('--theme-bland'),
       color: '#fff'
+    };
+    const colorPickerStyle = {
+      backgroundColor: this.state.color,
+      width: '2em',
+      height: '2em',
+      display: 'block',
+      borderRadius: '3px',
+      cursor: 'pointer'
     };
 
     //render html page to user, comments cannot be inserted within a html document when using JSX
@@ -210,8 +276,9 @@ class Teams extends Component {
                                tutorial.addFinished("edit_team_names")
                              }}>
                         <h6>Did you know?</h6>
-                        You can rename teams and change their tracking times by clicking the respective fields. Try it out!<br/><br/>
-                        <i>The tracking times define when WUAT should actively track data from employees, don't want outliers from 12 at midnight!</i>
+                        You can rename teams, change their tracking times and color by clicking the respective cells.
+                        Try it out!<br/><br/>
+                        <i>The tracking times define when WUAT should actively track data from employees</i>
                       </Alert>
                     </div>
                 }
@@ -237,6 +304,15 @@ class Teams extends Component {
                              className={this.state.errors.name ? 'is-invalid' : ''} type="text" id="name" name="name"
                              placeholder="Name"/>
                       <FormFeedback>{this.state.errors.name}</FormFeedback>
+                    </InputGroup>
+                  </FormGroup>
+                  <FormGroup>
+                    <InputGroup>
+                      <InputGroupAddon addonType="prepend">
+                        <InputGroupText><i className="fa fa-paint-brush"/></InputGroupText>
+                      </InputGroupAddon>
+                      <div ref={this.colorRef} style={colorPickerStyle}/>
+                      <FormFeedback>{this.state.errors.color}</FormFeedback>
                     </InputGroup>
                   </FormGroup>
                   <FormGroup>
