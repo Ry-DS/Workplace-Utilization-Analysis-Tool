@@ -101,7 +101,7 @@ namespace WUAT.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to localhost.
+        ///   Looks up a localized string similar to 10.21.2.28.
         /// </summary>
         internal static string server_ip {
             get {

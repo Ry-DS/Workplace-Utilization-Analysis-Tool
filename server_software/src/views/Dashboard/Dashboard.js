@@ -15,6 +15,7 @@ import {
 import {CustomTooltips} from '@coreui/coreui-plugin-chartjs-custom-tooltips';
 import {getStyle, hexToRgba} from '@coreui/coreui/dist/js/coreui-utilities'
 import DashboardCard from "./DashboardCard";
+import {checkTime, cleanData, createDateString, mainChartOpts, processSessions} from '../../utils/data-processing-utils'
 //data stuff
 import axios from 'axios';
 import MONITOR_TYPE from '../../utils/monitorTypes';
@@ -88,131 +89,10 @@ const employeesOnlineCardOpts = {
   },
 };
 
-// sparkline charts
-const sparkLineChartData = [
-  {
-    data: [35, 23, 56, 22, 97, 23, 64],
-    label: 'New Clients',
-  },
-  {
-    data: [65, 59, 84, 84, 51, 55, 40],
-    label: 'Recurring Clients',
-  },
-  {
-    data: [35, 23, 56, 22, 97, 23, 64],
-    label: 'Pageviews',
-  },
-  {
-    data: [65, 59, 84, 84, 51, 55, 40],
-    label: 'Organic',
-  },
-  {
-    data: [78, 81, 80, 45, 34, 12, 40],
-    label: 'CTR',
-  },
-  {
-    data: [1, 13, 9, 17, 34, 41, 38],
-    label: 'Bounce Rate',
-  },
-];
-
-const makeSparkLineData = (dataSetNo, variant) => {
-  const dataset = sparkLineChartData[dataSetNo];
-  const data = {
-    labels: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
-    datasets: [
-      {
-        backgroundColor: 'transparent',
-        borderColor: variant ? variant : '#c2cfd6',
-        data: dataset.data,
-        label: dataset.label,
-      },
-    ],
-  };
-  return () => data;
-};
-
-const sparklineChartOpts = {
-  tooltips: {
-    enabled: false,
-    custom: CustomTooltips
-  },
-  responsive: true,
-  maintainAspectRatio: true,
-  scales: {
-    xAxes: [
-      {
-        display: false,
-      }],
-    yAxes: [
-      {
-        display: false,
-      }],
-  },
-  elements: {
-    line: {
-      borderWidth: 2,
-    },
-    point: {
-      radius: 0,
-      hitRadius: 10,
-      hoverRadius: 4,
-      hoverBorderWidth: 3,
-    },
-  },
-  legend: {
-    display: false,
-  },
-};
 
 // Main Chart
 
 
-const mainChartOpts = {
-  tooltips: {
-    enabled: false,
-    custom: CustomTooltips,
-    intersect: true,
-    mode: 'index',
-    position: 'nearest',
-    callbacks: {
-      labelColor: function (tooltipItem, chart) {
-        return {backgroundColor: chart.data.datasets[tooltipItem.datasetIndex].borderColor}
-      }
-    }
-  },
-  maintainAspectRatio: false,
-  legend: {
-    display: false,
-  },
-  scales: {
-    xAxes: [
-      {
-        gridLines: {
-          drawOnChartArea: false,
-        },
-      }],
-    yAxes: [
-      {
-        ticks: {
-          beginAtZero: true,
-          callback: function (value) {
-            if (value % 1 === 0) {
-              return value;
-            }
-          }
-        }
-      }],
-  },
-  elements: {
-    point: {
-      radius: 0,
-      hitRadius: 10,
-      hoverRadius: 4,
-      hoverBorderWidth: 3,
-    },
-  },
-};
 
 class Dashboard extends Component {
   constructor(props) {
@@ -268,32 +148,7 @@ class Dashboard extends Component {
       },
       mainChartData : {
         labels: [],
-        datasets: [
-          {
-            label: 'My First dataset',
-            backgroundColor: hexToRgba(brandNorm, 10),
-            borderColor: brandNorm,
-            pointHoverBackgroundColor: '#fff',
-            borderWidth: 2,
-            data: [],
-          },
-          {
-            label: 'My Second dataset',
-            backgroundColor: 'transparent',
-            borderColor: brandLight,
-            pointHoverBackgroundColor: '#fff',
-            borderWidth: 2,
-            data: [],
-          },
-          {
-            label: 'My Third dataset',
-            backgroundColor: 'transparent',
-            borderColor: brandDark,
-            pointHoverBackgroundColor: '#fff',
-            borderWidth: 2,
-            data: [],
-          },
-        ],
+        datasets: [],
       },
       date: new Date()
 
@@ -357,51 +212,18 @@ class Dashboard extends Component {
     this.setState({date: dates, mainChartData});
   };
 
-  processData(dat) {//this method is terrible, and I know no better way of doing it, maybe I would have split it up into nicer methods if I had time.
+  processData(raw) {//this method is terrible, and I know no better way of doing it, maybe I would have split it up into nicer methods if I had time.
     console.time('processData');
-    //total count of all monitors
-    let totalMonitors = {};
-    let monitors = dat.data.monitors;
-    let teams = dat.data.teams;
-    //quick lookup of teams and monitors based off ids
-    let teamIndex = {};
-    let monitorIndex = {};
-    //setup indexes
-    teams.forEach(team => teamIndex[team._id] = team);
-    let newMonitor = false;
-    monitors.forEach(monitor => {
+    let data = cleanData(raw);
 
-      monitorIndex[monitor._id] = monitor;
+    let newMonitor = false;
+    data.monitors.forEach(monitor => {
+
       newMonitor = monitor.new;//also detect new monitors
 
     });
     if (newMonitor) {//and send alerting message if they exist
       toast.notify("A new Monitor has been discovered, make sure to review it!");
-    }
-
-    //calculate total monitors in building+assign total monitors accessible to each team.
-    for (let type in MONITOR_TYPE) {
-      monitors.forEach(monitor => {
-        if (monitor.type !== MONITOR_TYPE[type]) {
-          return;
-
-        }
-        monitor.quota.forEach(floor => {
-          if (typeof totalMonitors[MONITOR_TYPE[type]] === 'number')//if a number is already there, add onto it
-            totalMonitors[MONITOR_TYPE[type]] += floor.amount;
-          else totalMonitors[MONITOR_TYPE[type]] = floor.amount;//otherwise, initialise it as a new number.
-          floor.sharedWith.forEach(id => {
-            let team = teamIndex[id];
-            if (!team.totalMonitors)
-              team.totalMonitors = {};
-            if (typeof team.totalMonitors[MONITOR_TYPE[type]] === 'number')//same as above
-              team.totalMonitors[MONITOR_TYPE[type]] += floor.amount;
-            else team.totalMonitors[MONITOR_TYPE[type]] = floor.amount;
-
-
-          });
-        });
-      });
     }
     let date = new Date();
     let dateString = createDateString(date);
@@ -414,14 +236,13 @@ class Dashboard extends Component {
     for (let type in MONITOR_TYPE) {//populate with the current amount of monitors per type.
       monitorsUsedToday[MONITOR_TYPE[type]] = Array(date.getHours() + 1).fill(0);
     }
-    teams.forEach(team => {
+    data.teams.forEach(team => {
       monitorsUsedPerTeam[team._id] = {};
     });
     monitorsUsedPerTeam.dates = [];
-    teams.forEach(team => {
+    data.teams.forEach(team => {
       team.employees.forEach(employee => {
         employee.usageData.forEach(date => {
-          date.sessions = processSessions(date);
           if (monitorsUsedPerTeam.dates.indexOf(date._id) === -1) {//add it if it isn't already there
             monitorsUsedPerTeam.dates.push(date._id);
           }
@@ -479,7 +300,7 @@ class Dashboard extends Component {
       if (!monitorsUsedPercentages.hasOwnProperty(type))
         continue;
       for (let i = 0; i < monitorsUsedPercentages[type].length; i++) {
-        monitorsUsedPercentages[type][i] = (monitorsUsedPercentages[type][i] / totalMonitors[type] * 100).toFixed(1);
+        monitorsUsedPercentages[type][i] = (monitorsUsedPercentages[type][i] / data.totalMonitors[type] * 100).toFixed(1);
       }
 
     }
@@ -493,84 +314,7 @@ class Dashboard extends Component {
     freeDeskMonitorsCardData.datasets[0].data = monitorsUsedPercentages[MONITOR_TYPE.DESK];
     freeProjectorsCardData.datasets[0].data = monitorsUsedPercentages[MONITOR_TYPE.PROJECTOR];
 
-    function processSessions(date) {
-      let sessions = [];
-      date.events.forEach((event, index) => {
-        event.time = new Date(event.time);
-        if (event.type === 'LOG_IN') {
 
-
-          //find logout
-          let logoutPair = null;
-          let monitorsUsed = [];
-          let monitor = monitorIndex[event.monitorGroup_id];
-          if (monitor) {
-            monitorsUsed.push({startTime: event.time, monitor});
-          }
-          for (let i = index + 1; i < date.events.length; i++) {
-            if (i >= date.events.length)
-              break;
-            let other = date.events[i];
-            other.time = new Date(other.time);
-            if ((other.type === 'PLUG_IN' || other.type === 'LOG_OUT') && monitorsUsed.length !== 0) {//set time durations of monitor usages
-              monitorsUsed[monitorsUsed.length - 1].duration = other.time - monitorsUsed[monitorsUsed.length - 1].startTime;
-              monitorsUsed[monitorsUsed.length - 1].endTime = other.time;
-            }
-            if (other.type === 'PLUG_IN') {
-              let monitor = monitorIndex[other.monitorGroup_id];
-              if (monitor) {
-                monitorsUsed.push({startTime: other.time, monitor});
-              }
-            }
-            if (other.type === 'LOG_OUT') {
-              logoutPair = other;
-              break;
-            }
-          }
-          if (logoutPair != null)
-            sessions.push({
-              startTime: event.time,
-              endTime: logoutPair.time,
-              duration: logoutPair.time - event.time,
-              monitorsUsed
-            });
-          //last element, lets pretend its a completed session
-          else if(index===date.events.length-1){
-            let date=new Date();
-            monitorsUsed.forEach(monitorSession => {//make sure all monitor sessions are valid
-              if (!monitorSession.endTime) {
-                monitorSession.endTime = date;
-                monitorSession.duration = monitorSession.endTime - monitorSession.startTime;
-              }
-            });
-            sessions.push({
-              startTime: event.time,
-              endTime: date,
-              duration: date-event.time,
-              monitorsUsed
-            })
-          }
-
-
-        }
-      });
-      return sessions;
-    }
-
-    function checkTime(ch, cm, start, end) {
-      let h = ch, m = cm
-        , a = start.getHours(), b = start.getMinutes()
-        , c = end.getHours(), d = end.getMinutes();
-      if (a > c || ((a === c) && (b > d))) {
-        // not a valid input
-      } else {
-        if (h > a && h < c) {
-          return true;
-        } else if (h === a && m >= b) {
-          return true;
-        } else return h === c && m <= d;
-      }
-    }
 
     let selectedDates = monitorsUsedPerTeam.dates.map((date, index) => {
       if (index > 10)//don't select more than 10 dates
@@ -579,11 +323,10 @@ class Dashboard extends Component {
       return new Date(parseInt(splitted[0]), parseInt(splitted[1]), parseInt(splitted[2]));
     });
     this.setState({
-      data: dat.data,
-      monitorIndex,
-      teamIndex,
+      monitorIndex: data.monitorIndex,
+      teamIndex: data.teamIndex,
       date: selectedDates,
-      totalMonitors,
+      totalMonitors: data.totalMonitors,
       monitorsUsed: monitorsUsedToday,
       monitorsUsedPerTeam,
       employeesOnlineCardData,
@@ -594,7 +337,7 @@ class Dashboard extends Component {
     this.dateChange(selectedDates);//updates main chart
 
 
-    console.log(dat.data, totalMonitors, monitorsUsedToday);
+    console.log(raw.data, data.totalMonitors, monitorsUsedToday);
     console.timeEnd('processData');
 
   }
@@ -611,6 +354,7 @@ class Dashboard extends Component {
     };
     return (
       <div className="animated fadeIn">
+        {/*Cards at top*/}
         <Row>
 
           <Col xs="12" sm="6" lg="3">
@@ -716,7 +460,7 @@ class Dashboard extends Component {
                   </Col>
                   <Col sm={12} md className="mb-sm-2 mb-0">
                     <div className="text-muted">Team 4</div>
-                    <strong>22.123 Users (80%)</strong>
+                    <strong>22.123 Usekrs (80%)</strong>
                     <Progress className="progress-xs mt-2" color="danger" value="80"/>
                   </Col>
                   <Col sm={12} md className="mb-sm-2 mb-0 d-md-down-none">
@@ -738,8 +482,5 @@ class Dashboard extends Component {
 
 }
 
-function createDateString(date) {//easy method to convert a date to a readable string.
-  return `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
-}
 
 export default Dashboard;

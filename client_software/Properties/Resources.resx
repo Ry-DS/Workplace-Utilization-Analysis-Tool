@@ -125,7 +125,7 @@
     <value>100</value>
   </data>
   <data name="server_ip" xml:space="preserve">
-    <value>localhost</value>
+    <value>10.21.2.28</value>
   </data>
   <data name="server_port" type="System.Int32, mscorlib">
     <value>7250</value>

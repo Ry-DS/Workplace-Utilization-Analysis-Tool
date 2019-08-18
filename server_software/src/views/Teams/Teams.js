@@ -147,7 +147,7 @@ const columns = (container) => {
   return [//define columns for the table, we pass the Users component, so we can perform actions on click
     {title: "Name", field: "name", editor: true},
     {title: "Created on", field: "creationDate", align: "center"},
-    {title: "Count", field: "employeeCount", align: "center", width: 100},
+    {title: "Registered", field: "employeeCount", align: "center", width: 120},
     {title: "Start Tracking", field: 'startTime', align: 'center', editor: flatpickerEditor, formatter: timeFormatter},
     {title: "Stop Tracking", field: 'endTime', align: 'center', editor: flatpickerEditor, formatter: timeFormatter},
     {title: '', field: 'color', align: 'center', editor: colorPickerEditor, formatter: colorFormatter, width: 30},
@@ -253,7 +253,7 @@ class Teams extends Component {
     return (
       <div className="animated fadeIn">
         <Row>
-          <Col xs="12" sm="9">
+          <Col xs="12" sm="12">
             <Card>
               <CardHeader>
                 <i className="fa fa-user"/> Teams
@@ -288,7 +288,9 @@ class Teams extends Component {
 
 
           </Col>
-          <Col xs="12" sm="3">
+        </Row>
+        <Row>
+          <Col xs="12" sm="5">
             <Card>
               <CardHeader>
                 <i className="fa fa-plus"/> Add a Team
