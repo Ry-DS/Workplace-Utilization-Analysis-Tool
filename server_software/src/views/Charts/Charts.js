@@ -6,52 +6,8 @@ import './../../scss/flatpickr-bgis.scss'
 
 import Flatpickr from 'react-flatpickr'
 import axios from "axios";
+import {mainChartOpts} from '../../utils/data-processing-utils'
 
-const totalMonitorUsagePerTypeOpts = {
-  tooltips: {
-    enabled: false,
-    custom: CustomTooltips,
-    intersect: true,
-    mode: 'index',
-    position: 'nearest',
-    callbacks: {
-      labelColor: function (tooltipItem, chart) {
-        return {backgroundColor: chart.data.datasets[tooltipItem.datasetIndex].borderColor}
-      }
-    }
-  },
-  maintainAspectRatio: false,
-  legend: {
-    display: false,
-  },
-  scales: {
-    xAxes: [
-      {
-        gridLines: {
-          drawOnChartArea: false,
-        },
-      }],
-    yAxes: [
-      {
-        ticks: {
-          beginAtZero: true,
-          callback: function (value) {
-            if (value % 1 === 0) {
-              return value;
-            }
-          }
-        }
-      }],
-  },
-  elements: {
-    point: {
-      radius: 0,
-      hitRadius: 10,
-      hoverRadius: 4,
-      hoverBorderWidth: 3,
-    },
-  },
-};
 
 const line = {
   labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
@@ -212,7 +168,9 @@ class Charts extends Component {
       this.processData(dat);
     })
   }
+  processData(dat){
 
+  }
   dateChange = (dates) => {
 
     this.setState({dates})
@@ -247,7 +205,7 @@ class Charts extends Component {
               </Col>
             </Row>
             <div className="chart-wrapper" style={{height: 300 + 'px', marginTop: 40 + 'px'}}>
-              <Line data={line} options={totalMonitorUsagePerTypeOpts} height={300}/>
+              <Line data={line} options={mainChartOpts} height={300}/>
             </div>
           </CardBody>
 

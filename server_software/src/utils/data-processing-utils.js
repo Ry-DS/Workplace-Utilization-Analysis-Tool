@@ -1,52 +1,55 @@
 import {CustomTooltips} from "@coreui/coreui-plugin-chartjs-custom-tooltips";
 import MONITOR_TYPE from './monitorTypes'
+//to help sort out the complex code to process the data
+//if this was a proper project with more time, we might do this at the backend instead to optimise experience for the user
 
 function createDateString(date) {//easy method to convert a date to a readable string.
   return `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
 }
 
-function processSessions(date, monitorIndex) {
+function processSessions(date, monitorIndex) {//makes sessions out of the recorded events in a day
+  //a session is defined as a login event, followed by some update events then a logout event.
   let sessions = [];
-  date.events.forEach((event, index) => {
+  date.events.forEach((event, index) => {//for every event in the given day
     event.time = new Date(event.time);
-    if (event.type === 'LOG_IN') {
+    if (event.type === 'LOG_IN') {//if its a login
 
 
       //find logout
       let logoutPair = null;
-      let monitorsUsed = [];
-      let monitor = monitorIndex[event.monitorGroup_id];
-      if (monitor) {
-        monitorsUsed.push({startTime: event.time, monitor});
+      let monitorsUsed = [];//storing monitors used in this session
+      let monitor = monitorIndex[event.monitorGroup_id];//get monitor first used in login event
+      if (monitor) {//if it exists
+        monitorsUsed.push({startTime: event.time, monitor});//store it as an incomplete monitor session, we'll find the end later
       }
-      for (let i = index + 1; i < date.events.length; i++) {
-        if (i >= date.events.length)
+      for (let i = index + 1; i < date.events.length; i++) {//go through all the other events, skipping the one we just looked at. Trying to find update events and eventually a logout
+        if (i >= date.events.length)//if somehow the login is all there is.
           break;
-        let other = date.events[i];
+        let other = date.events[i];//the event which isn't the login event
         other.time = new Date(other.time);
         if ((other.type === 'PLUG_IN' || other.type === 'LOG_OUT') && monitorsUsed.length !== 0) {//set time durations of monitor usages
           monitorsUsed[monitorsUsed.length - 1].duration = other.time - monitorsUsed[monitorsUsed.length - 1].startTime;
           monitorsUsed[monitorsUsed.length - 1].endTime = other.time;
-        }
-        if (other.type === 'PLUG_IN') {
+        }//the stuff below is still run, top one is just to make sure we complete the monitor session
+        if (other.type === 'PLUG_IN') {//start a new monitor session if the event is a plugin
           let monitor = monitorIndex[other.monitorGroup_id];
           if (monitor) {
             monitorsUsed.push({startTime: other.time, monitor});
           }
-        }
+        }//otherwise, get the logout pair and prepare to complete this session.
         if (other.type === 'LOG_OUT') {
           logoutPair = other;
           break;
         }
       }
-      if (logoutPair != null)
+      if (logoutPair != null)//found a logout event to pair up?
         sessions.push({
           startTime: event.time,
           endTime: logoutPair.time,
           duration: logoutPair.time - event.time,
           monitorsUsed
         });
-      //last element, lets pretend its a completed session
+      //last element, lets pretend its a completed session. Probably caused by premature shutdown.
       else if (index === date.events.length - 1) {
         let date = new Date();
         monitorsUsed.forEach(monitorSession => {//make sure all monitor sessions are valid
@@ -68,7 +71,7 @@ function processSessions(date, monitorIndex) {
   });
   return sessions;
 }
-
+//Taken from https://stackoverflow.com/questions/9081220/how-to-check-if-current-time-falls-within-a-specific-range-on-a-week-day-using-j/32896572#32896572
 function checkTime(ch, cm, start, end) {
   let h = ch, m = cm
     , a = start.getHours(), b = start.getMinutes()
