@@ -2,6 +2,8 @@ import {CustomTooltips} from "@coreui/coreui-plugin-chartjs-custom-tooltips";
 import MONITOR_TYPE from './monitorTypes'
 //to help sort out the complex code to process the data
 //if this was a proper project with more time, we might do this at the backend instead to optimise experience for the user
+const times = ['12am', '1am', '2am', '3am', '4am', '5am', '6am', '7am', '8am', '9am', '10am', '11am', '12pm', '1pm',
+  '2pm', '3pm', '4pm', '5pm', '6pm', '7pm', '8pm', '9pm', '10pm', '11pm'];
 
 function createDateString(date) {//easy method to convert a date to a readable string.
   return `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
@@ -184,4 +186,4 @@ function cleanData(dat) {
   return {teams, teamIndex, totalMonitors, monitorIndex, monitors}
 }
 
-export {createDateString, mainChartOpts, checkTime, cleanData};
+export {createDateString, mainChartOpts, checkTime, cleanData, times};

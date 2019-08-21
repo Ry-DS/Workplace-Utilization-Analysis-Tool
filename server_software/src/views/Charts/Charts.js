@@ -1,12 +1,11 @@
 import React, {Component} from 'react';
 import {Bar, Doughnut, Line, Pie, Polar, Radar} from 'react-chartjs-2';
-import {Button, Card, CardBody, CardColumns, CardHeader, CardTitle, Col, Row} from 'reactstrap';
+import {Card, CardBody, CardColumns, CardHeader} from 'reactstrap';
 import {CustomTooltips} from '@coreui/coreui-plugin-chartjs-custom-tooltips';
 import './../../scss/flatpickr-bgis.scss'
 
-import Flatpickr from 'react-flatpickr'
 import axios from "axios";
-import {mainChartOpts} from '../../utils/data-processing-utils'
+import {cleanData} from '../../utils/data-processing-utils'
 
 
 const line = {
@@ -169,6 +168,9 @@ class Charts extends Component {
     })
   }
   processData(dat){
+    let data = cleanData(dat);
+    console.log(data);
+
 
   }
   dateChange = (dates) => {
@@ -182,31 +184,7 @@ class Charts extends Component {
       <div className="animated fadeIn">
         <Card>
           <CardBody>
-            <Row>
-              <Col sm="5">
-                <CardTitle className="mb-0">Total Monitor Utilization per Type</CardTitle>
-                <div className="small text-muted"></div>
-              </Col>
-              <Col sm="7" className="d-none d-sm-inline-block">
-                <Button color="primary" className="float-right"><i className="icon-cloud-download"></i></Button>
 
-                <Flatpickr
-                  className="form-control"
-                  style={dateStyle}
-                  value={this.state.dates}
-                  options={{
-                    mode: "range",
-                    dateFormat: "Y-m-d",
-                  }}
-                  onChange={date => {
-                    this.dateChange(date)
-                  }}
-                />
-              </Col>
-            </Row>
-            <div className="chart-wrapper" style={{height: 300 + 'px', marginTop: 40 + 'px'}}>
-              <Line data={line} options={mainChartOpts} height={300}/>
-            </div>
           </CardBody>
 
         </Card>
@@ -307,7 +285,4 @@ class Charts extends Component {
   }
 }
 
-function createDateString(date) {//easy method to convert a date to a readable string.
-  return `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
-}
 export default Charts;
