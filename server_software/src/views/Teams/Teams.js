@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import $ from 'jquery';
 import flatpickr from 'flatpickr/dist/flatpickr.min.js';
-import 'flatpickr/dist/flatpickr.min.css'
+import '../../scss/flatpickr-bgis.scss'
 import {
   Alert,
   Button,
@@ -90,7 +90,7 @@ function flatpickerEditor(cell, onRendered, success, cancel)
 }
 
 function colorPickerEditor(cell, onRendered, success, cancel, ref) {
-  let input = ref && ref.current ? ref.current : $(colorFormatter(cell)).get()[0];
+  let input = ref ? ref : $(colorFormatter(cell)).get()[0];
   const pickr = new Pickr({
     el: input, // Insert query / element
     default: cell.getValue(),
@@ -196,7 +196,6 @@ class Teams extends Component {
       this.setState({data, loading: false});//update table and stop loading animation
     });
     if (this.colorRef.current) {
-
       colorPickerEditor({getValue: () => this.state.color}, () => {
       }, (color) => this.setState({color}), () => {
       }, this.colorRef.current);
