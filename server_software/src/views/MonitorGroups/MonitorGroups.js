@@ -9,9 +9,9 @@ import MONITOR_TYPES from '../../utils/monitorTypes';
 
 
 const monitorTypeDropdown = {};
-for (let type in MONITOR_TYPES) {
-  monitorTypeDropdown[MONITOR_TYPES[type]] = MONITOR_TYPES[type];
-}
+MONITOR_TYPES.forEach(type => {
+  monitorTypeDropdown[type] = type;
+});
 const editButtons = function () { //plain text value, so we cant use react jsx. Instead, just a plain html button for deletion
   return "<Button class='btn btn-primary' style='width: 100%'><i class='fa fa-pencil-square-o'/></Button>"
 };

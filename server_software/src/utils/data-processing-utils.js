@@ -152,29 +152,29 @@ function cleanData(dat) {
   });
 
   //calculate total monitors in building+assign total monitors accessible to each team.
-  for (let type in MONITOR_TYPE) {
+  MONITOR_TYPE.forEach(type => {
     monitors.forEach(monitor => {
-      if (monitor.type !== MONITOR_TYPE[type]) {
+      if (monitor.type !== type) {
         return;
 
       }
       monitor.quota.forEach(floor => {
-        if (typeof totalMonitors[MONITOR_TYPE[type]] === 'number')//if a number is already there, add onto it
-          totalMonitors[MONITOR_TYPE[type]] += floor.amount;
-        else totalMonitors[MONITOR_TYPE[type]] = floor.amount;//otherwise, initialise it as a new number.
+        if (typeof totalMonitors[type] === 'number')//if a number is already there, add onto it
+          totalMonitors[type] += floor.amount;
+        else totalMonitors[type] = floor.amount;//otherwise, initialise it as a new number.
         floor.sharedWith.forEach(id => {
           let team = teamIndex[id];
           if (!team.totalMonitors)
             team.totalMonitors = {};
-          if (typeof team.totalMonitors[MONITOR_TYPE[type]] === 'number')//same as above
-            team.totalMonitors[MONITOR_TYPE[type]] += floor.amount;
-          else team.totalMonitors[MONITOR_TYPE[type]] = floor.amount;
+          if (typeof team.totalMonitors[type] === 'number')//same as above
+            team.totalMonitors[type] += floor.amount;
+          else team.totalMonitors[type] = floor.amount;
 
 
         });
       });
     });
-  }
+  });
   teams.forEach(team => {
     team.employees.forEach(employee => {
       employee.usageData.forEach(date => {

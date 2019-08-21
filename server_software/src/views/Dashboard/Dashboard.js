@@ -11,7 +11,6 @@ import axios from 'axios';
 import MONITOR_TYPE from '../../utils/monitorTypes';
 import toast from 'toasted-notes'
 import 'toasted-notes/src/styles.css';
-import './../../scss/flatpickr-bgis.scss'
 
 
 //fetch color themes from css
@@ -165,9 +164,9 @@ class Dashboard extends Component {
     let onlineToday = Array(24).fill(0);//key: hour of day, value: array of employees online at that time.
     //monitors free at a specific hour for each type
     let monitorsUsedToday = {}, monitorsUsedPerTeam = {};
-    for (let type in MONITOR_TYPE) {//populate with the current amount of monitors per type.
-      monitorsUsedToday[MONITOR_TYPE[type]] = Array(date.getHours() + 1).fill(0);
-    }
+    MONITOR_TYPE.forEach((type) => {//populate with the current amount of monitors per type.
+      monitorsUsedToday[type] = Array(date.getHours() + 1).fill(0);
+    });
     data.teams.forEach(team => {
       monitorsUsedPerTeam[team._id] = {};
     });

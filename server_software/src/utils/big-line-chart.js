@@ -3,8 +3,15 @@ import {Button, ButtonGroup, ButtonToolbar, CardBody, CardTitle, Col, Row} from 
 import Flatpickr from "react-flatpickr";
 import {createDateString, mainChartOpts, times} from "./data-processing-utils";
 import {Line} from "react-chartjs-2";
+import '../scss/flatpickr-bgis.scss'
 
-
+//makes a fancy chart to display data easily based on date
+//props:
+//title: Title of the graph to show
+//subtitle: text to show below title
+//disableDate: function(Date): lets you tell graph what dates to not allow user to select
+//dataset: function(Dates): Lets you pass in a dataset based on a given date range to show to user. Changes as new dates are selected
+//Recommended to use a ref if you are fetching updated data and call dateChange(date) in order to update graph
 class BigLineChart extends React.Component {
   constructor(props) {
     super(props);
@@ -22,19 +29,23 @@ class BigLineChart extends React.Component {
   onRadioBtnClick = (radioSelected) => {
     this.setState({
       radioSelected: radioSelected,
-      date: [this.state.date[0]]
     });
-    this.dateChange(this.state.date);
+    if (this.state.date.length > 0)
+      this.dateChange([this.state.date[0]]);
   };
   dateChange = (dates) => {
     let datasets = [];
+    let dataDates;
+    if (this.state.radioSelected === 2 && dates.length === 2) {
+      dataDates = getDatesRange(dates[0], dates[1]);
+    } else dataDates = dates.slice(0);
     let mainChartData = {...this.state.mainChartData};
-    mainChartData.labels = dates.length === 1 ? times : dates.sort((a, b) => a - b).map(d => {
+    mainChartData.labels = dataDates.length === 1 ? times : dataDates.sort((a, b) => a - b).map(d => {
       return createDateString(d)
 
     });
     if (this.props.dataset) {
-      datasets = this.props.dataset(dates);
+      datasets = this.props.dataset(dataDates);
       mainChartData.datasets = datasets;
     }
     this.setState({date: dates, mainChartData});
@@ -48,7 +59,7 @@ class BigLineChart extends React.Component {
       <Row>
         <Col sm="5">
           <CardTitle className="mb-0">{this.props.title}</CardTitle>
-          <div className="small text-muted">{this.props.subtext}</div>
+          <div className="small text-muted">{this.props.subtitle}</div>
         </Col>
         <Col sm="7" className="d-none d-sm-inline-block">
           <Button color="primary" className="float-right"><i className="icon-cloud-download"></i></Button>
@@ -71,6 +82,8 @@ class BigLineChart extends React.Component {
               disable: [
                 (date) => {
                   // return true to disable
+                  if (!this.props.disableDate)
+                    return false;
                   return this.props.disableDate(date);
 
                 }
@@ -86,6 +99,14 @@ class BigLineChart extends React.Component {
       </div>
     </CardBody>);
   }
+}
+
+function getDatesRange(start, end) {
+  let arr, dt;
+  for (arr = [], dt = new Date(start.getTime()); dt <= end; dt.setDate(dt.getDate() + 1)) {
+    arr.push(new Date(dt));
+  }
+  return arr;
 }
 
 export default BigLineChart;

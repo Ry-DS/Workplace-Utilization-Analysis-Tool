@@ -114,9 +114,9 @@ class Monitor extends Component {
       marginRight: '1em'
     };
     const options = [];
-    for (let type in MONITOR_TYPE) {
-      options.push({value: MONITOR_TYPE[type], label: MONITOR_TYPE[type]});
-    }
+    MONITOR_TYPE.forEach(type => {
+      options.push({value: type, label: type});
+    });
     const customStyles = {
       option: (provided, state) => ({
         ...provided,

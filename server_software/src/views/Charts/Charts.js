@@ -2,6 +2,8 @@ import React, {Component} from 'react';
 import {Bar, Doughnut, Line, Pie, Polar, Radar} from 'react-chartjs-2';
 import {Card, CardBody, CardColumns, CardHeader} from 'reactstrap';
 import {CustomTooltips} from '@coreui/coreui-plugin-chartjs-custom-tooltips';
+import BigLineChart from "../../utils/big-line-chart";
+import MONITOR_TYPE from '../../utils/monitorTypes';
 import './../../scss/flatpickr-bgis.scss'
 
 import axios from "axios";
@@ -159,6 +161,7 @@ const options = {
 class Charts extends Component {
   constructor(props) {
     super(props);
+    this.chartRef = React.createRef();//ref to total graph
     this.state = {}
   }
 
@@ -170,23 +173,22 @@ class Charts extends Component {
   processData(dat){
     let data = cleanData(dat);
     console.log(data);
+    let monitorTypesUsedByType = {};
+    MONITOR_TYPE.forEach(type => {
+      //TODO
+    });
+
 
 
   }
-  dateChange = (dates) => {
 
-    this.setState({dates})
-  };
 
   render() {
     let dateStyle = {width: '40%'};
     return (
       <div className="animated fadeIn">
         <Card>
-          <CardBody>
-
-          </CardBody>
-
+          <BigLineChart title={"Total Monitor Usage by Type"}/>
         </Card>
         <CardColumns className="cols-2">
           <Card>
