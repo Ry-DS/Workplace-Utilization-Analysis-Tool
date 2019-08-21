@@ -2,6 +2,7 @@ import React from 'react';
 import {Button, ButtonGroup, ButtonToolbar, CardBody, CardTitle, Col, Row} from "reactstrap";
 import Flatpickr from "react-flatpickr";
 import {createDateString, mainChartOpts, times} from "./data-processing-utils";
+import LoadingAnimation from "./LoadingAnimation";
 import {Line} from "react-chartjs-2";
 import '../scss/flatpickr-bgis.scss'
 
@@ -62,7 +63,6 @@ class BigLineChart extends React.Component {
           <div className="small text-muted">{this.props.subtitle}</div>
         </Col>
         <Col sm="7" className="d-none d-sm-inline-block">
-          <Button color="primary" className="float-right"><i className="icon-cloud-download"></i></Button>
           <ButtonToolbar className="float-right" aria-label="Toolbar with button groups">
             <ButtonGroup className="mr-3" aria-label="First group">
               <Button color="outline-secondary" onClick={() => this.onRadioBtnClick(1)}
@@ -95,7 +95,11 @@ class BigLineChart extends React.Component {
         </Col>
       </Row>
       <div className="chart-wrapper" style={{height: 300 + 'px', marginTop: 40 + 'px'}}>
-        <Line data={this.state.mainChartData} options={mainChartOpts} height={300}/>
+        {
+          this.state.mainChartData.datasets.length > 0 ?
+            <Line data={this.state.mainChartData} options={mainChartOpts} height={300}/> : <LoadingAnimation/>
+        }
+
       </div>
     </CardBody>);
   }

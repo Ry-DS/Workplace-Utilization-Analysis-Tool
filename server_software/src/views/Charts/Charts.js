@@ -7,8 +7,13 @@ import MONITOR_TYPE from '../../utils/monitorTypes';
 import './../../scss/flatpickr-bgis.scss'
 
 import axios from "axios";
-import {cleanData} from '../../utils/data-processing-utils'
-
+import {checkTime, cleanData, createDateString} from '../../utils/data-processing-utils'
+import {getStyle, hexToRgba} from "@coreui/coreui/dist/js/coreui-utilities";
+//fetch color themes from css
+const brandDark = getStyle('--theme-dark');
+const brandLight = getStyle('--theme-light');
+const brandNorm = getStyle('--theme-norm');
+const brandBland = getStyle('--theme-bland');
 
 const line = {
   labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
@@ -173,11 +178,67 @@ class Charts extends Component {
   processData(dat){
     let data = cleanData(dat);
     console.log(data);
-    let monitorTypesUsedByType = {};
+    let monitorsUsedByType = {};
     MONITOR_TYPE.forEach(type => {
-      //TODO
+      monitorsUsedByType[type] = {};
+    });
+    monitorsUsedByType.dates = [];
+    data.teams.forEach(team => {
+      team.employees.forEach(employee => {
+        employee.usageData.forEach(date => {
+          if (monitorsUsedByType.dates.indexOf(date._id) === -1) {//add it if it isn't already there
+            monitorsUsedByType.dates.push(date._id);
+          }
+
+          for (let i = 0; i < 24; i++) {
+            let monitorsChecked = [];//make sure we don't recount a specific type.
+            for (let session of date.sessions) {
+              for (let monitorSession of session.monitorsUsed) {
+                if (checkTime(i, 0, monitorSession.startTime, monitorSession.endTime) && monitorsChecked.indexOf(monitorSession.monitor.type) === -1) {
+                  let monitorsUsed = monitorsUsedByType[monitorSession.monitor.type];
+                  if (!monitorsUsed[date._id]) {
+                    monitorsUsed[date._id] = Array(24).fill(0)
+                  }
+                  monitorsUsed[date._id][i] += 1;
+                  monitorsChecked.push(monitorSession.monitor.type);
+
+
+                }
+              }
+            }
+
+          }
+
+
+        })
+
+      })
     });
 
+    for (let type in monitorsUsedByType) {
+      if (!monitorsUsedByType.hasOwnProperty(type) || type === 'dates')
+        continue;
+      for (let date in monitorsUsedByType[type]) {
+        if (!monitorsUsedByType[type].hasOwnProperty(date))
+          continue;
+        monitorsUsedByType[type][date] = {
+          byHour: monitorsUsedByType[type][date],
+          max: Math.max(...monitorsUsedByType[type][date])
+        };
+      }
+
+    }
+    console.log(monitorsUsedByType);
+    let selectedDates = monitorsUsedByType.dates.map((date, index) => {
+      if (index > 5)//don't select more than 10 dates
+        return undefined;
+      let splitted = date.split('-');
+      return new Date(parseInt(splitted[0]), parseInt(splitted[1]), parseInt(splitted[2]));
+    });
+    this.setState({monitorsUsedByType});
+    if (this.chartRef.current) {
+      this.chartRef.current.dateChange(selectedDates);
+    }
 
 
   }
@@ -188,7 +249,60 @@ class Charts extends Component {
     return (
       <div className="animated fadeIn">
         <Card>
-          <BigLineChart title={"Total Monitor Usage by Type"}/>
+          <BigLineChart title={"Total Monitor Usage by Type"} disableDate={(date) => {
+            if (!this.state.monitorsUsedByType)
+              return true;
+            let dateString = createDateString(date);
+            // return true to disable
+            return this.state.monitorsUsedByType.dates.indexOf(dateString) === -1;
+
+          }} dataset={(dates) => {
+            let datasets = [];
+            if (this.state.monitorsUsedByType) {//data exists
+              for (let type in this.state.monitorsUsedByType) {//every team in dataset
+                if (!this.state.monitorsUsedByType.hasOwnProperty(type) || type === 'dates')
+                  continue;
+                let singleDay = dates.length === 1;
+                let data = Array(singleDay ? 24 : dates.length).fill(0);//data array, either 24 hours for single day or per date
+                if (singleDay) {//if single day
+                  let day = this.state.monitorsUsedByType[type][createDateString(dates[0])];//just get 24 hour data for that day
+                  if (day) {//if it exists of course
+                    data = day.byHour;
+                  }
+                } else//otherwise
+                  for (let i = 0; i < dates.length; i++) {
+                    let dayMax = this.state.monitorsUsedByType[type][createDateString(dates[i])];
+                    if (dayMax) {//check every day, if it exists put it in. The max for that day
+                      data[i] = dayMax.max;
+                    }
+                  }
+                let color;
+                switch (type) {
+                  case MONITOR_TYPE.PROJECTOR:
+                    color = brandNorm;
+                    break;
+                  case MONITOR_TYPE.DESK:
+                    color = brandLight;
+                    break;
+                  case MONITOR_TYPE.LAPTOP:
+                    color = brandDark;
+                    break;
+                }
+                datasets.push({
+                  label: type,
+                  backgroundColor: hexToRgba(color, 10),
+                  borderColor: color,
+                  pointHoverBackgroundColor: '#fff',
+                  borderWidth: 2,
+                  data: data
+
+                });
+
+              }
+              return datasets;
+
+            }
+          }} ref={this.chartRef}/>
         </Card>
         <CardColumns className="cols-2">
           <Card>

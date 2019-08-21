@@ -337,21 +337,22 @@ class Dashboard extends Component {
 
               }} dataset={(dates) => {
                 let datasets = [];
-                if (this.state.monitorsUsedPerTeam) {
-                  for (let teamId in this.state.monitorsUsedPerTeam) {
+                if (this.state.monitorsUsedPerTeam) {//data exists
+                  for (let teamId in this.state.monitorsUsedPerTeam) {//every team in dataset
                     if (!this.state.monitorsUsedPerTeam.hasOwnProperty(teamId) || teamId === 'dates')
                       continue;
                     let team = this.state.teamIndex[teamId];
-                    let data = Array(dates.length === 1 ? 24 : dates.length).fill(0);
-                    if (dates.length === 1) {
-                      let day = this.state.monitorsUsedPerTeam[teamId][createDateString(dates[0])];
-                      if (day) {
+                    let singleDay = dates.length === 1;
+                    let data = Array(singleDay ? 24 : dates.length).fill(0);//data array, either 24 hours for single day or per date
+                    if (singleDay) {//if single day
+                      let day = this.state.monitorsUsedPerTeam[teamId][createDateString(dates[0])];//just get 24 hour data for that day
+                      if (day) {//if it exists of course
                         data = day.byHour;
                       }
-                    } else
+                    } else//otherwise
                       for (let i = 0; i < dates.length; i++) {
                         let dayMax = this.state.monitorsUsedPerTeam[teamId][createDateString(dates[i])];
-                        if (dayMax) {
+                        if (dayMax) {//check every day, if it exists put it in. The max for that day
                           data[i] = dayMax.max;
                         }
                       }
