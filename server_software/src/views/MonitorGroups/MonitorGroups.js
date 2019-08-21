@@ -41,7 +41,7 @@ class MonitorGroups extends Component {
       data: [],//table data to display
       errors: {},//errors and fields listed for the register form
       name: '',
-      hint: !tutorial.isFinished('edit_team_names'),
+      hint: !tutorial.isFinished('edit_monitor_groups'),
       formLoading: false,//whether the registration form is processing, disables the submit button
     }
 

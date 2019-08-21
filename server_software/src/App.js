@@ -18,7 +18,6 @@ const DefaultLayout = React.lazy(() => import('./containers/DefaultLayout'));
 
 // Pages
 const Login = React.lazy(() => import('./views/Pages/Login'));
-const Register = React.lazy(() => import('./views/Pages/Register'));
 const Page404 = React.lazy(() => import('./views/Pages/Page404'));
 const Page500 = React.lazy(() => import('./views/Pages/Page500'));
 

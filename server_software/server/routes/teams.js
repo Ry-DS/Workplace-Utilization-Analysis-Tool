@@ -22,7 +22,7 @@ router.get("/list", (req, res) => {//TODO
 
 //make everything a protected route. Only users with perms can perform operations here
 router.use('/edit', (req, res, next) => {
-  routeBuffer.push("editMonitors");
+  routeBuffer.push("editSettings");
   next();
 });
 router.use('/edit', passport.authenticate('jwt', {session: false}));

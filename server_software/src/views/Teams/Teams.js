@@ -90,7 +90,7 @@ function flatpickerEditor(cell, onRendered, success, cancel)
 }
 
 function colorPickerEditor(cell, onRendered, success, cancel, ref) {
-  let input = ref ? ref : $(colorFormatter(cell)).get()[0];
+  let input = ref && ref.current ? ref.current : $(colorFormatter(cell)).get()[0];
   const pickr = new Pickr({
     el: input, // Insert query / element
     default: cell.getValue(),
@@ -198,7 +198,7 @@ class Teams extends Component {
     if (this.colorRef.current) {
       colorPickerEditor({getValue: () => this.state.color}, () => {
       }, (color) => this.setState({color}), () => {
-      }, this.colorRef.current);
+      }, this.colorRef);
     }
 
   }

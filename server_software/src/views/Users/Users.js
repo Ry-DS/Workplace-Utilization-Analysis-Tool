@@ -35,7 +35,7 @@ const columns = (container) => {
   {title: "Last Login", field: "lastLogin", align: "center"},
   {title: "Created on", field: "creationDate", align: "center"},
   {title: "Edit Users", field: "editUsers", align: "center", formatter: "tickCross", editor: true},
-  {title: "Edit Settings", field: "editSettings", align: "center", formatter: "tickCross", editor: true},
+    {title: "Edit Teams", field: "editSettings", align: "center", formatter: "tickCross", editor: true},
     {title: "Edit Monitors", field: "editMonitors", align: "center", formatter: "tickCross", editor: true},
     {
       title: "Del.", sortable: false, width: 70, formatter: editButtons, cellClick: function (e, cell, value, data) {

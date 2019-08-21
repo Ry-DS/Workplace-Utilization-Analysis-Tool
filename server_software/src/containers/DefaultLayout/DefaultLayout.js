@@ -42,8 +42,22 @@ class DefaultLayout extends Component {
   render() {
     //here, we remove navigation items if the user doesn't have perms to access them
     let navItems = navigation.items;
-    if (!this.props.auth.user.permissions.editUsers)
-      navItems = [...navigation.items.slice(0, 4), ...navigation.items.slice(5)];//an immutable array instance so we don't affect the real one.
+    //remove items based on permissions
+    navItems = navItems.filter(el => {
+      if (!el.name)
+        return true;
+      let name = el.name;
+      let perms = this.props.auth.user.permissions;
+      if (!perms.editMonitors && name === 'Monitor Groups')
+        return false;
+      if (!perms.editUsers && name === 'Users')
+        return false;
+      if (!perms.editSettings && name === 'Employee Teams')
+        return false;
+      if (!perms.editSettings && !perms.editMonitors && !perms.editUsers && name === 'Manage')
+        return false;
+      return true;
+    });
     //render html to user
     return (
       <div className="app">
