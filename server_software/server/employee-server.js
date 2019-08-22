@@ -51,7 +51,7 @@ module.exports = class EmployeeServer {
         console.log(`Data received from client: ${data}`);
         let id;
         switch (data.includes(":") ? params[0] : data) {//parse the request the employee sent
-          case "ID":
+          case "ID"://sent first by employee
 
             if (socket.employeeId) {//see if they already sent an ID command
               socket.destroy();
@@ -88,11 +88,11 @@ module.exports = class EmployeeServer {
             });
             break;
 
-          case "REGISTER":
+          case "REGISTER"://sent if employee needs to set their team after being given a list by INIT command
             let teamName = params[1];
-            id=socket.employeeId;
+            id = socket.employeeId;//we assume from now on they already sent an ID command
 
-            if(!id){
+            if (!id) {//no id?
               socket.destroy();
               console.log("Invalid register occurred: No attached MAC ID");
               return;
@@ -105,9 +105,9 @@ module.exports = class EmployeeServer {
                   lastLogin: Date.now()
                 }
               }
-            }, {/*upsert: true/*Testing only*/}, (err, doc) => {
+            }, {/*upsert: true/*Testing only, true means employees can create teams which is obviously bad*/}, (err, doc) => {
               if (!doc) {
-                Team.find({},{name: 1,_id: 0},(err,teams)=>{
+                Team.find({}, {name: 1, _id: 0}, (err, teams) => {//means we only want the names of the teams.
                   if(teams&&teams.length!==0){
                     teams=teams.map(team=>team.name);
                     socket.write('INIT:'+teams.join(':'))
@@ -116,13 +116,13 @@ module.exports = class EmployeeServer {
                 });
               } else {
                 socket.write('SUCCESS');
-                socket.active = true
+                socket.active = true//means the connection is active and ready to track
               }
             });
             break;
-          case 'UPDATE':
+          case 'UPDATE'://on monitor update event (new monitor plugged in)
             id=socket.employeeId;
-
+            //validity checks
             if(!id){
               socket.destroy();
               console.log("Invalid update occurred: No attached MAC ID");
@@ -142,7 +142,7 @@ module.exports = class EmployeeServer {
             };
             let monitorId = pair(monitorType.machineId, monitorType.productId);//generates a unique code to identify this monitor
             MonitorGroup.findOne({_id: monitorId}).then(monitor => {//create new monitor if it doesn't exist
-              if (!monitor) {//TODO limit on if employees can add new monitors
+              if (!monitor) {//TODO limit on if employees can add new monitors. Possible with more time
                 let monitor = new MonitorGroup({
                   name: monitorType.friendlyName ? monitorType.friendlyName : monitorType.machineCode,
                   friendlyName: monitorType.friendlyName ? monitorType.friendlyName : monitorType.machineCode,

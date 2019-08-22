@@ -1,3 +1,4 @@
+//route which highlights how certain paths in the backend should act.
 const passport = require('passport');
 
 const express = require("express");
@@ -20,6 +21,7 @@ router.get("/list", (req, res) => {//TODO
 
 });
 //Team.watch().on('change',data=>console.log(data));
+//initial plan was to update the client on data changes, but it would prove too complex for the time frame
 
 
 module.exports = router;

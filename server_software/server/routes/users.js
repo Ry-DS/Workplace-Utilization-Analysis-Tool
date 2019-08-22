@@ -45,6 +45,7 @@ router.post("/register", (req, res) => {//begin registering from above method
   //method to add user
   const addUser = (firstUser, query) => {
     const permissions = {//if they are the first user, they should have access to everything. otherwise, nothing
+      //first user calculated when doing security
       editMonitors: firstUser,
       editSettings: firstUser,
       editUsers: firstUser
@@ -115,7 +116,7 @@ router.post("/login", (req, res) => {
           payload,
           keys.secretOrKey,
           {
-            expiresIn: 24*60*60// 24 hours
+            expiresIn: 24 * 60 * 60// 24 hours, afterwards, user must login again
           },
           (err, token) => {
             res.json({
@@ -133,7 +134,7 @@ router.post("/login", (req, res) => {
           }
         });
         userCache.remove(user.id);//make sure the user is refreshed from security once logged in
-      } else {
+      } else {//otherwise, password must be incorrect
         return res
           .status(400)
           .json({password: "Password incorrect"});

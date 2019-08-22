@@ -52,7 +52,7 @@ router.post("/edit/create", (req, res) => {//begin registering from above method
 });
 
 
-router.post('/edit/delete', (req, res) => {
+router.post('/edit/delete', (req, res) => {//self explanatory.
   const id = req.body.id;
   Team.deleteOne({_id: id}).then(() => res.status(200).json({success: true})).catch(err => res.status(400).json(err));
 
@@ -62,8 +62,8 @@ router.post('/edit', (req, res) => {
   if(query.type==='name'){//editing name, need to check it doesn't exist
   Team.findOne({name: query.value}).then((doc) => {
     if (doc) {
-      res.status(400).json({name: 'Name already exists'});
-    } else {
+      res.status(400).json({name: 'Name already exists'});//found a team with same name? Let user know and stop.
+    } else {//otherwise, update
       Team.updateOne({_id: query.id}, {
         $set: {
           name: query.value
@@ -72,7 +72,7 @@ router.post('/edit', (req, res) => {
 
     }
   });
-  }else{
+  } else {//otherwise, doesn't matter what parameter the user chose.
     Team.updateOne({_id: query.id},{$set:{
         [query.type]: query.value
 

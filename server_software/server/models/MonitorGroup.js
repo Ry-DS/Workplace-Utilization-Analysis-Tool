@@ -1,3 +1,4 @@
+//defines the schema/how data is stored in the DB
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 const MONITOR_TYPE = require('./../monitorTypes');

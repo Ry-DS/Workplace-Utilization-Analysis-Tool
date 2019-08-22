@@ -2,9 +2,7 @@ const passport = require('passport');
 
 const express = require("express");
 const router = express.Router();
-// // Load input validation
-// const validateAddTeamInput = require("../validation/add_team");
-// Load Team model
+// Load Monitor model
 const MonitorGroup = require("../models/MonitorGroup");
 
 const {routeBuffer} = require('../passport-config');//authenticate specific routes
@@ -19,11 +17,11 @@ router.use('/edit', (req, res, next) => {
 router.use('/edit', passport.authenticate('jwt', {session: false}));
 
 
-router.post('/edit/delete', (req, res) => {
+router.post('/edit/delete', (req, res) => {//each route defined by its path and db action. Self explanatory
   const id = req.body.id;
   MonitorGroup.deleteOne({_id: id}).then(() => res.status(200).json({success: true})).catch(err => res.status(400).json(err));
 
-});
+});//for each db operation, we send response codes based on the outcome. A response is also needed or it isn't sent.
 router.post('/edit', (req, res) => {
   const query = req.body;
   MonitorGroup.updateOne({_id: query.id}, {
@@ -38,7 +36,7 @@ router.post('/edit', (req, res) => {
 });
 router.post('/edit/replace', (req, res) => {
   const query = req.body;
-  query.new = false;
+  query.new = false;//ensure once an update is made, the monitor is no longer considered new.
   try {
     MonitorGroup.updateOne({_id: query._id}, {$set: query}).then(() => res.status(200).json({success: true}))
       .catch(err => {
@@ -50,7 +48,7 @@ router.post('/edit/replace', (req, res) => {
     console.error(e);
   }
 });
-//list all teams and data registered within the program
+//list all data registered within the program
 router.get("/edit/list", (req, res) => {
   const query = req.query;
   if (!query.id)
