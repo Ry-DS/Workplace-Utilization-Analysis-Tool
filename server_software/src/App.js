@@ -12,7 +12,7 @@ import jwt_decode from "jwt-decode";
 import setAuthToken from "./utils/authToken";
 import {logoutUser, setCurrentUser} from "./redux/actions/authActions";
 import PrivateRoute from "./utils/PrivateRoute";
-
+//the beginning of it all, assembles the program together, frontend.
 // Containers
 const DefaultLayout = React.lazy(() => import('./containers/DefaultLayout'));
 

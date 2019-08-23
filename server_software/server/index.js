@@ -1,5 +1,9 @@
 //https://www.twilio.com/blog/react-app-with-node-js-server-proxy
-const bootWithFrontend=false;
+//backend built with the assistance of the above resource.
+//the main class for the backend.
+const bootWithFrontend = false;//for testing, normally true. True means the frontend is running in the same instance as the backend.
+//we normally split them for easier debugging.
+
 //this server sends data to the react application for the admin to view
 const express = require('express');//express server backend
 const bodyParser = require('body-parser');//for parsing requests and data given from users
@@ -88,7 +92,7 @@ function startupMongoConnection() {
     });
 }
 
-function setupQuitHandler() {
+function setupQuitHandler() {//make sure to shutdown gracefully.
   onShutdown('http-server', async () => {
     console.log("Closing employee server...");
     for (let conn of employeeServer.connections) {

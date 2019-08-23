@@ -1,3 +1,4 @@
+//Default footer provided by CoreUI.
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 

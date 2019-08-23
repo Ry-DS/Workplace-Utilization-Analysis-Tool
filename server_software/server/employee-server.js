@@ -219,7 +219,7 @@ module.exports = class EmployeeServer {
         this.closeEvent(socket);
       });
 
-      // Don't forget to catch error, for your own sake.
+      // Don't forget to catch error
 
       socket.on('error', err => {
         console.log(`Error: ${err}`);
@@ -237,8 +237,8 @@ module.exports = class EmployeeServer {
 
   // When the client requests to end the TCP connection with the server, the server
   // ends the connection.
-
-  closeEvent(socket) {
+//there are several ways the connection can end, so we have a single event for them all.
+  closeEvent(socket) {//purpose is to gracefully put a logout event after closing
     if (!socket.active || !socket.employeeId)//they never were sending updates in the first place, don't bother
       return;
     //date identifying...

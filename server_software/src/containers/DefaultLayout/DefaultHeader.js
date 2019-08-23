@@ -6,7 +6,7 @@ import PropTypes from 'prop-types';
 import {AppHeaderDropdown, AppNavbarBrand, AppSidebarToggler} from '@coreui/react';
 import logo from '../../assets/img/brand/bgis.png'
 import miniLogo from '../../assets/img/brand/logo_small.png'
-
+//default header provided by coreui. just shows the logo, logout and dashboard link.
 const propTypes = {
   children: PropTypes.node,
 };

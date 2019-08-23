@@ -72,6 +72,7 @@ class BigLineChart extends React.Component {
             </ButtonGroup>
 
           </ButtonToolbar>
+          <span>Select Date:
           <Flatpickr
             className="form-control"
             style={dateStyle}
@@ -92,6 +93,7 @@ class BigLineChart extends React.Component {
             onChange={date => {
               this.dateChange(date)
             }}/>
+          </span>
         </Col>
       </Row>
       <div className="chart-wrapper" style={{height: 300 + 'px', marginTop: 40 + 'px'}}>

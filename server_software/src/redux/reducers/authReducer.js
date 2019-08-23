@@ -1,3 +1,4 @@
+//reducers actually do the actions, like decide which to do. This one is for authentication
 import {SET_CURRENT_USER} from "../actions/types";
 
 const isEmpty = require("is-empty");

@@ -26,7 +26,7 @@ import routes from '../../routes';
 import wuatLogo from '../../assets/img/brand/wuat/WUAT Logo.svg';
 import logoCover from '../../assets/img/brand/logo_small.png';
 
-
+//default layout by coreui. Assembles all the default stuff together.
 const DefaultFooter = React.lazy(() => import('./DefaultFooter'));
 const DefaultHeader = React.lazy(() => import('./DefaultHeader'));
 

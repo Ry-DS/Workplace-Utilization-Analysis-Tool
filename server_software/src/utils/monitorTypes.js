@@ -1,3 +1,4 @@
+//same as backend, copy of the monitor types
 const MONITOR_TYPE = {
   LAPTOP: 'Laptop',
   PROJECTOR: 'Projector',

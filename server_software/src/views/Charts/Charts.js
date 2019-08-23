@@ -1,3 +1,4 @@
+//Container holding various chart types to show to the user.
 import React, {Component} from 'react';
 import {Bar, Doughnut, Line, Pie, Polar, Radar} from 'react-chartjs-2';
 import {Card, CardBody, CardColumns, CardHeader} from 'reactstrap';
@@ -171,18 +172,19 @@ class Charts extends Component {
   }
 
   componentDidMount() {
-    axios('/api/data/list').then(dat => {
+    axios('/api/data/list').then(dat => {//fetch data on mount
       this.processData(dat);
     })
   }
+
   processData(dat){
     let data = cleanData(dat);
     console.log(data);
-    let monitorsUsedByType = {};
-    MONITOR_TYPE.forEach(type => {
+    let monitorsUsedByType = {};//as named, for main graph
+    MONITOR_TYPE.forEach(type => {//for every monitor type, make a new dataset
       monitorsUsedByType[type] = {};
     });
-    monitorsUsedByType.dates = [];
+    monitorsUsedByType.dates = [];//store global dates to make the disabled dates for datepicker
     data.teams.forEach(team => {
       team.employees.forEach(employee => {
         employee.usageData.forEach(date => {
@@ -190,14 +192,15 @@ class Charts extends Component {
             monitorsUsedByType.dates.push(date._id);
           }
 
-          for (let i = 0; i < 24; i++) {
+          for (let i = 0; i < 24; i++) {//for every hour in the day
             let monitorsChecked = [];//make sure we don't recount a specific type.
             for (let session of date.sessions) {
               for (let monitorSession of session.monitorsUsed) {
-                if (checkTime(i, 0, monitorSession.startTime, monitorSession.endTime) && monitorsChecked.indexOf(monitorSession.monitor.type) === -1) {
+                if (checkTime(i, 0, monitorSession.startTime, monitorSession.endTime)//see if the session is for this specific hour and hasn't been counted before.
+                  && monitorsChecked.indexOf(monitorSession.monitor.type) === -1) {
                   let monitorsUsed = monitorsUsedByType[monitorSession.monitor.type];
                   if (!monitorsUsed[date._id]) {
-                    monitorsUsed[date._id] = Array(24).fill(0)
+                    monitorsUsed[date._id] = Array(24).fill(0)//make everything 0 initially.
                   }
                   monitorsUsed[date._id][i] += 1;
                   monitorsChecked.push(monitorSession.monitor.type);
@@ -222,8 +225,8 @@ class Charts extends Component {
         if (!monitorsUsedByType[type].hasOwnProperty(date))
           continue;
         monitorsUsedByType[type][date] = {
-          byHour: monitorsUsedByType[type][date],
-          max: Math.max(...monitorsUsedByType[type][date])
+          byHour: monitorsUsedByType[type][date],//to create by day datasets.
+          max: Math.max(...monitorsUsedByType[type][date])//max value in a day, main value for a date
         };
       }
 
@@ -237,7 +240,7 @@ class Charts extends Component {
     });
     this.setState({monitorsUsedByType});
     if (this.chartRef.current) {
-      this.chartRef.current.dateChange(selectedDates);
+      this.chartRef.current.dateChange(selectedDates);//trigger update
     }
 
 

@@ -1,3 +1,4 @@
+//a special container which requires permission to access a feature. Even if this can be easily bypassed, the backend is still secure.
 import React from "react";
 import {Redirect, Route} from "react-router-dom";
 import {connect} from "react-redux";

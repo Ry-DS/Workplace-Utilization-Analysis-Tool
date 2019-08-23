@@ -1,3 +1,4 @@
+//error reducer, to pass errors from the authentication
 import {GET_ERRORS} from "../actions/types";
 
 const initialState = {};

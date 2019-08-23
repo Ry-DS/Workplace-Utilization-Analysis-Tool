@@ -12,7 +12,7 @@ import MONITOR_TYPE from '../../utils/monitorTypes';
 import toast from 'toasted-notes'
 import 'toasted-notes/src/styles.css';
 
-
+//main dashboard cards
 const freeProjectorsCardOpts = {
   tooltips: {
     enabled: false,
@@ -76,7 +76,7 @@ class Dashboard extends Component {
     super(props);
 
     this.chartRef = React.createRef();//ref to update chart on data fetch
-    this.state = {
+    this.state = {//default state, outlines chart designs.
       employeesOnlineCardData: {
         labels: times,
         datasets: [

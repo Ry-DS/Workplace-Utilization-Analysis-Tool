@@ -1,3 +1,4 @@
+//individual chart edit menu
 import React, {Component} from 'react';
 import {
   Button,
@@ -24,8 +25,6 @@ import CardFooter from "reactstrap/es/CardFooter";
 import toast from 'toasted-notes'
 import 'toasted-notes/src/styles.css';
 
-//notifications
-
 
 class Monitor extends Component {
 
@@ -33,7 +32,7 @@ class Monitor extends Component {
     super(props);
     this.state = {
       loading: true,
-      errors: [],
+      errors: [],//form stuff
       teams: [],
       data: null,
       selectedOptions: []
@@ -101,6 +100,7 @@ class Monitor extends Component {
 
     });
   };
+
   render() {
     const buttonStyle = {//submit button style, with better colors to match theme
       backgroundColor: getStyle('--theme-light'),
@@ -239,7 +239,6 @@ class Monitor extends Component {
 
 
                   </ListGroup>
-
 
 
                 }

@@ -1,3 +1,4 @@
+//defines the nav items in the sidebar.
 export default {//defines everything in the sidebar
   items: [
     {
@@ -53,16 +54,16 @@ export default {//defines everything in the sidebar
       class: ''
     },
 
-        {
-          divider: true,
-        },
     {
-          name: 'Visit BGIS',
-          url: 'https://www.bgis.com/',
-          icon: 'icon-layers',
-          variant: 'danger',
-          attributes: { target: '_blank', rel: "noopener" },
-        },
+      divider: true,
+    },
+    {
+      name: 'Visit BGIS',
+      url: 'https://www.bgis.com/',
+      icon: 'icon-layers',
+      variant: 'danger',
+      attributes: { target: '_blank', rel: "noopener" },
+    },
 
     //end of samples children
 
