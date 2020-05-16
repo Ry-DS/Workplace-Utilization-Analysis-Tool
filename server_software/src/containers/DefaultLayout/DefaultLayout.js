@@ -48,6 +48,7 @@ class DefaultLayout extends Component {
         return true;
       let name = el.name;
       let perms = this.props.auth.user.permissions;
+
       if (!perms.editMonitors && name === 'Monitor Groups')
         return false;
       if (!perms.editUsers && name === 'Users')
