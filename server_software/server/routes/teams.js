@@ -9,10 +9,8 @@ const Team = require("../models/Team");
 
 const {routeBuffer} = require('../passport-config');//authenticate specific routes
 
-//auth list teams route
-router.use('/list', passport.authenticate('jwt', {session: false}));
 //list all teams and data registered within the program
-router.get("/list", (req, res) => {//TODO
+router.get("/list", passport.authenticate('jwt', {session: false}), (req, res) => {
   Team.find({}, (err, teams) => {
     res.send(teams);
   });

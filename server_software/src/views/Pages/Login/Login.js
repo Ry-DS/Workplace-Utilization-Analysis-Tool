@@ -5,24 +5,9 @@ import PropTypes from "prop-types";
 import {connect} from "react-redux";
 import {loginUser} from "../../../redux/actions/authActions";
 import wuatLogo from '../../../assets/img/brand/wuat/WUAT Logo.svg';
-import {
-  Button,
-  Card,
-  CardBody,
-  Col,
-  Container,
-  Form,
-  FormFeedback,
-  Input,
-  InputGroup,
-  InputGroupAddon,
-  InputGroupText,
-  Popover,
-  PopoverBody,
-  PopoverHeader,
-  Row
-} from 'reactstrap';
+import {Button, Card, CardBody, Col, Container, Form, Popover, PopoverBody, PopoverHeader, Row} from 'reactstrap';
 import {getStyle} from '@coreui/coreui/dist/js/coreui-utilities'
+import {FormFieldWithError as FormField} from "../../../utils/FormField";
 
 
 function Login(props) {
@@ -47,23 +32,17 @@ function Login(props) {
     e.preventDefault();
     //we start the loading animation
     setLoading(true);
-    setErrors([]);
+    setErrors({});
 
-    const userData =
-      {
-        email,
-        password
-      };
-    props.loginUser(userData);//we try login
+    const userLogin = {email, password};
+    props.loginUser(userLogin);//we try login
   };
 
   const toggle = () => {//show popup for password forget
     setPopoverOpen(!popoverOpen)
   };
 
-  const logoStyle = {
-    width: '8em'
-  };
+
   //custom button style
   const buttonStyle = {
     backgroundColor: getStyle('--theme-light'),
@@ -78,35 +57,20 @@ function Login(props) {
             <Card>
               <CardBody>
                 <Form noValidate onSubmit={onSubmit}>
-                  <img src={wuatLogo} alt="Logo" className="center-art animated fadeIn" style={logoStyle}/>
+                  <img src={wuatLogo} alt="Logo" className="center-art animated fadeIn" style={{width: '8em'}}/>
                   <div className="p-4">
                     <h1>Login</h1>
                     <p className="text-muted">Sign into your account</p>
-                    <InputGroup className="mb-3">
-                      <InputGroupAddon addonType="prepend">
-                        <InputGroupText>
-                          <i className="icon-user"/>
-                        </InputGroupText>
-                      </InputGroupAddon>
-                      <Input onChange={e => setEmail(e.target.value)}
-                             value={email}
-                             id="email" type="text" className={errors.email ? 'is-invalid' : ''}
-                             placeholder="Email" autoComplete="email"/>
-                      <FormFeedback>{errors.email}</FormFeedback>
+                    <FormField onChange={setEmail} name='Email' value={email} errors={errors} setErrors={setErrors}
+                               field='email'>
+                      <i className="icon-user"/>
+                    </FormField>
 
-                    </InputGroup>
-                    <InputGroup className="mb-4">
-                      <InputGroupAddon addonType="prepend">
-                        <InputGroupText>
-                          <i className="icon-lock"/>
-                        </InputGroupText>
-                      </InputGroupAddon>
-                      <Input onChange={e => setPassword(e.target.value)}
-                             value={password}
-                             id="password" type="password" className={errors.password ? 'is-invalid' : ''}
-                             placeholder="Password" autoComplete="current-password"/>
-                      <FormFeedback>{errors.password}</FormFeedback>
-                    </InputGroup>
+                    <FormField type='password' onChange={setPassword} value={password} name='Password' errors={errors}
+                               setErrors={setErrors} field='password'>
+                      <i className="icon-lock"/>
+                    </FormField>
+
                     <Row>
                       <Col xs="6">
                         <Button className="px-4" style={buttonStyle} type='submit'
@@ -136,6 +100,7 @@ function Login(props) {
 
 
 }
+
 Login.propTypes = {//setup props that are needed and what they should be.
   loginUser: PropTypes.func.isRequired,//saying a function is needed for loginUser
   auth: PropTypes.object.isRequired,//saying an object is needed

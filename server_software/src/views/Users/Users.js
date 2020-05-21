@@ -1,20 +1,5 @@
 import React, {Component} from 'react';
-import {
-  Alert,
-  Button,
-  Card,
-  CardBody,
-  CardHeader,
-  Col,
-  Form,
-  FormFeedback,
-  FormGroup,
-  Input,
-  InputGroup,
-  InputGroupAddon,
-  InputGroupText,
-  Row
-} from 'reactstrap';
+import {Alert, Button, Card, CardBody, CardHeader, Col, Form, FormGroup, Row} from 'reactstrap';
 import axios from 'axios';
 import 'react-tabulator/css/tabulator_simple.min.css'
 import {ReactTabulator} from 'react-tabulator';
@@ -23,6 +8,7 @@ import {connect} from "react-redux";
 import PropTypes from "prop-types";
 import {getStyle} from "@coreui/coreui/dist/js/coreui-utilities";
 import tutorial from './../../utils/tutorial';
+import FormField from "../../utils/FormField";
 
 const editButtons = function (value, data, cell, row, options) { //plain text value, so we cant use react jsx. Instead, just a plain html button for deletion
   return "<Button class='btn btn-danger' style='width: 100%'><i class='fa fa-trash-o'/></Button>"
@@ -113,7 +99,7 @@ class Users extends Component {
       password: this.state.password,
       passwordRetype: this.state.passwordRetype
     }).then(res => {//success?
-      this.setState({formLoading: false});//remove loading animation
+      this.setState({formLoading: false, name: '', email: '', password: '', passwordRetype: ''});//remove loading animation and clear form
       this.componentDidMount();//reload table with new user
     }).catch(err => {//failed?
       this.setState({errors: err.response.data, formLoading: false});//stop loading animation and show why it failed to user
@@ -182,51 +168,22 @@ class Users extends Component {
               </CardHeader>
               <CardBody>
                 <Form noValidate>
-                  <FormGroup>
-                    <InputGroup>
-                      <InputGroupAddon addonType="prepend">
-                        <InputGroupText><i className="icon-user"/></InputGroupText>
-                      </InputGroupAddon>
-                      <Input value={this.state.name} onChange={this.onChange}
-                             className={this.state.errors.name ? 'is-invalid' : ''} type="text" id="name" name="name"
-                             placeholder="Name"/>
-                      <FormFeedback>{this.state.errors.name}</FormFeedback>
-                    </InputGroup>
-                  </FormGroup>
-                  <FormGroup>
-                    <InputGroup>
-                      <InputGroupAddon addonType="prepend">
-                        <InputGroupText><i className="icon-envelope"/></InputGroupText>
-                      </InputGroupAddon>
-                      <Input value={this.state.email} onChange={this.onChange}
-                             className={this.state.errors.email ? 'is-invalid' : ''} type="email" id="email"
-                             name="email" placeholder="Email"/>
-                      <FormFeedback>{this.state.errors.email}</FormFeedback>
-                    </InputGroup>
-
-                  </FormGroup>
-                  <FormGroup>
-                    <InputGroup>
-                      <InputGroupAddon addonType="prepend">
-                        <InputGroupText><i className="icon-lock"/></InputGroupText>
-                      </InputGroupAddon>
-                      <Input value={this.state.password} onChange={this.onChange}
-                             className={this.state.errors.password ? 'is-invalid' : ''} type="password" id="password"
-                             name="password" placeholder="Password"/>
-                      <FormFeedback>{this.state.errors.password}</FormFeedback>
-                    </InputGroup>
-                  </FormGroup>
-                  <FormGroup>
-                    <InputGroup>
-                      <InputGroupAddon addonType="prepend">
-                        <InputGroupText><i className="icon-lock"/></InputGroupText>
-                      </InputGroupAddon>
-                      <Input value={this.state.passwordRetype} onChange={this.onChange}
-                             className={this.state.errors.passwordRetype ? 'is-invalid' : ''} type="password"
-                             id="passwordRetype" name="passwordRetype" placeholder="Confirm"/>
-                      <FormFeedback>{this.state.errors.passwordRetype}</FormFeedback>
-                    </InputGroup>
-                  </FormGroup>
+                  <FormField id='name' onChange={this.onChange} value={this.state.name} name='Name'
+                             error={this.state.errors.name}>
+                    <i className='icon-user'/>
+                  </FormField>
+                  <FormField id='email' onChange={this.onChange} value={this.state.email} name='Email'
+                             error={this.state.errors.email}>
+                    <i className="icon-envelope"/>
+                  </FormField>
+                  <FormField type='password' id='password' onChange={this.onChange} value={this.state.password}
+                             name='Password' error={this.state.errors.password}>
+                    <i className="icon-lock"/>
+                  </FormField>
+                  <FormField type='password' id='passwordRetype' onChange={this.onChange}
+                             value={this.state.passwordRetype} name='Confirm' error={this.state.errors.passwordRetype}>
+                    <i className="icon-lock"/>
+                  </FormField>
                   <FormGroup>
                     <Button type="submit" color="success" onClick={this.register} style={buttonStyle}
                             disabled={this.state.formLoading}>
