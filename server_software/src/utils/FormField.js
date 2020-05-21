@@ -29,7 +29,6 @@ function FormField({error, name, value, onChange, placeholder, children, classNa
 
   );
 }
-
 //use this to automatically handle error state and pass it on, instead of you managing it yourself.
 const makeWithErrorState = Component => ({errors, setErrors, field, onChange, ...rest}) => {
   return <Component error={errors[field]} onChange={e => {
